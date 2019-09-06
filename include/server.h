@@ -7,9 +7,14 @@
 #include <sys/types.h>
 #include <sys/socket.h> 
 
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/ssl.h>
+
+
 // Internal
 #include <nscodes.h>
-#include <crypto.h>
+
 
 
 /*
@@ -19,7 +24,7 @@ typedef struct nss {
 
     unsigned short sock;
     struct sockaddr_in *serv_addr;
-    WOLFSSL_CTX *ctx;
+    WOLFSSL_CTX *tls_ctx;
 
 } NS_server_t;
 

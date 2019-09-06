@@ -18,23 +18,25 @@ CC= gcc
 CFLAGS= -std=c99 -Werror -Wall -s -O2 -I$(INCLUDE) -I$(CRYPTINC) -I$(SNOW)
 DBGCFLAGS= -std=c99 -Werror -Wall -DNETDEBUG -O2 -I$(INCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DNETDEBUG
-LFLAGS= -L$(CRYPTBASE)/lib
+LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
 
 #
 # Build out seperate objs for release, test, debug 
 #
-ROBJS=$(addprefix $(SRC)/, main.o server.o)
-TOBJS=$(addprefix $(SRC)/, main-test.o server-test.o)
-DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o)
+ROBJS=$(addprefix $(SRC)/, main.o server.o crypto.o)
+TOBJS=$(addprefix $(SRC)/, main-test.o server-test.o crypto-test.o)
+DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o)
 
 .PHONY: clean
 
 all: clean \
-	 netplay-release netplay-release-static netplay-release-test \
-	 netplay-debug netplay-debug-static \
+	 netplay-release netplay-release-test \
+	 netplay-debug \
 	 misc
+
+release: clean netplay-release
 
 test: clean netplay-release-test runtest
 

@@ -7,7 +7,7 @@
 #include <logging.h>
 #include <macros.h>
 #include <nscodes.h>
-
+#include <crypto.h>
 
 
 NS_server_t *ns_serv;
@@ -32,6 +32,9 @@ void NS_server_clean(){
         LOGDEBUG("Closing server Socket\n");
         close(ns_serv->sock);
     }
+    if(ns_serv->tls_ctx != NULL){
+        wolfSSL_CTX_free(ns_serv->tls_ctx);
+    }
     BUFFREE(ns_serv->serv_addr);
 	BUFFREE(ns_serv);
 
@@ -43,6 +46,8 @@ NS_STATUS NS_server_run(uint16_t port){
     
     BUFALLOC(ns_serv, sizeof(NS_server_t));
     BUFALLOC(ns_serv->serv_addr, sizeof(struct sockaddr_in));
+
+    SERVFAIL_IF(NS_init_TLS_1_2(ns_serv), "TLS1.2 INIT");
  
     if ((ns_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
         LOGERROR("Socket creation failure");

@@ -7,8 +7,9 @@
 
 
 #include <nscodes.h>
+#include <server.h>
 
-NS_STATUS init_TLS_1_2();
+NS_STATUS NS_init_TLS_1_2(NS_server_t *serv);
 
 
 

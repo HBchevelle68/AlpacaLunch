@@ -23,7 +23,7 @@
  *   Error checking
  */
 #define SERVFAIL_IF(ret, errstr) \
-     if(ret < 0) {           \
+     if(ret != NS_SUCCESS) {           \
         LOGERROR(errstr);    \
         NS_server_clean();   \
         return NS_FAILURE; } \
