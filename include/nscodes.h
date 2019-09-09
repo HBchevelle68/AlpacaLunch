@@ -1,6 +1,8 @@
 #ifndef NSCODES_H
 #define NSCODES_H
 
+#include <stdint.h>
+
 typedef uint32_t NS_STATUS;
 
 //#define NSERR(code) (0x0000 | code)

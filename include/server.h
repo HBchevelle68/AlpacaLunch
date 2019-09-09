@@ -39,6 +39,13 @@ typedef struct nss {
 #define LISTEN(sock, lcnt) \
     (lcnt>0 ? listen(sock, lcnt) : listen(sock, 10))
 
+#define FILLSOCKADDR(serv, port) \
+    NS_server_t *temp = (NS_server_t*)serv;         \
+    temp->serv_addr->sin_family = AF_INET;          \
+    temp->serv_addr->sin_addr.s_addr = INADDR_ANY;  \
+    temp->serv_addr->sin_port = BEU16(port);        \
+ 
+
 
 
  /* Func */

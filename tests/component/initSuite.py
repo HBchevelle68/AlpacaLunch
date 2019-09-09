@@ -7,15 +7,16 @@ import subprocess
 class InitSuite(unittest.TestCase):
 
     def test_initSuite(self):
+        # Move to the proper directory
         if os.getcwd().split('/')[-1] != "netSandbox":
             toplvl = os.path.join(os.path.dirname(__file__), "../../")
             os.chdir(toplvl)
             print(os.getcwd())
 
-        if not os.path.isfile("binaries/netsand-release"):
-            make_process = subprocess.Popen(["make", "clean", "netplay-release"], stdout=subprocess.PIPE)
-            ret = make_process.wait()
-            self.assertEqual(ret, 0)
+        # Wipe out any old binaries and rebuild fresh
+        make_process = subprocess.Popen(["make", "release"], stdout=subprocess.PIPE)
+        ret = make_process.wait()
+        self.assertEqual(ret, 0)
 
 
 

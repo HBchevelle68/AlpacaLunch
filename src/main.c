@@ -9,16 +9,21 @@
 #include <logging.h> 
 #include <crypto.h>
 #include <server.h>
+#include <macros.h>
+#include <sighandler.h>
+#include <ns.h>
 
 /*
  * Test harness
  */
 #ifndef SNOW_ENABLED
 
+
+
 int main(){
 
-    DEBUGWARNING(); 
-
+    
+    FAIL_IF(NS_init());
     int i = 10;
 
     LOGERROR("This is a test: %d\n", i);

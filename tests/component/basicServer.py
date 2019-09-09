@@ -25,7 +25,6 @@ class BasicServer(unittest.TestCase):
             process = subprocess.Popen(["binaries/netplay-release"])
         except subprocess.CalledProcessError:
             return -1
-
         time.sleep(1)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
