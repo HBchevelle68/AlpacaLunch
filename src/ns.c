@@ -11,9 +11,10 @@
 NS_STATUS NS_init(){
     NS_STATUS result = NS_SUCCESS;
 
-    DEBUGWARNING(); 
-
+    
     FAIL_IF(getuid());
+    
+    DEBUGWARNING(); 
     FAIL_IF(NS_install_sighandlers());
 
     return result;
@@ -25,4 +26,5 @@ NS_STATUS NS_init(){
  */
 void NS_exit(){
     NS_server_clean();
+    exit(0);
 }

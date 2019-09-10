@@ -3,7 +3,7 @@ import os
 
 import initSuite
 import basicServer
-
+import signalSuite
 
 
 
@@ -20,6 +20,7 @@ if __name__ == "__main__":
     # Add tests to the suite
     suite.addTests(loader.loadTestsFromModule(initSuite))
     suite.addTests(loader.loadTestsFromModule(basicServer))
+    suite.addTests(loader.loadTestsFromModule(signalSuite))
 
     # Run Component tests
     result = unittest.TextTestRunner(verbosity=3).run(suite)

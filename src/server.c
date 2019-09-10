@@ -2,6 +2,7 @@
 #include <string.h> 
 #include <netinet/in.h> 
 #include <unistd.h> 
+#include <errno.h>
 
 #include <server.h>
 #include <logging.h>
@@ -19,7 +20,6 @@ void NS_server_clean(){
 
     if(ns_serv != NULL){
         if(ns_serv->sock > 0) {
-            LOGDEBUG("Closing server Socket\n");
             close(ns_serv->sock);
         }
         if(ns_serv->tls_ctx != NULL){
@@ -28,17 +28,22 @@ void NS_server_clean(){
         BUFFREE(ns_serv->serv_addr);
         BUFFREE(ns_serv);
     }
-
-
 }
 
 
 static
 NS_STATUS NS_server_loop(){
     uint32_t conn_sock = 0;
+    socklen_t addrlen = sizeof(ns_serv->serv_addr);
     while(1){
-        conn_sock = accept(ns_serv->sock, (struct sockaddr *)&(ns_serv->serv_addr), (socklen_t*)sizeof(struct sockaddr_in));
-        close(conn_sock); 
+        conn_sock = accept(ns_serv->sock, (struct sockaddr*)(ns_serv->serv_addr), &addrlen);
+        /*
+         * Can be interuppted by sighandler
+         * or simply an error
+         */
+        if(conn_sock != -1){
+            close(conn_sock); 
+        }
     }
     return NS_FAILURE;
 }
