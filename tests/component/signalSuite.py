@@ -6,8 +6,6 @@ import socket
 import signal
 import errno
 
-HOST = 'localhost'
-PORT = 12345
 
 class SignalSuite(unittest.TestCase):
 
@@ -49,8 +47,8 @@ class SignalSuite(unittest.TestCase):
         process.send_signal(signal.SIGHUP)
         
         if self._is_running(process.pid) == False:
-            self.fail(">>>>> Signal handling of SIGHUP failed <<<<<")
             process.terminate()
+            self.fail(">>>>> Signal handling of SIGHUP failed <<<<<")
             return -1
         
         process.terminate()
@@ -68,8 +66,8 @@ class SignalSuite(unittest.TestCase):
         process.send_signal(signal.SIGINT)
 
         if self._is_running(process.pid) is False:
-            self.fail(">>>>> Signal handling of SIGINT failed <<<<<")
             process.terminate()
+            self.fail(">>>>> Signal handling of SIGINT failed <<<<<")
             return -1
         
         process.terminate()
@@ -87,8 +85,8 @@ class SignalSuite(unittest.TestCase):
         os.kill(process.pid, signal.SIGQUIT)
 
         if self._is_running(process.pid) is False:
-            self.fail(">>>>> Signal handling of SIGQUIT failed <<<<<")
             process.terminate()
+            self.fail(">>>>> Signal handling of SIGQUIT failed <<<<<")
             return -1
         
         process.terminate()
@@ -106,8 +104,8 @@ class SignalSuite(unittest.TestCase):
         process.send_signal(signal.SIGALRM)
 
         if self._is_running(process.pid) is False:
-            self.fail(">>>>> Signal handling of SIGALRM failed <<<<<")
             process.terminate()
+            self.fail(">>>>> Signal handling of SIGALRM failed <<<<<")
             return -1
         
         process.terminate()
@@ -125,8 +123,8 @@ class SignalSuite(unittest.TestCase):
         process.wait(timeout=5)
 
         if self._is_running(process.pid) is True:
-            self.fail(">>>>> Signal handling of SIGTERM failed <<<<<")
             os.kill(process.pid, signal.SIGTERM)
+            self.fail(">>>>> Signal handling of SIGTERM failed <<<<<")
             return -1
         
         return 0

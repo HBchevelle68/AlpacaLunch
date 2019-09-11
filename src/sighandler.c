@@ -15,11 +15,11 @@ void NS_signal_handler(int signum){
     switch (signum) {
     
     case SIGHUP:
-    case SIGINT:
     case SIGQUIT:
     case SIGALRM:
+    case SIGINT:
         break;
-    
+
     case SIGTERM:
         NS_exit();
         break;

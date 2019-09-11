@@ -18,9 +18,7 @@ class InitSuite(unittest.TestCase):
         make_process = subprocess.Popen(["make", "release"], stdout=subprocess.PIPE)
         ret = make_process.wait()
         self.assertEqual(ret, 0)
-        if sys.version_info[0] < 3:
-            print("SCRIPT NOT RUNNING WITH PYTHON 3....this is gonna fail")
-            self.fail(">>>>> RUN TESTS WITH PYTHON 3.5+ <<<<<")
+        
 
 
 

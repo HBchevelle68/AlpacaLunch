@@ -30,20 +30,50 @@ void NS_server_clean(){
     }
 }
 
+static 
+void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
+
+    WOLFSSL* ssl;
+    uint32_t n;
+    char buff[1500];
+
+    if((ssl = wolfSSL_new(ns_serv->tls_ctx)) == NULL) {
+		   LOGERROR("CyaSSL_new error\n");
+		   return;
+	}
+	wolfSSL_set_fd(ssl, cli_sock);
+
+    LOGDEBUG("Reading from tls1.2 socket\n");
+    memset(&buff, 0, 1500);
+    while ((n = wolfSSL_read(ssl, buff, 1500)) > 0){
+        if( n < 0 ){
+            LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(ssl,n));
+            break;
+        }
+        LOGDEBUG("FROM CONNECTION: %s\n", buff);
+    }
+    wolfSSL_free(ssl);
+
+}
+
+
 
 static
 NS_STATUS NS_server_loop(){
     struct sockaddr_in	cliaddr = {0};
-    uint32_t conn_sock = 0;
+    uint32_t cli_sock = 0;
     socklen_t addrlen = sizeof(cliaddr);
     while(1){
-        conn_sock = accept(ns_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
+        cli_sock = accept(ns_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
         /*
          * Can be interuppted by sighandler
          * or simply an error
          */
-        if(conn_sock != -1){
-            close(conn_sock); 
+        if(cli_sock != -1){
+            LOGDEBUG("Client connected\n");
+            NS_conn_handler(cli_sock, &cliaddr);
+            close(cli_sock);
+            memset(&cliaddr, 0, (size_t)addrlen);
         }
     }
     return NS_FAILURE;
@@ -78,7 +108,7 @@ NS_STATUS NS_server_run(uint16_t port){
     ret_status = NS_server_loop();
 
     NS_server_clean();
-    
+
     return ret_status;
 }
 
