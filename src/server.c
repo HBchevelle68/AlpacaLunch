@@ -33,10 +33,11 @@ void NS_server_clean(){
 
 static
 NS_STATUS NS_server_loop(){
+    struct sockaddr_in	cliaddr = {0};
     uint32_t conn_sock = 0;
-    socklen_t addrlen = sizeof(ns_serv->serv_addr);
+    socklen_t addrlen = sizeof(cliaddr);
     while(1){
-        conn_sock = accept(ns_serv->sock, (struct sockaddr*)(ns_serv->serv_addr), &addrlen);
+        conn_sock = accept(ns_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
         /*
          * Can be interuppted by sighandler
          * or simply an error
@@ -77,6 +78,7 @@ NS_STATUS NS_server_run(uint16_t port){
     ret_status = NS_server_loop();
 
     NS_server_clean();
+    
     return ret_status;
 }
 

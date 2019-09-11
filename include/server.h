@@ -44,8 +44,14 @@ typedef struct nss {
     temp->serv_addr->sin_family = AF_INET;          \
     temp->serv_addr->sin_addr.s_addr = INADDR_ANY;  \
     temp->serv_addr->sin_port = BEU16(port);        \
- 
+ /*
 
+#define LOGCONNECTION() \
+
+    LOGDEBUG("Connection from %s, port %d\n", 
+			 inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)),
+			 HU16(cliaddr.sin_port));
+*/
 
 
  /* Func */

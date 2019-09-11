@@ -2,7 +2,7 @@ import unittest
 import os
 
 import initSuite
-import basicServer
+import basicServerSuite
 import signalSuite
 
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     # Add tests to the suite
     suite.addTests(loader.loadTestsFromModule(initSuite))
-    suite.addTests(loader.loadTestsFromModule(basicServer))
+    suite.addTests(loader.loadTestsFromModule(basicServerSuite))
     suite.addTests(loader.loadTestsFromModule(signalSuite))
 
     # Run Component tests

@@ -7,7 +7,7 @@ import socket
 HOST = 'localhost'
 PORT = 12345
 
-class BasicServer(unittest.TestCase):
+class BasicServerSuite(unittest.TestCase):
 
     def _run_kill(self):
         try:
@@ -38,7 +38,7 @@ class BasicServer(unittest.TestCase):
         return result
 
     
-    def test_basicServer(self):
+    def test_basicServerSuite(self):
 
         # Sub-test 1
         # Check binary can load without crashing
