@@ -1,6 +1,7 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
+#include <stdio.h>
 #include <string.h>
 
 /*
@@ -48,6 +49,12 @@ do { if (DEBUGENABLE){ \
 #define LOGERROR(fmt, ...) \
     do { if (DEBUGENABLE) fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
+
+#define LOGTESTFILE(buff) \
+        FILE* fp;                                 \
+        fp = fopen("/tmp/test.txt", "a");         \
+        fprintf(fp, "%s\n", buff);                \
+        fclose(fp);
 
 
 #endif

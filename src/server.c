@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h> 
+#include <stdarg.h>
 #include <netinet/in.h> 
 #include <unistd.h> 
 #include <errno.h>
@@ -38,7 +39,7 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
     char buff[1500];
 
     if((ssl = wolfSSL_new(ns_serv->tls_ctx)) == NULL) {
-		   LOGERROR("CyaSSL_new error\n");
+		   LOGERROR("wolfSSL_new error\n");
 		   return;
 	}
 	wolfSSL_set_fd(ssl, cli_sock);
@@ -51,19 +52,21 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
             break;
         }
         LOGDEBUG("FROM CONNECTION: %s\n", buff);
+        LOGTESTFILE(buff);
     }
     wolfSSL_free(ssl);
-
 }
 
-
+/*
+ * Currently single threaded 
+ */
 
 static
 NS_STATUS NS_server_loop(){
     struct sockaddr_in	cliaddr = {0};
     uint32_t cli_sock = 0;
     socklen_t addrlen = sizeof(cliaddr);
-    while(1){
+    while(1){   
         cli_sock = accept(ns_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
         /*
          * Can be interuppted by sighandler

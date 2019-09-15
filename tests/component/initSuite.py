@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-
+TSTFPATH = "/tmp/test.txt"
 
 class InitSuite(unittest.TestCase):
 
@@ -12,7 +12,6 @@ class InitSuite(unittest.TestCase):
         if os.getcwd().split('/')[-1] != "netSandbox":
             toplvl = os.path.join(os.path.dirname(__file__), "../../")
             os.chdir(toplvl)
-            print(os.getcwd())
 
         # Wipe out any old binaries and rebuild fresh
         make_process = subprocess.Popen(["make", "release"], stdout=subprocess.PIPE)
@@ -20,6 +19,11 @@ class InitSuite(unittest.TestCase):
         self.assertEqual(ret, 0)
         
 
+        if os.path.isfile(TSTFPATH):
+            os.remove(TSTFPATH)
+
+            
+        return 0
 
 
 
