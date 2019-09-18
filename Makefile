@@ -10,7 +10,7 @@ TESTCOMPONENT = $(TESTBASE)/component
 CRYPTBASE= $(DIR)/crypt
 CRYPTINC= $(CRYPTBASE)/include
 CRYPTSTATIC= $(CRYPTBASE)/lib/libwolfssl.a
-SNOW= $(TESTBASE)/lib
+SNOW= $(TESTBASE)/unit
 
 #
 # Build variables
@@ -33,37 +33,37 @@ DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o sighandler
 .PHONY: clean
 
 all: clean \
-	 netplay-release netplay-release-test \
-	 netplay-debug \
+	 netsand-release netsand-release-test \
+	 netsand-debug \
 	 misc \
 	 scrub
 
-release: clean netplay-release scrub
+release: clean netsand-release scrub
 
-test: clean netplay-release-test runtest scrub
+test: clean netsand-release-test runtest scrub
 
-debug: clean netplay-debug scrub
+debug: clean netsand-debug scrub
 
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-netplay-release: $(ROBJS)
+netsand-release: $(ROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netplay-release-test: $(TOBJS)
+netsand-release-test: $(TOBJS)
 	$(CC) $(CFLAGS) $(TEST) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netplay-release-static: $(ROBJS)
+netsand-release-static: $(ROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-netplay-debug: $(DOBJS)
+netsand-debug: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netplay-debug-static: $(DOBJS)
+netsand-debug-static: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 
@@ -78,7 +78,7 @@ netplay-debug-static: $(DOBJS)
 	$(CC) -c $(DBG) $(CFLAGS) $< -o $@
 
 runtest:
-	$(BIN)/netplay-release-test
+	$(BIN)/netsand-release-test
 
 misc:
 	md5sum $(BIN)/* >> $(BIN)/MD5SUMS

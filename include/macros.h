@@ -3,6 +3,7 @@
 
 #include <arpa/inet.h>
 
+// Internal
 #include <ns.h>
 
 
@@ -29,10 +30,10 @@
 /*
  *   Error checking
  */
-#define FAIL_IF(ret)             \
-     if(ret != NS_SUCCESS) {     \
-        NS_exit();               \
-        return NS_FAILURE;       \
+#define FAIL_IF(ret)         \
+     if(ret != NS_SUCCESS) { \
+        NS_exit();           \
+        return NS_FAILURE;   \
      }
 
 #define FAIL_IF_PRINT(ret, errstr)\

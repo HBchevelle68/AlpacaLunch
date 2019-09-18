@@ -36,7 +36,9 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
 
     WOLFSSL* ssl;
     uint32_t n;
-    char buff[1500];
+    char* buff;
+    
+    BUFALLOC(buff, 1500);
 
     if((ssl = wolfSSL_new(ns_serv->tls_ctx)) == NULL) {
 		   LOGERROR("wolfSSL_new error\n");
@@ -54,6 +56,8 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
         LOGDEBUG("FROM CONNECTION: %s\n", buff);
         LOGTESTFILE(buff);
     }
+
+    BUFFREE(buff);
     wolfSSL_free(ssl);
 }
 
@@ -90,7 +94,7 @@ NS_STATUS NS_server_run(uint16_t port){
     BUFALLOC(ns_serv, sizeof(NS_server_t));
     BUFALLOC(ns_serv->serv_addr, sizeof(struct sockaddr_in));
 
-    FAIL_IF_PRINT(NS_init_TLS_1_2(ns_serv), "TLS1.2 INIT\n");
+    FAIL_IF(NS_init_TLS_1_2(ns_serv));
  
     if ((ns_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
         LOGERROR("Socket creation failure\n");

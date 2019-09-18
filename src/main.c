@@ -31,6 +31,8 @@ int main(){
     LOGINFO("This is a test: %d\n", i);
 
     NS_server_run(12345);
+
+    NS_exit();
    
     return 0; 
 }

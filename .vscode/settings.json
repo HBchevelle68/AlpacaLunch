@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "cstdarg": "cpp"
+        "cstdarg": "cpp",
+        "in.h": "c",
+        "unistd.h": "c",
+        "unistd_64.h": "c"
     }
 }

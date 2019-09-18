@@ -3,6 +3,8 @@
 
 #include <nscodes.h>
 
+
+
 NS_STATUS NS_init();
 void NS_exit();
     

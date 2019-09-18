@@ -30,11 +30,11 @@ void NS_signal_handler(int signum){
 
 }
 
-NS_STATUS NS_install_sighandlers(){
-    NS_STATUS result = NS_SUCCESS;
 
-    struct sigaction act;
+NS_STATUS NS_install_sighandlers(){
     
+    NS_STATUS result = NS_SUCCESS;
+    struct sigaction act;
     memset(&act, 0, sizeof(struct sigaction));
     
     act.sa_handler = NS_signal_handler;
