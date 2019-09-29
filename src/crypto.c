@@ -7,12 +7,11 @@
  * TO DO
  * This needs to be configurable at runtime
  */
-
 #define SCERT "../certs/cert.pem"
 #define PKEY "../certs/prvt.pem"
 
 
-NS_STATUS NS_init_TLS_1_2(NS_server_t *serv){
+NS_STATUS NS_init_TLS(NS_server_t *serv){
 
     NS_STATUS result = NS_SUCCESS;
 
@@ -36,3 +35,36 @@ NS_STATUS NS_init_TLS_1_2(NS_server_t *serv){
 
     return result;
 }
+
+/*
+ * Generates a TLS instance for a successful connection
+ */
+WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock){
+
+    WOLFSSL* tls;
+    if((tls = wolfSSL_new(serv->tls_ctx)) == NULL) {
+		   LOGERROR("wolfSSL_new error\n");
+		   return NULL;
+	}
+	if(wolfSSL_set_fd(tls, cli_sock) != SSL_SUCCESS){
+           LOGERROR("wolfSSL_set_fd error\n");
+		   return NULL;
+    }
+    return tls;
+}
+
+
+/*
+NS_STATUS NS_gen_hash(char* buf){
+    
+    int ret;
+    unsigned char digest[SHA224_DIGEST_SIZE];
+    Sha256 sha;
+
+    if ((ret = wc_InitSha256(&sha)) != 0) {
+        LOGERROR("wc_InitSha256 failed");
+        return NS_SUCCESS;
+    }
+    
+}
+*/

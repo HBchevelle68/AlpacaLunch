@@ -28,7 +28,7 @@ class TLSSuite(unittest.TestCase):
 
         # Deploy binary
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         time.sleep(1)
@@ -41,7 +41,7 @@ class TLSSuite(unittest.TestCase):
         except ConnectionRefusedError:
             secure_socket.close()
             process.terminate()
-            #self.fail(">>>>> _run_tls_connect_send failed ConnectionRefusedError <<<<<")
+            self.fail(">>>>> _run_tls_connect_send failed ConnectionRefusedError <<<<<")
 
         secure_socket.write("THIS IS A TEST?!123456789!@#$%^&*()_+~<>?:")
 
@@ -57,7 +57,7 @@ class TLSSuite(unittest.TestCase):
 
         # Deploy binary
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         time.sleep(1)

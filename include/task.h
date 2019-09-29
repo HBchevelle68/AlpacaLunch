@@ -1,12 +1,13 @@
 #ifndef TASK_H
 #define TASK_H
 
-/*
- * Struct that holds callback task to execute on accept call
+#include <nscodes.h>
 
-typedef struct {
-    void (*function)(void *);
-    void *args;
-} accepttask_t;
- */
+enum tasks {
+    GetFile = 1,
+    PutFile = 2
+};
+
+NS_STATUS process_task(char* buf);
+
 #endif

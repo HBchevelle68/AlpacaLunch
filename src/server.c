@@ -34,23 +34,20 @@ void NS_server_clean(){
 static 
 void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
 
-    WOLFSSL* ssl;
+    WOLFSSL* l_tls;
     uint32_t n;
     char* buff;
     
     BUFALLOC(buff, 1500);
 
-    if((ssl = wolfSSL_new(ns_serv->tls_ctx)) == NULL) {
-		   LOGERROR("wolfSSL_new error\n");
-		   return;
-	}
-	wolfSSL_set_fd(ssl, cli_sock);
+    l_tls = NS_gen_local_TLS(ns_serv, cli_sock);
 
     LOGDEBUG("Reading from tls1.2 socket\n");
-    memset(&buff, 0, 1500);
-    while ((n = wolfSSL_read(ssl, buff, 1500)) > 0){
+    memset(buff, 0, 1500);
+    while ((n = wolfSSL_read(l_tls, buff, 1500)) > 0){
+        
         if( n < 0 ){
-            LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(ssl,n));
+            LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(l_tls,n));
             break;
         }
         LOGDEBUG("FROM CONNECTION: %s\n", buff);
@@ -58,7 +55,7 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
     }
 
     BUFFREE(buff);
-    wolfSSL_free(ssl);
+    wolfSSL_free(l_tls);
 }
 
 /*
@@ -94,7 +91,7 @@ NS_STATUS NS_server_run(uint16_t port){
     BUFALLOC(ns_serv, sizeof(NS_server_t));
     BUFALLOC(ns_serv->serv_addr, sizeof(struct sockaddr_in));
 
-    FAIL_IF(NS_init_TLS_1_2(ns_serv));
+    FAIL_IF(NS_init_TLS(ns_serv));
  
     if ((ns_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
         LOGERROR("Socket creation failure\n");

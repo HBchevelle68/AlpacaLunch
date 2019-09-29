@@ -39,7 +39,7 @@ class SignalSuite(unittest.TestCase):
     
     def _run_signal_SIGHUP(self):
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
           
@@ -57,7 +57,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGINT(self):
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         
@@ -76,7 +76,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGQUIT(self):
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         
@@ -95,7 +95,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGALRM(self):
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         
@@ -114,7 +114,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGTERM(self):
         try:
-            process = subprocess.Popen(["binaries/netplay-release"])
+            process = subprocess.Popen(["binaries/netsand-release"])
         except subprocess.CalledProcessError:
             return -1
         
