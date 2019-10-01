@@ -37,7 +37,7 @@ NS_STATUS NS_init_TLS(NS_server_t *serv){
 }
 
 /*
- * Generates a TLS instance for a successful connection
+ * TLS wrap a socket 
  */
 WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock){
 
@@ -53,6 +53,24 @@ WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock){
     return tls;
 }
 
+
+NS_STATUS NS_init_RSA(NS_server_t *serv){
+
+    RsaKey priv;
+    RsaKey pub;
+    WC_RNG rng;
+    int ret = 0;
+    long e = 65537; // standard value to use for exponent
+
+    wc_InitRsaKey(&priv, NULL); // not using heap hint. No custom memory
+    wc_InitRng(&rng);
+
+    // generate 2048 bit long private key
+    ret = wc_MakeRsaKey(&priv, 2048, e, &rng);
+    if( ret != 0 ) {
+        // error generating private key
+    }
+}
 
 /*
 NS_STATUS NS_gen_hash(char* buf){

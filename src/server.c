@@ -6,12 +6,14 @@
 #include <errno.h>
 
 #include <server.h>
+#include <nsmemory.h>
 #include <logging.h>
 #include <macros.h>
 #include <nscodes.h>
 #include <crypto.h>
 
 
+#define BUFSIZE 1500
 NS_server_t *ns_serv = NULL;
 
 
@@ -38,20 +40,25 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
     uint32_t n;
     char* buff;
     
-    BUFALLOC(buff, 1500);
+    BUFALLOC(buff, BUFSIZE);
+    ZEROBUFF(buff, BUFSIZE);
 
+    /* Wrap socket */ 
     l_tls = NS_gen_local_TLS(ns_serv, cli_sock);
+    
 
     LOGDEBUG("Reading from tls1.2 socket\n");
-    memset(buff, 0, 1500);
-    while ((n = wolfSSL_read(l_tls, buff, 1500)) > 0){
+    while ( (n = wolfSSL_read(l_tls, buff, BUFSIZE) ) > 0 ){
         
         if( n < 0 ){
             LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(l_tls,n));
             break;
         }
+          
         LOGDEBUG("FROM CONNECTION: %s\n", buff);
         LOGTESTFILE(buff);
+
+        ZEROBUFF(buff,BUFSIZE);
     }
 
     BUFFREE(buff);

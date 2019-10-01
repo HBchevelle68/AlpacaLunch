@@ -16,6 +16,7 @@ if __name__ == "__main__":
     if os.geteuid() != 0:
         print("You need to have root privileges to run this script.\n")
         exit(0)
+        
     if sys.version_info[0] < 3:
             print("This script is designed to be run with Python 3.5 and up.\n")
             exit(0)

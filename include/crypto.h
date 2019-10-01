@@ -5,6 +5,7 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/sha256.h>
+#include <wolfssl/wolfcrypt/rsa.h>
 
 #include <nscodes.h>
 #include <server.h>

@@ -44,23 +44,6 @@
      }
 
 
-/*
- * Heap allocation and free
- * 
- */
-#define BUFALLOC(buf, size) \
-     if(size > 0) {         \
-          buf = (void*)malloc(size * sizeof(unsigned char)); \
-          memset(buf, 0, size);                              \
-     }
-
-#define BUFFREE(buf)                                        \
-     if(buf != NULL) {                                      \
-          memset(buf, (unsigned char)0x00, sizeof(*buf));   \
-          free(buf);                                        \
-          buf = NULL;                                       \
-     }             
-
 
 
 #endif

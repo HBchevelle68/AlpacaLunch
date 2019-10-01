@@ -480,16 +480,6 @@
                 #define XSTRTOK(s1,d,ptr) strtok_r((s1),(d),(ptr))
             #endif
         #endif
-
-        #if defined(WOLFSSL_CERT_EXT) || defined(HAVE_OCSP) || \
-            defined(HAVE_CRL_IO) || defined(HAVE_HTTP_CLIENT) || \
-            !defined(NO_CRYPT_BENCHMARK)
-
-            #ifndef XATOI /* if custom XATOI is not already defined */
-                #include <stdlib.h>
-                #define XATOI(s)          atoi((s))
-            #endif
-        #endif
     #endif
 
     #ifdef USE_WOLF_STRTOK
@@ -840,7 +830,9 @@
     #endif
 
 
-    #if defined(HAVE_STACK_SIZE)
+    #ifdef WOLFSSL_RIOT_OS
+        #define EXIT_TEST(ret) exit(ret)
+    #elif defined(HAVE_STACK_SIZE)
         #define EXIT_TEST(ret) return (void*)((size_t)(ret))
     #else
         #define EXIT_TEST(ret) return ret
