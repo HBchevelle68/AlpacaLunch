@@ -8,7 +8,7 @@ import os
 TSTFPATH = "/tmp/test.txt"
 HOST = 'localhost'
 PORT = 12345
-
+BINARY = "binaries/sassyllama-release"
 
 def build_wolfssl_sock():
     # TLS wrapped Socket
@@ -28,7 +28,7 @@ class TLSSuite(unittest.TestCase):
 
         # Deploy binary
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         time.sleep(1)
@@ -57,7 +57,7 @@ class TLSSuite(unittest.TestCase):
 
         # Deploy binary
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         time.sleep(1)

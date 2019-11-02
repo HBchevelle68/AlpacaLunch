@@ -9,7 +9,7 @@ class InitSuite(unittest.TestCase):
 
     def test_initSuite(self):
         # Move to the proper directory
-        if os.getcwd().split('/')[-1] != "netSandbox":
+        if os.getcwd().split('/')[-1] != "sassyllama":
             toplvl = os.path.join(os.path.dirname(__file__), "../../")
             os.chdir(toplvl)
 

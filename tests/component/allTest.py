@@ -16,18 +16,15 @@ except Exception as e:
         print("[!] Missing Python 3.5 or higher")
     if 'wolfssl' not in sys.modules:
         print("[!] Missing wolfssl\n")
-    
     exit(0)
 
 
 
 if __name__ == "__main__":
     if os.geteuid() != 0:
-        print("You need to have root privileges to run this script.\n")
+        print("[!] You need to have root privileges to run this script.\n")
         exit(0)
-        
-    
-    print(sys.version_info[0]   )
+
     # Initialize the test suite
     loader = unittest.TestLoader()
     suite  = unittest.TestSuite()

@@ -6,12 +6,12 @@ import socket
 
 HOST = 'localhost'
 PORT = 12345
-
+BINARY = "binaries/sassyllama-release"
 class BasicServerSuite(unittest.TestCase):
 
     def _run_kill(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         
@@ -22,7 +22,7 @@ class BasicServerSuite(unittest.TestCase):
     def _run_connect_kill(self):
         result = 0
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         time.sleep(1)

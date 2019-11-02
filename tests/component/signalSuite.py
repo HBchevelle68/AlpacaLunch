@@ -6,6 +6,7 @@ import socket
 import signal
 import errno
 
+BINARY = "binaries/sassyllama-release"
 
 class SignalSuite(unittest.TestCase):
 
@@ -39,7 +40,7 @@ class SignalSuite(unittest.TestCase):
     
     def _run_signal_SIGHUP(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
           
@@ -57,7 +58,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGINT(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         
@@ -76,7 +77,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGQUIT(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         
@@ -95,7 +96,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGALRM(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         
@@ -114,7 +115,7 @@ class SignalSuite(unittest.TestCase):
 
     def _run_signal_SIGTERM(self):
         try:
-            process = subprocess.Popen(["binaries/netsand-release"])
+            process = subprocess.Popen([BINARY])
         except subprocess.CalledProcessError:
             return -1
         
