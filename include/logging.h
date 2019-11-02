@@ -7,7 +7,7 @@
 /*
  * Suppress vscode's inability to detect volatility
  */ 
-#ifndef NETDEBUG
+#ifndef TALKATIVELLAMA
 #define DEBUGENABLE 0
 #else
 #define DEBUGENABLE 1
@@ -29,7 +29,7 @@ do { if (DEBUGENABLE){ \
         printf("*************** DEBUG ON ***************\n"); \
         printf("****************************************\n"); \
       }                                                       \
-   } while(0)
+} while(0)
 
 
 

@@ -3,6 +3,7 @@
 #
 DIR := ${CURDIR}
 BIN = $(DIR)/binaries
+HASH = $(BIN)/hashes
 SRC = $(DIR)/src
 INCLUDE= $(DIR)/include
 TESTBASE= $(DIR)/tests
@@ -33,37 +34,37 @@ DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o sighandler
 .PHONY: clean
 
 all: clean \
-	 netsand-release netsand-release-test \
-	 netsand-debug \
+	 sassyllama-release sassyllama-release-test \
+	 sassyllama-debug \
 	 misc \
 	 scrub
 
-release: clean netsand-release scrub
+release: clean sassyllama-release scrub
 
-test: clean netsand-release-test runtest scrub
+test: clean sassyllama-release-test runtest scrub
 
-debug: clean netsand-debug scrub
+debug: clean sassyllama-debug scrub
 
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-netsand-release: $(ROBJS)
+sassyllama-release: $(ROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netsand-release-test: $(TOBJS)
+sassyllama-release-test: $(TOBJS)
 	$(CC) $(CFLAGS) $(TEST) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netsand-release-static: $(ROBJS)
+sassyllama-release-static: $(ROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-netsand-debug: $(DOBJS)
+sassyllama-debug: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-netsand-debug-static: $(DOBJS)
+sassyllama-debug-static: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 
@@ -78,11 +79,12 @@ netsand-debug-static: $(DOBJS)
 	$(CC) -c $(DBG) $(CFLAGS) $< -o $@
 
 runtest:
-	$(BIN)/netsand-release-test
+	$(BIN)/sassyllama-release-test
 
 misc:
-	md5sum $(BIN)/net* >> $(BIN)/MD5SUMS
-	sha1sum $(BIN)/net* >> $(BIN)/SHA1SUMS
+	mkdir -p $(HASH)
+	md5sum $(BIN)/sassy* >> $(HASH)/MD5SUMS
+	sha1sum $(BIN)/sassy* >> $(HASH)/SHA1SUMS
 	
 scrub:
 	rm -f $(SRC)/*.o $(TESTCOMPONENT)/*.pyc
