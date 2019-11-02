@@ -39,7 +39,7 @@ NS_STATUS NS_init_TLS(NS_server_t *serv){
 /*
  * TLS wrap a socket 
  */
-WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock){
+WOLFSSL* NS_wrap_sock(NS_server_t *serv, uint16_t cli_sock){
 
     WOLFSSL* tls;
     if((tls = wolfSSL_new(serv->tls_ctx)) == NULL) {
@@ -57,7 +57,7 @@ WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock){
 NS_STATUS NS_init_RSA(NS_server_t *serv){
 
     RsaKey priv;
-    RsaKey pub;
+    //RsaKey pub;
     WC_RNG rng;
     int ret = 0;
     long e = 65537; // standard value to use for exponent
@@ -70,6 +70,7 @@ NS_STATUS NS_init_RSA(NS_server_t *serv){
     if( ret != 0 ) {
         // error generating private key
     }
+    return NS_SUCCESS;
 }
 
 /*

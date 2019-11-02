@@ -12,7 +12,7 @@
 
 NS_STATUS NS_init_TLS(NS_server_t *serv);
 
-WOLFSSL* NS_gen_local_TLS(NS_server_t *serv, uint16_t cli_sock);
+WOLFSSL* NS_wrap_sock(NS_server_t *serv, uint16_t cli_sock);
 
 NS_STATUS NS_init_RSA(NS_server_t *serv);
 

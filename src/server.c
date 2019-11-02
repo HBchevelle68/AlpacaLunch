@@ -44,7 +44,7 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
     ZEROBUFF(buff, BUFSIZE);
 
     /* Wrap socket */ 
-    l_tls = NS_gen_local_TLS(ns_serv, cli_sock);
+    l_tls = NS_wrap_sock(ns_serv, cli_sock);
     
 
     LOGDEBUG("Reading from tls1.2 socket\n");
@@ -98,6 +98,7 @@ NS_STATUS NS_server_run(uint16_t port){
     BUFALLOC(ns_serv, sizeof(NS_server_t));
     BUFALLOC(ns_serv->serv_addr, sizeof(struct sockaddr_in));
 
+    /* Init WolfSSL */
     FAIL_IF(NS_init_TLS(ns_serv));
  
     if ((ns_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
@@ -107,7 +108,7 @@ NS_STATUS NS_server_run(uint16_t port){
 
     ns_serv->serv_addr->sin_family = AF_INET;          
     ns_serv->serv_addr->sin_addr.s_addr = INADDR_ANY;  
-    ns_serv->serv_addr->sin_port = BEU16(port);        
+    ns_serv->serv_addr->sin_port = BEU16(port);
 
     FAIL_IF(REUSEADDR(ns_serv->sock));
     FAIL_IF(BIND(ns_serv->sock, ns_serv->serv_addr));

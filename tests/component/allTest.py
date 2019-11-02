@@ -5,10 +5,19 @@ import sys
 '''
     Import Test suites
 '''
-import initSuite
-import basicServerSuite
-import signalSuite
-import tlsSuite
+try:
+    import initSuite
+    import basicServerSuite
+    import signalSuite
+    import tlsSuite
+
+except Exception as e:
+    if sys.version_info[0] < 3:
+        print("[!] Missing Python 3.5 or higher")
+    if 'wolfssl' not in sys.modules:
+        print("[!] Missing wolfssl\n")
+    
+    exit(0)
 
 
 
@@ -17,10 +26,8 @@ if __name__ == "__main__":
         print("You need to have root privileges to run this script.\n")
         exit(0)
         
-    if sys.version_info[0] < 3:
-            print("This script is designed to be run with Python 3.5 and up.\n")
-            exit(0)
-           
+    
+    print(sys.version_info[0]   )
     # Initialize the test suite
     loader = unittest.TestLoader()
     suite  = unittest.TestSuite()

@@ -81,8 +81,8 @@ runtest:
 	$(BIN)/netsand-release-test
 
 misc:
-	md5sum $(BIN)/* >> $(BIN)/MD5SUMS
-	sha1sum $(BIN)/* >> $(BIN)/SHA1SUMS
+	md5sum $(BIN)/net* >> $(BIN)/MD5SUMS
+	sha1sum $(BIN)/net* >> $(BIN)/SHA1SUMS
 	
 scrub:
 	rm -f $(SRC)/*.o $(TESTCOMPONENT)/*.pyc
