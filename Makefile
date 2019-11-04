@@ -8,10 +8,24 @@ SRC = $(DIR)/src
 INCLUDE= $(DIR)/include
 TESTBASE= $(DIR)/tests
 TESTCOMPONENT = $(TESTBASE)/component
+
+#
+# WolfSSL
+#
 CRYPTBASE= $(DIR)/crypt
 CRYPTINC= $(CRYPTBASE)/include
 CRYPTSTATIC= $(CRYPTBASE)/lib/libwolfssl.a
-SNOW= $(TESTBASE)/unit
+#
+# Unit Test 
+#
+# SNOW= $(TESTBASE)/unit
+
+#
+# Controller
+#
+CONTROLLER= $(DIR)/controller
+CONTROLLERSRC= $(CONTROLLER)/sassycontroller
+CONTROLLERTEST=$(CONTROLLER)/tests
 
 #
 # Build variables
@@ -90,4 +104,4 @@ scrub:
 	rm -f $(SRC)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
-	rm -fr $(BIN)/* $(SRC)/*.o $(TESTCOMPONENT)/*.pyc
+	rm -fr $(BIN)/* $(SRC)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
