@@ -18,7 +18,7 @@ CRYPTSTATIC= $(CRYPTBASE)/lib/libwolfssl.a
 #
 # Unit Test 
 #
-# SNOW= $(TESTBASE)/unit
+SNOW= $(TESTBASE)/unit
 
 #
 # Controller
@@ -47,8 +47,7 @@ DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o sighandler
 
 .PHONY: clean
 
-all: clean \
-	 sassyllama-release sassyllama-release-test \
+all: sassyllama-release sassyllama-release-test \
 	 sassyllama-debug \
 	 misc \
 	 scrub
