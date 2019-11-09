@@ -47,37 +47,38 @@ DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o sighandler
 
 .PHONY: clean
 
-all: sassyllama-release sassyllama-release-test \
-	 sassyllama-debug \
+all: clean \
+	 alpacalunch-release alpacalunch-release-test \
+	 alpacalunch-debug \
 	 misc \
 	 scrub
 
-release: clean sassyllama-release scrub
+release: clean alpacalunch-release scrub
 
-test: clean sassyllama-release-test runtest scrub
+test: clean alpacalunch-release-test runtest scrub
 
-debug: clean sassyllama-debug scrub
+debug: clean alpacalunch-debug scrub
 
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-sassyllama-release: $(ROBJS)
+alpacalunch-release: $(ROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-sassyllama-release-test: $(TOBJS)
+alpacalunch-release-test: $(TOBJS)
 	$(CC) $(CFLAGS) $(TEST) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-sassyllama-release-static: $(ROBJS)
+alpacalunch-release-static: $(ROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-sassyllama-debug: $(DOBJS)
+alpacalunch-debug: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-sassyllama-debug-static: $(DOBJS)
+alpacalunch-debug-static: $(DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 
@@ -92,12 +93,12 @@ sassyllama-debug-static: $(DOBJS)
 	$(CC) -c $(DBG) $(CFLAGS) $< -o $@
 
 runtest:
-	$(BIN)/sassyllama-release-test
+	$(BIN)/alpacalunch-release-test
 
 misc:
 	mkdir -p $(HASH)
-	md5sum $(BIN)/sassy* >> $(HASH)/MD5SUMS
-	sha1sum $(BIN)/sassy* >> $(HASH)/SHA1SUMS
+	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
+	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	
 scrub:
 	rm -f $(SRC)/*.o $(TESTCOMPONENT)/*.pyc

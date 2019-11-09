@@ -6,7 +6,7 @@ import socket
 
 HOST = 'localhost'
 PORT = 12345
-BINARY = "binaries/sassyllama-release"
+BINARY = "binaries/alpacalunch-release"
 class BasicServerSuite(unittest.TestCase):
 
     def _run_kill(self):

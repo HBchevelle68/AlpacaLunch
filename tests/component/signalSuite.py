@@ -6,7 +6,7 @@ import socket
 import signal
 import errno
 
-BINARY = "binaries/sassyllama-release"
+BINARY = "binaries/alpacalunch-release"
 
 class SignalSuite(unittest.TestCase):
 

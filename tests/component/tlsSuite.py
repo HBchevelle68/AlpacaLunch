@@ -8,7 +8,7 @@ import os
 TSTFPATH = "/tmp/test.txt"
 HOST = 'localhost'
 PORT = 12345
-BINARY = "binaries/sassyllama-release"
+BINARY = "binaries/alpacalunch-release"
 
 def build_wolfssl_sock():
     # TLS wrapped Socket
