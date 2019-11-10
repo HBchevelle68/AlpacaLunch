@@ -2,9 +2,9 @@
 #define SIGHANDLER_H
 
 // Internal
-#include <nscodes.h>
+#include <codes.h>
 
-void NS_sig_handler(int signum);
-NS_STATUS NS_install_sighandlers();
+void alpacacore_sig_handler(int signum);
+ALPACA_STATUS alpacacore_install_sighandlers();
 
 #endif

@@ -1,21 +1,21 @@
 
 
 // Internal
-#include <ns.h>
+#include <allu.h>
 #include <macros.h>
 #include <server.h>
 #include <logging.h>
 #include <sighandler.h>
 
 
-NS_STATUS NS_init(){
-    NS_STATUS result = NS_SUCCESS;
+ALPACA_STATUS alpacacore_init(){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
 
     
     FAIL_IF(getuid());
     
     DEBUGWARNING(); 
-    FAIL_IF(NS_install_sighandlers());
+    FAIL_IF(alpacacore_install_sighandlers());
 
     return result;
 }
@@ -24,7 +24,7 @@ NS_STATUS NS_init(){
 /*
  * Small for now. Called by sighandler
  */
-void NS_exit(){
-    NS_server_clean();
+void alpacacore_exit(){
+    alpacacore_server_clean();
     exit(0);
 }

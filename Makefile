@@ -53,9 +53,9 @@ STATIC= -static
 # ALPACA-CORE
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORE)/, main.o server.o crypto.o sighandler.o ns.o)
-ALPACACORE_TOBJS=$(addprefix $(ALPACACORE)/, main-test.o server-test.o crypto-test.o sighandler-test.o ns-test.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORE)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o ns-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORE)/, main.o server.o crypto.o sighandler.o allu.o)
+ALPACACORE_TOBJS=$(addprefix $(ALPACACORE)/, main-test.o server-test.o crypto-test.o sighandler-test.o allu-test.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORE)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o allu-debug.o) 
 
 .PHONY: clean
 

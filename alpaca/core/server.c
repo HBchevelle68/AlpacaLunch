@@ -6,35 +6,35 @@
 #include <errno.h>
 
 #include <server.h>
-#include <nsmemory.h>
+#include <memory.h>
 #include <logging.h>
 #include <macros.h>
-#include <nscodes.h>
+#include <codes.h>
 #include <crypto.h>
 
 
 #define BUFSIZE 1500
-NS_server_t *ns_serv = NULL;
+allu_server_t *allu_serv = NULL;
 
 
 
 
-void NS_server_clean(){
+void alpacacore_server_clean(){
 
-    if(ns_serv != NULL){
-        if(ns_serv->sock > 0) {
-            close(ns_serv->sock);
+    if(allu_serv != NULL){
+        if(allu_serv->sock > 0) {
+            close(allu_serv->sock);
         }
-        if(ns_serv->tls_ctx != NULL){
-            wolfSSL_CTX_free(ns_serv->tls_ctx);
+        if(allu_serv->tls_ctx != NULL){
+            wolfSSL_CTX_free(allu_serv->tls_ctx);
         }
-        BUFFREE(ns_serv->serv_addr);
-        BUFFREE(ns_serv);
+        BUFFREE(allu_serv->serv_addr);
+        BUFFREE(allu_serv);
     }
 }
 
 static 
-void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
+void alpacacore_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
 
     WOLFSSL* l_tls;
     uint32_t n;
@@ -44,7 +44,7 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
     ZEROBUFF(buff, BUFSIZE);
 
     /* Wrap socket */ 
-    l_tls = NS_wrap_sock(ns_serv, cli_sock);
+    l_tls = alpacacore_wrap_sock(allu_serv, cli_sock);
     
 
     LOGDEBUG("Reading from tls1.2 socket\n");
@@ -70,56 +70,56 @@ void NS_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
  */
 
 static
-NS_STATUS NS_server_loop(){
+ALPACA_STATUS alpacacore_server_loop(){
     struct sockaddr_in	cliaddr = {0};
     uint32_t cli_sock = 0;
     socklen_t addrlen = sizeof(cliaddr);
     while(1){   
-        cli_sock = accept(ns_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
+        cli_sock = accept(allu_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
         /*
          * Can be interuppted by sighandler
          * or simply an error
          */
         if(cli_sock != -1){
             LOGDEBUG("Client connected\n");
-            NS_conn_handler(cli_sock, &cliaddr);
+            alpacacore_conn_handler(cli_sock, &cliaddr);
             close(cli_sock);
             memset(&cliaddr, 0, (size_t)addrlen);
         }
     }
-    return NS_FAILURE;
+    return ALPACA_FAILURE;
 }
 
 
-NS_STATUS NS_server_run(uint16_t port){
+ALPACA_STATUS alpacacore_server_run(uint16_t port){
 
-	NS_STATUS ret_status = NS_SUCCESS;
+	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
-    BUFALLOC(ns_serv, sizeof(NS_server_t));
-    BUFALLOC(ns_serv->serv_addr, sizeof(struct sockaddr_in));
+    BUFALLOC(allu_serv, sizeof(allu_server_t));
+    BUFALLOC(allu_serv->serv_addr, sizeof(struct sockaddr_in));
 
     /* Init WolfSSL */
-    FAIL_IF(NS_init_TLS(ns_serv));
+    FAIL_IF(alpacacore_init_TLS(allu_serv));
  
-    if ((ns_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
+    if ((allu_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
         LOGERROR("Socket creation failure\n");
-        return NS_FAILURE;
+        return ALPACA_FAILURE;
     } 
 
-    ns_serv->serv_addr->sin_family = AF_INET;          
-    ns_serv->serv_addr->sin_addr.s_addr = INADDR_ANY;  
-    ns_serv->serv_addr->sin_port = BEU16(port);
+    allu_serv->serv_addr->sin_family = AF_INET;          
+    allu_serv->serv_addr->sin_addr.s_addr = INADDR_ANY;  
+    allu_serv->serv_addr->sin_port = BEU16(port);
 
-    FAIL_IF(REUSEADDR(ns_serv->sock));
-    FAIL_IF(BIND(ns_serv->sock, ns_serv->serv_addr));
-    FAIL_IF(LISTEN(ns_serv->sock,20));
+    FAIL_IF(REUSEADDR(allu_serv->sock));
+    FAIL_IF(BIND(allu_serv->sock, allu_serv->serv_addr));
+    FAIL_IF(LISTEN(allu_serv->sock,20));
     
-    LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", ns_serv->sock, 
-                inet_ntoa(ns_serv->serv_addr->sin_addr), HU16(ns_serv->serv_addr->sin_port));
+    LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", allu_serv->sock, 
+                inet_ntoa(allu_serv->serv_addr->sin_addr), HU16(allu_serv->serv_addr->sin_port));
 
-    ret_status = NS_server_loop();
+    ret_status = alpacacore_server_loop();
 
-    NS_server_clean();
+    alpacacore_server_clean();
 
     return ret_status;
 }

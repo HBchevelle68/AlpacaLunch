@@ -1,5 +1,5 @@
-#ifndef NSMEMORY_H
-#define NSMEMORY_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
 
 

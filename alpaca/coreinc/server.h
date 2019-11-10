@@ -13,20 +13,20 @@
 
 
 // Internal
-#include <nscodes.h>
+#include <codes.h>
 
 
 
 /*
  * Defines server information
  */
-typedef struct nss {
+typedef struct alpacaserver {
 
     unsigned short sock;
     struct sockaddr_in *serv_addr;
     WOLFSSL_CTX *tls_ctx;
 
-} NS_server_t;
+} allu_server_t;
 
 
 /* Server macro's */
@@ -40,12 +40,12 @@ typedef struct nss {
     (lcnt>0 ? listen(sock, lcnt) : listen(sock, 10))
 
 #define FILLSOCKADDR(serv, port) \
-    NS_server_t *temp = (NS_server_t*)serv;         \
+    allu_server_t *temp = (allu_server_t*)serv;     \
     temp->serv_addr->sin_family = AF_INET;          \
     temp->serv_addr->sin_addr.s_addr = INADDR_ANY;  \
     temp->serv_addr->sin_port = BEU16(port);        \
- /*
 
+/*
 #define LOGCONNECTION() \
 
     LOGDEBUG("Connection from %s, port %d\n", 
@@ -55,8 +55,8 @@ typedef struct nss {
 
 
  /* Func */
-NS_STATUS NS_server_run(uint16_t port);
-void NS_server_clean();
+ALPACA_STATUS alpacacore_server_run(uint16_t port);
+void alpacacore_server_clean();
 
 
 #endif

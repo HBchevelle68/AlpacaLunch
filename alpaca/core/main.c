@@ -11,7 +11,7 @@
 #include <server.h>
 #include <macros.h>
 #include <sighandler.h>
-#include <ns.h>
+#include <allu.h>
 
 /*
  * Test harness
@@ -23,16 +23,16 @@
 int main(){
 
     
-    FAIL_IF(NS_init());
+    FAIL_IF(alpacacore_init());
     int i = 10;
 
     LOGERROR("This is a test: %d\n", i);
     LOGDEBUG("This is a test: %d\n", i);
     LOGINFO("This is a test: %d\n", i);
 
-    NS_server_run(12345);
+    alpacacore_server_run(12345);
 
-    NS_exit();
+    alpacacore_exit();
    
     return 0; 
 }
@@ -79,7 +79,7 @@ describe(networking) {
     
     
     after_each() {
-        NS_server_clean();
+        alpacacore_server_clean();
 	}
 
 

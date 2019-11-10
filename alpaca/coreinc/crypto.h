@@ -7,16 +7,16 @@
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/rsa.h>
 
-#include <nscodes.h>
+#include <codes.h>
 #include <server.h>
 
-NS_STATUS NS_init_TLS(NS_server_t *serv);
+ALPACA_STATUS alpacacore_init_TLS(allu_server_t *serv);
 
-WOLFSSL* NS_wrap_sock(NS_server_t *serv, uint16_t cli_sock);
+WOLFSSL* alpacacore_wrap_sock(allu_server_t *serv, uint16_t cli_sock);
 
-NS_STATUS NS_init_RSA(NS_server_t *serv);
+ALPACA_STATUS alpacacore_init_RSA(allu_server_t *serv);
 
-NS_STATUS NS_gen_hash(char* buf);
+ALPACA_STATUS alpacacore_gen_hash(char* buf);
 
 
 

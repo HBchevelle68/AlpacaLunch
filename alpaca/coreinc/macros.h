@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 
 // Internal
-#include <ns.h>
+#include <allu.h>
 
 
 
@@ -30,17 +30,17 @@
 /*
  *   Error checking
  */
-#define FAIL_IF(ret)         \
-     if(ret != NS_SUCCESS) { \
-        NS_exit();           \
-        return NS_FAILURE;   \
+#define FAIL_IF(ret)             \
+     if(ret != ALPACA_SUCCESS) { \
+        alpacacore_exit();       \
+        return ALPACA_FAILURE;   \
      }
 
-#define FAIL_IF_PRINT(ret, errstr)\
-     if(ret != NS_SUCCESS) {      \
-        LOGERROR(errstr);         \
-        NS_exit();                \
-        return NS_FAILURE;        \
+#define FAIL_IF_PRINT(ret, errstr) \
+     if(ret != ALPACA_SUCCESS) {   \
+        LOGERROR(errstr);          \
+        alpacacore_exit();         \
+        return ALPACA_FAILURE;     \
      }
 
 
