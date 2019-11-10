@@ -4,21 +4,32 @@
 DIR := ${CURDIR}
 BIN = $(DIR)/binaries
 HASH = $(BIN)/hashes
-SRC = $(DIR)/src
-INCLUDE= $(DIR)/include
+
+#
+# Source directories
+#
+SRCBASE = $(DIR)/alpaca
+ALPACACORE =$(SRCBASE)/core
+
+#
+# Header Directories
+#
+COREINCLUDE= $(SRCBASE)/coreinc
+
+#
+# TEST DIRECTORIES
+#
 TESTBASE= $(DIR)/tests
-TESTCOMPONENT = $(TESTBASE)/component
+COMPONENTBASE = $(TESTBASE)/component
+COMPONENTALL = $(COMPONENTBASE)/allTest.py
+SNOW= $(TESTBASE)/unit
 
 #
 # WolfSSL
 #
-CRYPTBASE= $(DIR)/crypt
+CRYPTBASE= $(SRCBASE)/cryptlibs
 CRYPTINC= $(CRYPTBASE)/include
 CRYPTSTATIC= $(CRYPTBASE)/lib/libwolfssl.a
-#
-# Unit Test 
-#
-SNOW= $(TESTBASE)/unit
 
 #
 # Controller
@@ -31,19 +42,20 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 # Build variables
 #
 CC= gcc
-CFLAGS= -Werror -Wall -s -O2 -I$(INCLUDE) -I$(CRYPTINC) -I$(SNOW)
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -O2 -I$(INCLUDE) -I$(CRYPTINC)
+CFLAGS= -Werror -Wall -s -O2 -I$(COREINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -O2 -I$(COREINCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
 
 #
+# ALPACA-CORE
 # Build out seperate objs for release, test, debug 
 #
-ROBJS=$(addprefix $(SRC)/, main.o server.o crypto.o sighandler.o ns.o)
-TOBJS=$(addprefix $(SRC)/, main-test.o server-test.o crypto-test.o sighandler-test.o ns-test.o)
-DOBJS=$(addprefix $(SRC)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o ns-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORE)/, main.o server.o crypto.o sighandler.o ns.o)
+ALPACACORE_TOBJS=$(addprefix $(ALPACACORE)/, main-test.o server-test.o crypto-test.o sighandler-test.o ns-test.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORE)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o ns-debug.o) 
 
 .PHONY: clean
 
@@ -63,22 +75,22 @@ debug: clean alpacalunch-debug scrub
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-alpacalunch-release: $(ROBJS)
+alpacalunch-release: $(ALPACACORE_ROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-test: $(TOBJS)
-	$(CC) $(CFLAGS) $(TEST) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
+alpacalunch-release-test: $(ALPACACORE_TOBJS)
+	$(CC) $(CFLAGS) $(TEST) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-static: $(ROBJS)
+alpacalunch-release-static: $(ALPACACORE_ROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-alpacalunch-debug: $(DOBJS)
+alpacalunch-debug: $(ALPACACORE_DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-debug-static: $(DOBJS)
+alpacalunch-debug-static: $(ALPACACORE_DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 
@@ -92,16 +104,22 @@ alpacalunch-debug-static: $(DOBJS)
 %-debug.o: %.c $(DEPS)
 	$(CC) -c $(DBG) $(CFLAGS) $< -o $@
 
-runtest:
-	$(BIN)/alpacalunch-release-test
 
+
+runtest:
+	sudo python3 $(COMPONENTALL) 
+	
+
+init-dirs:
+	mkdir -p $(HASH)
+	mkdir -p $(BIN)
 misc:
 	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	
 scrub:
-	rm -f $(SRC)/*.o $(TESTCOMPONENT)/*.pyc
+	rm -f $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
-	rm -fr $(BIN)/* $(SRC)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+	rm -fr $(BIN)/* $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc

@@ -3,6 +3,7 @@
         "cstdarg": "cpp",
         "in.h": "c",
         "unistd.h": "c",
-        "unistd_64.h": "c"
+        "unistd_64.h": "c",
+        "logging.h": "c"
     }
 }
