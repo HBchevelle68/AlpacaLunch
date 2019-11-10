@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/crypt/include/**",
+                "${workspaceFolder}/alpaca/coreinc",
+                "${workspaceFolder}/alpaca/cryptlibs/include/**",
                 "${workspaceFolder}/tests/lib"
             ],
             "defines": [],

@@ -11,26 +11,26 @@
 #define PKEY "../certs/prvt.pem"
 
 
-NS_STATUS NS_init_TLS(NS_server_t *serv){
+ALPACA_STATUS alpacacore_init_TLS(allu_server_t *serv){
 
-    NS_STATUS result = NS_SUCCESS;
+    ALPACA_STATUS result = ALPACA_SUCCESS;
 
     wolfSSL_Init();
     if ((serv->tls_ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL){
-        LOGERROR("wolfSSL_CTX_new ERROR: %d", NS_TLSINIT);
-        return NS_TLSINIT;
+        LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_TLSINIT);
+        return ALPACA_TLSINIT;
     }
 
     /* Load server cert into wolfSSL_CTX */
 	if (wolfSSL_CTX_use_certificate_file(serv->tls_ctx, SCERT, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
-	    LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d", NS_TLSCERT);
-	    return NS_TLSCERT;
+	    LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d", ALPACA_TLSCERT);
+	    return ALPACA_TLSCERT;
 	}
 
 	/* Load server key into wolfSSL_CTX */
 	if (wolfSSL_CTX_use_PrivateKey_file(serv->tls_ctx, PKEY, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
-        LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d", NS_TLSKEY);
-	    return NS_TLSKEY;
+        LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d", ALPACA_TLSKEY);
+	    return ALPACA_TLSKEY;
 	}
 
     return result;
@@ -39,7 +39,7 @@ NS_STATUS NS_init_TLS(NS_server_t *serv){
 /*
  * TLS wrap a socket 
  */
-WOLFSSL* NS_wrap_sock(NS_server_t *serv, uint16_t cli_sock){
+WOLFSSL* alpacacore_wrap_sock(allu_server_t *serv, uint16_t cli_sock){
 
     WOLFSSL* tls;
     if((tls = wolfSSL_new(serv->tls_ctx)) == NULL) {
@@ -54,7 +54,7 @@ WOLFSSL* NS_wrap_sock(NS_server_t *serv, uint16_t cli_sock){
 }
 
 
-NS_STATUS NS_init_RSA(NS_server_t *serv){
+ALPACA_STATUS alpacacore_init_RSA(allu_server_t *serv){
 
     RsaKey priv;
     //RsaKey pub;
@@ -70,11 +70,11 @@ NS_STATUS NS_init_RSA(NS_server_t *serv){
     if( ret != 0 ) {
         // error generating private key
     }
-    return NS_SUCCESS;
+    return ALPACA_SUCCESS;
 }
 
 /*
-NS_STATUS NS_gen_hash(char* buf){
+ALPACA_STATUS alpacacore_gen_hash(char* buf){
     
     int ret;
     unsigned char digest[SHA224_DIGEST_SIZE];
