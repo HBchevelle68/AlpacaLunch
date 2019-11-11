@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/alpaca/coreinc",
+                "${workspaceFolder}/alpaca/multithreadserver/mtsinc",
                 "${workspaceFolder}/alpaca/cryptlibs/include/**",
                 "${workspaceFolder}/tests/lib"
             ],

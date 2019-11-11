@@ -54,7 +54,7 @@ void alpacacore_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
             LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(l_tls,n));
             break;
         }
-          
+        
         LOGDEBUG("FROM CONNECTION: %s\n", buff);
         LOGTESTFILE(buff);
 

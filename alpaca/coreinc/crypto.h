@@ -7,14 +7,13 @@
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/rsa.h>
 
+// Internal
 #include <codes.h>
 #include <server.h>
 
 ALPACA_STATUS alpacacore_init_TLS(allu_server_t *serv);
 
 WOLFSSL* alpacacore_wrap_sock(allu_server_t *serv, uint16_t cli_sock);
-
-ALPACA_STATUS alpacacore_init_RSA(allu_server_t *serv);
 
 ALPACA_STATUS alpacacore_gen_hash(char* buf);
 

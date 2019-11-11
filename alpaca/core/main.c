@@ -12,7 +12,7 @@
 #include <macros.h>
 #include <sighandler.h>
 #include <allu.h>
-
+#include <mtsinc/multithreadserver.h>
 /*
  * Test harness
  */

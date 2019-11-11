@@ -54,25 +54,6 @@ WOLFSSL* alpacacore_wrap_sock(allu_server_t *serv, uint16_t cli_sock){
 }
 
 
-ALPACA_STATUS alpacacore_init_RSA(allu_server_t *serv){
-
-    RsaKey priv;
-    //RsaKey pub;
-    WC_RNG rng;
-    int ret = 0;
-    long e = 65537; // standard value to use for exponent
-
-    wc_InitRsaKey(&priv, NULL); // not using heap hint. No custom memory
-    wc_InitRng(&rng);
-
-    // generate 2048 bit long private key
-    ret = wc_MakeRsaKey(&priv, 2048, e, &rng);
-    if( ret != 0 ) {
-        // error generating private key
-    }
-    return ALPACA_SUCCESS;
-}
-
 /*
 ALPACA_STATUS alpacacore_gen_hash(char* buf){
     
