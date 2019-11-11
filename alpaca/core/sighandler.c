@@ -5,9 +5,9 @@
 #include <string.h>
 
 // Internal
-#include <sighandler.h>
-#include <logging.h>
-#include <allu.h>
+#include <core/sighandler.h>
+#include <core/logging.h>
+#include <core/allu.h>
 
 
 void alpacacore_signal_handler(int signum){

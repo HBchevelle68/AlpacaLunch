@@ -2,7 +2,7 @@
 #define SIGHANDLER_H
 
 // Internal
-#include <codes.h>
+#include <core/codes.h>
 
 void alpacacore_sig_handler(int signum);
 ALPACA_STATUS alpacacore_install_sighandlers();

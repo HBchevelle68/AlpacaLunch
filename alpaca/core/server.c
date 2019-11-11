@@ -5,12 +5,12 @@
 #include <unistd.h> 
 #include <errno.h>
 
-#include <server.h>
-#include <memory.h>
-#include <logging.h>
-#include <macros.h>
-#include <codes.h>
-#include <crypto.h>
+#include <core/server.h>
+#include <core/memory.h>
+#include <core/logging.h>
+#include <core/macros.h>
+#include <core/codes.h>
+#include <core/crypto.h>
 
 
 #define BUFSIZE 1500

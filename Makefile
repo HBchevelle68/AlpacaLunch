@@ -10,15 +10,14 @@ HASH = $(BIN)/hashes
 #
 SRCBASE = $(DIR)/alpaca
 ALPACACORESRC = $(SRCBASE)/core
+ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 
-ALPACATHREADBASE = $(SRCBASE)/multithreadserver
-ALPACATHREADSRC = $(ALPACATHREADBASE)/mts
 
 #
 # Header Directories
 #
-COREINCLUDE= $(SRCBASE)/coreinc
-MTHREADINC = $(ALPACATHREADBASE)/mtsinc
+ALPACAINCLUDE= $(SRCBASE)
+
 
 #
 # TEST DIRECTORIES
@@ -46,8 +45,8 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 # Build variables
 #
 CC= gcc
-CFLAGS= -Werror -Wall -s -O2 -I$(COREINCLUDE) -I$(MTHREADINC) -I$(CRYPTINC) -I$(SNOW)
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -O2 -I$(COREINCLUDE) -I$(MTHREADINC) -I$(CRYPTINC)
+CFLAGS= -Werror -Wall -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
 TEST= -DSNOW_ENABLED
@@ -66,9 +65,9 @@ ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o server-debug.o cryp
 # ALPACA-MULTITHREADSERVER object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
-ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-test.o)
-ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
+ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver.o)
+ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver-test.o)
+ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver-debug.o) 
 
 .PHONY: clean
 

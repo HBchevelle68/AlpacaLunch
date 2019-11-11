@@ -1,18 +1,15 @@
-/*
- * C standard
- */ 
+// Standard
 #include <stdio.h> 
 #include <time.h>
-/*
- * Internal
- */
-#include <logging.h> 
-#include <crypto.h>
-#include <server.h>
-#include <macros.h>
-#include <sighandler.h>
-#include <allu.h>
-#include <mtsinc/multithreadserver.h>
+
+// Internal
+#include <core/logging.h> 
+#include <core/crypto.h>
+#include <core/server.h>
+#include <core/macros.h>
+#include <core/sighandler.h>
+#include <core/allu.h>
+#include <multithreadserver/multithreadserver.h>
 /*
  * Test harness
  */
@@ -54,8 +51,8 @@ int main(){
 #endif 
 
 #ifdef SNOW_ENABLED
-#include <server.h>
-#include <crypto.h>
+#include <core/server.h>
+#include <core/crypto.h>
 
 #define TEST_SUCCESS 1
 #define TEST_FAILURE 0

@@ -1,11 +1,11 @@
 
 
 // Internal
-#include <allu.h>
-#include <macros.h>
-#include <server.h>
-#include <logging.h>
-#include <sighandler.h>
+#include <core/allu.h>
+#include <core/macros.h>
+#include <core/server.h>
+#include <core/logging.h>
+#include <core/sighandler.h>
 
 
 ALPACA_STATUS alpacacore_init(){

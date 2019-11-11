@@ -1,6 +1,6 @@
 // Internal
-#include <crypto.h>
-#include <logging.h>
+#include <core/crypto.h>
+#include <core/logging.h>
 
 
 /*

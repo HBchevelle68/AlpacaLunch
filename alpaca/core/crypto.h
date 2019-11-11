@@ -8,8 +8,8 @@
 #include <wolfssl/wolfcrypt/rsa.h>
 
 // Internal
-#include <codes.h>
-#include <server.h>
+#include <core/codes.h>
+#include <core/server.h>
 
 ALPACA_STATUS alpacacore_init_TLS(allu_server_t *serv);
 
