@@ -47,9 +47,6 @@ extern "C" {
 #undef  WOLFSSL_KEY_GEN
 #define WOLFSSL_KEY_GEN
 
-#undef  WOLFSSL_CERT_GEN
-#define WOLFSSL_CERT_GEN
-
 #undef  NO_DSA
 #define NO_DSA
 
@@ -61,6 +58,9 @@ extern "C" {
 
 #undef  ECC_SHAMIR
 #define ECC_SHAMIR
+
+#undef  NO_OLD_TLS
+#define NO_OLD_TLS
 
 #undef  WOLFSSL_BASE64_ENCODE
 #define WOLFSSL_BASE64_ENCODE

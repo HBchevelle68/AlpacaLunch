@@ -12,7 +12,6 @@ SRCBASE = $(DIR)/alpaca
 ALPACACORESRC = $(SRCBASE)/core
 ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 
-
 #
 # Header Directories
 #
@@ -65,9 +64,9 @@ ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o server-debug.o cryp
 # ALPACA-MULTITHREADSERVER object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver.o)
-ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver-test.o)
-ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREAD)/, multithreadserver-debug.o) 
+ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
+ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-testo)
+ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debugo) 
 
 .PHONY: clean
 

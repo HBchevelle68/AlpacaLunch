@@ -4,7 +4,7 @@ package="wolfssl"
 version="4.1.0"
 libs="-lwolfssl"
  
-prefix="/home/ap/netSandbox/crypt"
+prefix="/home/ap/AlpacaLunch/alpaca/cryptlibs"
 exec_prefix="${prefix}"
 bindir="${exec_prefix}/bin"
 sbindir="${exec_prefix}/sbin"
