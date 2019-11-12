@@ -4,6 +4,7 @@
 DIR := ${CURDIR}
 BIN = $(DIR)/binaries
 HASH = $(BIN)/hashes
+BUILD = $(DIR)/build
 
 #
 # Source directories
@@ -50,6 +51,7 @@ DBG= -g3 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
+STATICBUILD-CFLAGS = -Werror -Wall -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 
 #
 # ALPACA-CORE object files
@@ -65,22 +67,30 @@ ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o server-debug.o cryp
 # Build out seperate objs for release, test, debug 
 #
 ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
+ALPACAMTHREADSERV_LOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-PIC.o)
 ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-test.o)
 ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
 
 .PHONY: clean
 
-all: clean \
+all: clean init-dirs \
 	 alpacalunch-release alpacalunch-release-test \
 	 alpacalunch-debug \
 	 misc \
 	 scrub
 
-release: clean alpacalunch-release scrub
+release: clean init-dirs alpacalunch-release scrub
 
-test: clean alpacalunch-release-test runtest scrub
+test: clean init-dirs alpacalunch-release-test runtest scrub
 
-debug: clean alpacalunch-debug scrub
+debug: clean init-dirs alpacalunch-debug scrub
+
+
+#
+#
+# compile -> get objs -> with objs build *.a -> build core linking with *.a -> binary
+#
+#
 
 
 #
@@ -124,6 +134,7 @@ runtest:
 init-dirs:
 	mkdir -p $(HASH)
 	mkdir -p $(BIN)
+	mkdir -p $(BUILD)
 misc:
 	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
@@ -133,4 +144,4 @@ scrub:
 	rm -f $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
-	rm -fr $(BIN)/* $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+	rm -fr $(BIN)/* $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
