@@ -12,12 +12,12 @@ BUILD = $(DIR)/build
 SRCBASE = $(DIR)/alpaca
 ALPACACORESRC = $(SRCBASE)/core
 ALPACATHREADSRC = $(SRCBASE)/multithreadserver
+ALPACATPOOLSRC = $(SRCBASE)/threadpool
 
 #
 # Header Directories
 #
 ALPACAINCLUDE= $(SRCBASE)
-
 
 #
 # TEST DIRECTORIES
@@ -71,6 +71,15 @@ ALPACAMTHREADSERV_LOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-PIC.o
 ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-test.o)
 ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
 
+#
+# ALPACA-THREADPOOL object files
+# Build out seperate objs for release, test, debug 
+#
+ALPACATPOOL_ROBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool.o)
+ALPACATPOOL_LOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-PIC.o)
+ALPACATPOOL_TOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-test.o)
+ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o) 
+
 .PHONY: clean
 
 all: clean init-dirs \
@@ -87,31 +96,24 @@ debug: clean init-dirs alpacalunch-debug scrub
 
 
 #
-#
-# compile -> get objs -> with objs build *.a -> build core linking with *.a -> binary
-#
-#
-
-
-#
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-alpacalunch-release: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS)
+alpacalunch-release: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-test: $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS)
+alpacalunch-release-test: $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS) $(ALPACATPOOL_TOBJS)
 	$(CC) $(CFLAGS) $(TEST) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-static: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS)
+alpacalunch-release-static: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-alpacalunch-debug: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS)
+alpacalunch-debug: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-debug-static: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS)
+alpacalunch-debug-static: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 
@@ -144,4 +146,5 @@ scrub:
 	rm -f $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
-	rm -fr $(BIN)/* $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o $(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+	rm -fr $(BIN)/* $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o  $(ALPACATPOOLSRC)/*.o \
+	$(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc

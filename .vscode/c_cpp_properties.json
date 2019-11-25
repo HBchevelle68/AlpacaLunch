@@ -4,8 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/alpaca/coreinc",
-                "${workspaceFolder}/alpaca/multithreadserver/mtsinc",
+                "${workspaceFolder}/alpaca/core/*",
+                "${workspaceFolder}/alpaca/multithreadserver/*",
+                "${workspaceFolder}/alpaca/threadpool/*",
                 "${workspaceFolder}/alpaca/cryptlibs/include/**",
                 "${workspaceFolder}/tests/lib"
             ],
