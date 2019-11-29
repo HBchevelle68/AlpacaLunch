@@ -75,10 +75,10 @@ ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug
 # ALPACA-THREADPOOL object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACATPOOL_ROBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool.o)
-ALPACATPOOL_LOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-PIC.o)
-ALPACATPOOL_TOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-test.o)
-ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o) 
+ALPACATPOOL_ROBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool.o steque.o) 
+ALPACATPOOL_LOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-PIC.o steque-PIC.o)
+ALPACATPOOL_TOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-test.o steque-test.o)
+ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o steque-debug.o) 
 
 .PHONY: clean
 
@@ -143,7 +143,7 @@ misc:
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	
 scrub:
-	rm -f $(ALPACACORE)/*.o $(TESTCOMPONENT)/*.pyc
+	rm -f $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o  $(ALPACATPOOLSRC)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
 	rm -fr $(BIN)/* $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o  $(ALPACATPOOLSRC)/*.o \

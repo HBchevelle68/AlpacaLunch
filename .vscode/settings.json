@@ -4,6 +4,8 @@
         "in.h": "c",
         "unistd.h": "c",
         "unistd_64.h": "c",
-        "logging.h": "c"
+        "logging.h": "c",
+        "steque.h": "c",
+        "stdlib.h": "c"
     }
 }
