@@ -58,11 +58,6 @@ typedef struct AlpacaLunch_threadpool {
 
 
 
-
-
-
-
-
 /* tpool_init
 	@brief - Initializes a threadpool (ALtpool_t) and
 	         returns a pointer to a allocated threadpool with

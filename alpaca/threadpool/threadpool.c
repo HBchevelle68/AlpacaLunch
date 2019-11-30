@@ -156,6 +156,7 @@ int threadpool_free_pool(ALtpool_t *tp){
         }
 
         // Clean queue memory
+        steque_destroy(&(tp->queue));
 
         // Finally lets clean up threadpool memory
         free(tp);
