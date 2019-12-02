@@ -31,17 +31,25 @@ void *thread_loop(void *threadpool){
     ALtask_t *to_execute;
 
     while(1) {
-        if((tp->tp_status & SHUTDOWN)){ break; }
+
+        if((tp->tp_status & SHUTDOWN)){ 
+            break;
+        }
+        
         pthread_mutex_lock(&(tp->tp_m_lock));
         while((tp->q_status = steque_isempty(&(tp->queue)))){
+
             if((tp->tp_status == GRACEFUL)){
                  threadpool_thread_safe_exit(tp);
             }
+
             pthread_cond_wait(&(tp->q_cond), &(tp->tp_m_lock));
             if((tp->tp_status == SHUTDOWN)){ 
                 threadpool_thread_safe_exit(tp);
             }
+
         }
+
         // Pop task from Queue and release lock
         to_execute = steque_pop(&(tp->queue));
         pthread_mutex_unlock(&(tp->tp_m_lock));
@@ -50,6 +58,7 @@ void *thread_loop(void *threadpool){
         (to_execute->routine)(to_execute->args);
         free(to_execute);
     }
+
     // Only gets here on 1st IF statement
     pthread_exit(NULL);
 }
@@ -59,7 +68,7 @@ ALtpool_t *tpool_init(unsigned int t_count){
 
     ALtpool_t *tp;
 
-    // Allocate threadpool_t struct
+    // ALLOCATE ALtpool_t struct and zero memory
     if((tp = malloc(sizeof(ALtpool_t))) == NULL) {
         return NULL;
     }
@@ -82,13 +91,13 @@ ALtpool_t *tpool_init(unsigned int t_count){
     pthread_cond_init(&(tp->q_cond), NULL);
     
 
-
-    // Start threads
+    // START threads
     for(int i = 0; i < t_count; i++) {
         if(pthread_create(&(tp->t_pool[i]), NULL, thread_loop, (void*)tp) != 0) {
             return NULL;
         }
     }
+
 
     // Finish up setting other vars
     pthread_mutex_lock(&(tp->tp_m_lock));
@@ -108,17 +117,30 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
     if(!tp){
         return -1;
     }
+
+    /*
+     * Allocate task 
+     */
     steque_t *item;
     ALtask_t *task = malloc(sizeof(ALtask_t));
+
+    /*
+     * Set task func ptr and func args 
+     */
     task->routine = routine;
     task->args = args;
     item = (void*)task;
 
-    pthread_mutex_lock(&(tp->tp_m_lock));
+    /*
+     * Push task to queue 
+     */
+    pthread_mutex_lock(&(tp->tp_m_lock));   // LOCK
+
     steque_enqueue(&(tp->queue), item);
     tp->q_status = TODO;
-    pthread_mutex_unlock(&(tp->tp_m_lock));
-    pthread_cond_broadcast(&(tp->q_cond));
+
+    pthread_mutex_unlock(&(tp->tp_m_lock)); // UNLOCK
+    pthread_cond_broadcast(&(tp->q_cond));  // BCAST
 
     return 0;
 }
@@ -134,9 +156,11 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
 */
 int threadpool_free_pool(ALtpool_t *tp){
 
-    // Make sure thread pool got allocated
-    // Repeat process of checking for allocated memory
-    // Free if memory allocated
+    /* 
+     * Make sure thread pool got allocated
+     * Repeat process of checking for allocated memory
+     * Free if memory allocated
+     */ 
     if(tp != NULL){
         
         pthread_cond_broadcast(&(tp->q_cond));
