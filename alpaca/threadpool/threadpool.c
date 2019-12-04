@@ -37,8 +37,7 @@ void *thread_loop(void *threadpool){
         }
         
         pthread_mutex_lock(&(tp->tp_m_lock));
-        while((tp->q_status = steque_isempty(&(tp->queue)))){
-
+        while(AL_queue_isempty(&(tp->queue)) == 1){
             if((tp->tp_status == GRACEFUL)){
                  threadpool_thread_safe_exit(tp);
             }
@@ -51,7 +50,7 @@ void *thread_loop(void *threadpool){
         }
 
         // Pop task from Queue and release lock
-        to_execute = steque_pop(&(tp->queue));
+        to_execute = AL_queue_dequeue(&(tp->queue));
         pthread_mutex_unlock(&(tp->tp_m_lock));
 
         // Begin execution of function
@@ -83,7 +82,7 @@ ALtpool_t *tpool_init(unsigned int t_count){
 
 
     // INIT QUEUE
-    steque_init(&(tp->queue));
+    AL_queue_init(&(tp->queue));
 
 
     // INIT LOCK/COND VAR
@@ -117,11 +116,8 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
     if(!tp){
         return -1;
     }
-
-    /*
-     * Allocate task 
-     */
-    steque_t *item;
+    
+    AL_item_t item;
     ALtask_t *task = malloc(sizeof(ALtask_t));
 
     /*
@@ -131,12 +127,8 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
     task->args = args;
     item = (void*)task;
 
-    /*
-     * Push task to queue 
-     */
-    pthread_mutex_lock(&(tp->tp_m_lock));   // LOCK
-
-    steque_enqueue(&(tp->queue), item);
+    pthread_mutex_lock(&(tp->tp_m_lock));
+    AL_queue_enqueue(&(tp->queue), item);
     tp->q_status = TODO;
 
     pthread_mutex_unlock(&(tp->tp_m_lock)); // UNLOCK
@@ -180,7 +172,7 @@ int threadpool_free_pool(ALtpool_t *tp){
         }
 
         // Clean queue memory
-        steque_destroy(&(tp->queue));
+        AL_queue_destroy(&(tp->queue));
 
         // Finally lets clean up threadpool memory
         free(tp);

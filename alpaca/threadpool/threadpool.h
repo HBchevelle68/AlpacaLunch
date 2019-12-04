@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <pthread.h>
 
-#include <threadpool/steque.h>
+#include <threadpool/alpacaqueue.h>
 
 enum STATUS {
 	NOTRUNNING  = 0x00,
@@ -35,7 +35,7 @@ typedef struct AlpacaLunch_task{
     The core pool
 
     pthread_t *t_pool       - Thread array
-    task_t *queue           - Queue holding tasks
+    AL_queue_t *queue           - Queue holding tasks
     pthread_mutex_t q_lock  - Mutex to access queue of tasks
     pthread_mutex_t q_cond  - Condition variable for Queue
     uint8_t tp_status       - Threadpool status flags
@@ -47,7 +47,7 @@ typedef struct AlpacaLunch_task{
 typedef struct AlpacaLunch_threadpool {
   
   pthread_t *t_pool;
-  steque_t queue;
+  AL_queue_t queue;
   pthread_mutex_t tp_m_lock; // threadpool mutex 
   pthread_cond_t q_cond;  // condition variable for queue of tasks
   uint8_t tp_status;
