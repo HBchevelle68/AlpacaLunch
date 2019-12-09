@@ -117,7 +117,7 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
         return -1;
     }
     
-    AL_item_t item;
+    //AL_item_t item;
     ALtask_t *task = malloc(sizeof(ALtask_t));
 
     /*
@@ -125,10 +125,10 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
      */
     task->routine = routine;
     task->args = args;
-    item = (void*)task;
+    //item = (void*)task;
 
     pthread_mutex_lock(&(tp->tp_m_lock));
-    AL_queue_enqueue(&(tp->queue), item);
+    AL_queue_enqueue(&(tp->queue), (AL_item_t)task);
     tp->q_status = TODO;
 
     pthread_mutex_unlock(&(tp->tp_m_lock)); // UNLOCK

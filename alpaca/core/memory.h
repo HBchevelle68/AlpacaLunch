@@ -1,12 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
-
-
-
-
 /*
  * Memory 
- * 
  */
 #define BUFALLOC(buf, size) \
      if(size > 0) {         \
