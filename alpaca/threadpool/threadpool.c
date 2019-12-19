@@ -3,7 +3,8 @@
 #include <stdlib.h>   // malloc and other mem functions
 
 // Internal
-#include <threadpool/threadpool.h>
+#include <interfaces/threadpool_interface.h>
+
 
 
 /*
@@ -146,6 +147,7 @@ int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
 
     @tp - Threadpool to teardown
 */
+static
 int threadpool_free_pool(ALtpool_t *tp){
 
     /* 

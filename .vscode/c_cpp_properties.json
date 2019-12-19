@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/alpaca/*",
                 "${workspaceFolder}/alpaca/core/*",
                 "${workspaceFolder}/alpaca/multithreadserver/*",
                 "${workspaceFolder}/alpaca/threadpool/*",

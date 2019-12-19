@@ -10,6 +10,9 @@
 #include <core/sighandler.h>
 #include <core/allu.h>
 #include <multithreadserver/multithreadserver.h>
+
+#include <interfaces/threadpool_interface.h>
+
 /*
  * Test harness
  */

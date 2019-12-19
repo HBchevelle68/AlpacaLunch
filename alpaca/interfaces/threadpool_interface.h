@@ -1,10 +1,20 @@
-#ifndef THREADPOOL_H
-#define THREADPOOL_H
+#ifndef THREADPOOL_INTERFACE_H
+#define THREADPOOL_INTERFACE_H
 
 #include <stdint.h>
 #include <pthread.h>
 
 #include <threadpool/alpacaqueue.h>
+
+/*
+ * INTERFACE
+ */
+#define threadpool_init AlpacaThreadpool_init
+#define threadpool_exit AlpacaThreadpool_exit
+
+
+
+
 
 enum STATUS {
 	NOTRUNNING  = 0x00,
@@ -68,7 +78,7 @@ typedef struct AlpacaLunch_threadpool {
 
 	@t_count - Thread count. Number of threads this pool will generate.
 */
-ALtpool_t *threadpool_init(unsigned int t_count);
+extern ALtpool_t *threadpool_init(unsigned int t_count);
 
 
 
@@ -82,7 +92,7 @@ ALtpool_t *threadpool_init(unsigned int t_count);
 	@routine - Function to add to queue
 	@args - Arguments needed for function. If no args, then pass NULL;
 */
-int threadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
+extern int threadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
 
 
 
@@ -92,9 +102,9 @@ int threadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
              and locks in proper order.
 
     @tp - Threadpool to teardown
-*/
-int threadpool_free_pool(ALtpool_t *tp);
 
+int threadpool_free_pool(ALtpool_t *tp);
+*/
 
 
 /* tpool_exit
@@ -106,7 +116,7 @@ int threadpool_free_pool(ALtpool_t *tp);
 
 	@tp - Threadpool to teardown.
 */
-int threadpool_exit(ALtpool_t *tp);
+extern int threadpool_exit(ALtpool_t *tp);
 
 
 
