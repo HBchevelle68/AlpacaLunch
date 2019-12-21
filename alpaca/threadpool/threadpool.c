@@ -2,7 +2,7 @@
 #include <string.h>   // memset
 #include <stdlib.h>   // malloc and other mem functions
 
-// Internal
+// Implements Interface 
 #include <interfaces/threadpool_interface.h>
 
 
@@ -64,7 +64,7 @@ void *thread_loop(void *threadpool){
 }
 
 
-ALtpool_t *tpool_init(unsigned int t_count){
+ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 
     ALtpool_t *tp;
 
@@ -112,7 +112,7 @@ ALtpool_t *tpool_init(unsigned int t_count){
 
 
 
-int threadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
+int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
 
     if(!tp){
         return -1;
@@ -178,6 +178,7 @@ int threadpool_free_pool(ALtpool_t *tp){
 
         // Finally lets clean up threadpool memory
         free(tp);
+        tp = NULL;
     }
 
     return 0;
@@ -185,7 +186,7 @@ int threadpool_free_pool(ALtpool_t *tp){
 
 
 
-int threadpool_exit(ALtpool_t *tp){
+int AlpacaThreadpool_exit(ALtpool_t *tp){
 
     tp->tp_status = SHUTDOWN;
     if(threadpool_free_pool(tp)){

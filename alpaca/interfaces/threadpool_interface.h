@@ -9,8 +9,9 @@
 /*
  * INTERFACE
  */
-#define threadpool_init AlpacaThreadpool_init
-#define threadpool_exit AlpacaThreadpool_exit
+//#define threadpool_init 	AlpacaThreadpool_init
+//#define threadpool_exit 	AlpacaThreadpool_exit
+//#define threadpool_add_task AlpacaThreadpool_add_task
 
 
 
@@ -78,7 +79,7 @@ typedef struct AlpacaLunch_threadpool {
 
 	@t_count - Thread count. Number of threads this pool will generate.
 */
-extern ALtpool_t *threadpool_init(unsigned int t_count);
+extern ALtpool_t* AlpacaThreadpool_init(unsigned int t_count);
 
 
 
@@ -92,19 +93,8 @@ extern ALtpool_t *threadpool_init(unsigned int t_count);
 	@routine - Function to add to queue
 	@args - Arguments needed for function. If no args, then pass NULL;
 */
-extern int threadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
+extern int AlpacaThreadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
 
-
-
-/*
-    @brief - Function called by threadpool_exit()
-             waits for threads to join and frees memory
-             and locks in proper order.
-
-    @tp - Threadpool to teardown
-
-int threadpool_free_pool(ALtpool_t *tp);
-*/
 
 
 /* tpool_exit
@@ -116,7 +106,7 @@ int threadpool_free_pool(ALtpool_t *tp);
 
 	@tp - Threadpool to teardown.
 */
-extern int threadpool_exit(ALtpool_t *tp);
+extern int AlpacaThreadpool_exit(ALtpool_t *tp);
 
 
 

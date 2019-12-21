@@ -10,14 +10,16 @@ BUILD = $(DIR)/build
 # Source directories
 #
 SRCBASE = $(DIR)/alpaca
-ALPACACORESRC = $(SRCBASE)/core
+ALPACACORESRC   = $(SRCBASE)/core
 ALPACATHREADSRC = $(SRCBASE)/multithreadserver
-ALPACATPOOLSRC = $(SRCBASE)/threadpool
+ALPACATPOOLSRC  = $(SRCBASE)/threadpool
+
 
 #
 # Header Directories
 #
 ALPACAINCLUDE= $(SRCBASE)
+#ALPACAINTERFACE = $(SRCBASE)/interfaces
 
 #
 # TEST DIRECTORIES
