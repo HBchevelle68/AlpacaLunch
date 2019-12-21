@@ -1,3 +1,3 @@
 // Internal
-#include <multithreadserver/multithreadserver.h>
+#include <interfaces/multithreadserver_interface.h>
 
