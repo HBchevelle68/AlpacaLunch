@@ -11,8 +11,10 @@ BUILD = $(DIR)/build
 #
 SRCBASE = $(DIR)/alpaca
 ALPACACORESRC   = $(SRCBASE)/core
+ALPACACOMMSSRC	= $(SRCBASE)/comms
 ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 ALPACATPOOLSRC  = $(SRCBASE)/threadpool
+
 
 
 #
@@ -82,6 +84,24 @@ ALPACATPOOL_LOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-PIC.o alpacaqueue-P
 ALPACATPOOL_TOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-test.o alpacaqueue-test.o)
 ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue-debug.o) 
 
+#
+# ALPACA-COMMS object files
+# Build out seperate objs for release, test, debug 
+#
+ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o ) 
+ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o)
+ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o)
+ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o) 
+
+#
+# Combining all modules into single varible
+#
+ALLROBJS = $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS) $(ALPACACOMMS_ROBJS)
+ALLTOBJS = $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS) $(ALPACATPOOL_TOBJS) $(ALPACACOMMS_TOBJS)
+ALLDOBJS = $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS) $(ALPACACOMMS_DOBJS)
+
+
+
 .PHONY: clean
 
 all: clean init-dirs \
@@ -97,25 +117,28 @@ test: clean init-dirs alpacalunch-release-test runtest scrub
 debug: clean init-dirs alpacalunch-debug scrub
 
 
+
+
+
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
-alpacalunch-release: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS)
+alpacalunch-release: $(ALLROBJS)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-test: $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS) $(ALPACATPOOL_TOBJS)
+alpacalunch-release-test: $(ALLTOBJS)
 	$(CC) $(CFLAGS) $(TEST) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-release-static: $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS)
+alpacalunch-release-static: $(ALLROBJS)
 	$(CC) $(CFLAGS) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 #
 # DEBUG, DEBUG STATIC(broken) builds
 #
-alpacalunch-debug: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS)
+alpacalunch-debug: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
 
-alpacalunch-debug-static: $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS)
+alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 

@@ -1,9 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h> 
 #include <stdarg.h>
 #include <netinet/in.h> 
 #include <unistd.h> 
 #include <errno.h>
+
+// Needs interface
+#include <interfaces/comms_interface.h>
 
 #include <core/server.h>
 #include <core/memory.h>
@@ -13,8 +17,8 @@
 #include <core/crypto.h>
 
 
-#define BUFSIZE 1500
-allu_server_t *allu_serv = NULL;
+
+ALLU_comms_ctx *allu_serv = NULL;
 
 
 
@@ -33,37 +37,7 @@ void alpacacore_server_clean(){
     }
 }
 
-static 
-void alpacacore_conn_handler(uint32_t cli_sock, struct sockaddr_in* cliaddr){
 
-    WOLFSSL* l_tls;
-    uint32_t n;
-    char* buff;
-    
-    BUFALLOC(buff, BUFSIZE);
-    ZEROBUFF(buff, BUFSIZE);
-
-    /* Wrap socket */ 
-    l_tls = alpacacore_wrap_sock(allu_serv, cli_sock);
-    
-
-    LOGDEBUG("Reading from tls1.2 socket\n");
-    while ( (n = wolfSSL_read(l_tls, buff, BUFSIZE) ) > 0 ){
-        
-        if( n < 0 ){
-            LOGERROR("wolfSSL_read error = %d\n", wolfSSL_get_error(l_tls,n));
-            break;
-        }
-        
-        LOGDEBUG("FROM CONNECTION: %s\n", buff);
-        LOGTESTFILE(buff);
-
-        ZEROBUFF(buff,BUFSIZE);
-    }
-
-    BUFFREE(buff);
-    wolfSSL_free(l_tls);
-}
 
 /*
  * Currently single threaded 
@@ -82,7 +56,7 @@ ALPACA_STATUS alpacacore_server_loop(){
          */
         if(cli_sock != -1){
             LOGDEBUG("Client connected\n");
-            alpacacore_conn_handler(cli_sock, &cliaddr);
+            AlpacaComms_connection_handler(allu_serv, cli_sock, &cliaddr);
             close(cli_sock);
             memset(&cliaddr, 0, (size_t)addrlen);
         }
@@ -95,11 +69,11 @@ ALPACA_STATUS alpacacore_server_run(uint16_t port){
 
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
-    BUFALLOC(allu_serv, sizeof(allu_server_t));
+    BUFALLOC(allu_serv, sizeof(ALLU_comms_ctx));
     BUFALLOC(allu_serv->serv_addr, sizeof(struct sockaddr_in));
 
     /* Init WolfSSL */
-    FAIL_IF(alpacacore_init_TLS(allu_serv));
+    FAIL_IF(AlpacaComms_init_TLS(allu_serv));
  
     if ((allu_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
         LOGERROR("Socket creation failure\n");
