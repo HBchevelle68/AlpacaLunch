@@ -17,9 +17,6 @@
 
 
 
-
-
-
  /* Funcs */
 ALPACA_STATUS alpacacore_server_run(uint16_t port);
 void alpacacore_server_clean();

@@ -77,5 +77,6 @@ extern WOLFSSL* AlpacaComms_wrap_sock(ALLU_comms_ctx *ctx, uint16_t cli_sock);
 
 extern ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *ctx);
 
+extern void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx);
 
 #endif

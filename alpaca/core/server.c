@@ -22,19 +22,12 @@ ALLU_comms_ctx *allu_serv = NULL;
 
 
 
-
 void alpacacore_server_clean(){
-
-    if(allu_serv != NULL){
-        if(allu_serv->sock > 0) {
-            close(allu_serv->sock);
-        }
-        if(allu_serv->tls_ctx != NULL){
-            wolfSSL_CTX_free(allu_serv->tls_ctx);
-        }
-        BUFFREE(allu_serv->serv_addr);
-        BUFFREE(allu_serv);
-    }
+    /*
+     * For now this is just a rather useless wrapper
+     * Leaving it for now in case of possible function exapansion
+     */
+    AlpacaComms_clean_comms_ctx(allu_serv);
 }
 
 

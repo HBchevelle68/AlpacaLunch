@@ -2,7 +2,6 @@
 #include <interfaces/comms_interface.h>
 
 // Internal
-
 #include <core/logging.h>
 
 short AlpacaComms_create_listen_sock(uint16_t port, uint32_t listen_count){
@@ -90,4 +89,30 @@ ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *serv){
 	}
 
     return result;
+}
+
+void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx){
+	
+	if(ctx != NULL){
+        
+        if(ctx->sock > 0) {
+            close(ctx->sock);
+        }
+        
+        if(ctx->tls_ctx != NULL){
+            wolfSSL_CTX_free(ctx->tls_ctx);
+        }
+        
+        if(ctx->serv_addr != NULL) {
+			memset(ctx->serv_addr, (unsigned char)0, sizeof(struct sockaddr_in));
+			free(ctx->serv_addr);
+			ctx->serv_addr = NULL;
+    	}
+        
+        if(ctx != NULL) {
+			memset(ctx, (unsigned char)0, sizeof(*ctx));
+			free(ctx);
+			ctx = NULL;
+    	}
+    }
 }

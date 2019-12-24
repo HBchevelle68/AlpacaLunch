@@ -49,13 +49,13 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 # Build variables
 #
 CC= gcc
-CFLAGS= -Werror -Wall -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC)
+CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
-STATICBUILD-CFLAGS = -Werror -Wall -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 
 #
 # ALPACA-CORE object files
@@ -150,7 +150,7 @@ alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) -c $(CFLAGS) $(TEST) $(DBG) $(RELEASE) $< -o $@
 
 %-debug.o: %.c $(DEPS)
-	$(CC) -c $(DBG) $(CFLAGS) $< -o $@
+	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
 
 
