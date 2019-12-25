@@ -69,7 +69,7 @@ typedef struct AlpacaCommsCtx {
  *
  */
 
-extern short AlpacaComms_create_tcp_listen_sock(uint16_t port, uint32_t listen_count);
+extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
 
 extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);
 

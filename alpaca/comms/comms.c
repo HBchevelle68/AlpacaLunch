@@ -2,10 +2,30 @@
 #include <interfaces/comms_interface.h>
 
 // Internal
+#include <core/macros.h>
 #include <core/logging.h>
 
-short AlpacaComms_create_listen_sock(uint16_t port, uint32_t listen_count){
-	return 0;
+ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count){
+	/* Init WolfSSL */
+    FAIL_IF_TRUE(AlpacaComms_init_TLS(ctx));
+ 
+    if ((ctx->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
+        LOGERROR("Socket creation failure\n");
+        return ALPACA_FAILURE;
+    } 
+
+    ctx->serv_addr->sin_family = AF_INET;          
+    ctx->serv_addr->sin_addr.s_addr = INADDR_ANY;  
+    ctx->serv_addr->sin_port = BEU16(port);
+
+    FAIL_IF_TRUE(REUSEADDR(ctx->sock));
+    FAIL_IF_TRUE(BIND(ctx->sock, ctx->serv_addr));
+    FAIL_IF_TRUE(LISTEN(ctx->sock,listen_count));
+    
+    LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", ctx->sock, 
+                inet_ntoa(ctx->serv_addr->sin_addr), HU16(ctx->serv_addr->sin_port));
+
+	return ALPACA_SUCCESS;
 }
 
  
@@ -14,12 +34,12 @@ void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, stru
     WOLFSSL* l_tls;
     uint32_t n;
     char* buff;
-    
-    
+        
     buff = (char*)calloc(COMMSBUFSIZE, sizeof(unsigned char));
                                  
-
-    /* Wrap socket */ 
+    /* 
+     * Wrap socket 
+     */ 
     l_tls = AlpacaComms_wrap_sock(ctx, cli_sock);
     
 
@@ -36,7 +56,6 @@ void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, stru
 
         memset(buff, 0, COMMSBUFSIZE);
     }
-
 
     /*
      * Free buffers and free wolfssl structs

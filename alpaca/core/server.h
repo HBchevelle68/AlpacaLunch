@@ -18,7 +18,7 @@
 
 
  /* Funcs */
-ALPACA_STATUS alpacacore_server_run(uint16_t port);
+ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count);
 void alpacacore_server_clean();
 
 

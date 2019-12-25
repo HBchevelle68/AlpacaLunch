@@ -58,31 +58,17 @@ ALPACA_STATUS alpacacore_server_loop(){
 }
 
 
-ALPACA_STATUS alpacacore_server_run(uint16_t port){
+ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count){
 
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
     BUFALLOC(allu_serv, sizeof(ALLU_comms_ctx));
     BUFALLOC(allu_serv->serv_addr, sizeof(struct sockaddr_in));
 
-    /* Init WolfSSL */
-    FAIL_IF(AlpacaComms_init_TLS(allu_serv));
- 
-    if ((allu_serv->sock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
-        LOGERROR("Socket creation failure\n");
-        return ALPACA_FAILURE;
-    } 
-
-    allu_serv->serv_addr->sin_family = AF_INET;          
-    allu_serv->serv_addr->sin_addr.s_addr = INADDR_ANY;  
-    allu_serv->serv_addr->sin_port = BEU16(port);
-
-    FAIL_IF(REUSEADDR(allu_serv->sock));
-    FAIL_IF(BIND(allu_serv->sock, allu_serv->serv_addr));
-    FAIL_IF(LISTEN(allu_serv->sock,20));
-    
-    LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", allu_serv->sock, 
-                inet_ntoa(allu_serv->serv_addr->sin_addr), HU16(allu_serv->serv_addr->sin_port));
+    ret_status = AlpacaComms_create_listen_sock(allu_serv, port, listen_count);
+    if(ret_status != ALPACA_SUCCESS){
+        return ret_status;
+    }
 
     ret_status = alpacacore_server_loop();
 

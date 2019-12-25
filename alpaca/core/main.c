@@ -23,7 +23,7 @@
 int main(){
 
     
-    FAIL_IF(alpacacore_init());
+    FAIL_IF_TRUE(alpacacore_init());
     int temp = 10;
 
     LOGERROR("This is a test: %d\n", temp);
@@ -46,7 +46,7 @@ int main(){
 
 
 
-    alpacacore_server_run(12345);
+    alpacacore_server_run(12345, 20);
 
 
     alpacacore_exit();

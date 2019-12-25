@@ -12,8 +12,8 @@ ALPACA_STATUS alpacacore_init(){
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
     DEBUGWARNING();
-    FAIL_IF(getuid()); 
-    FAIL_IF(alpacacore_install_sighandlers());
+    FAIL_IF_TRUE(getuid()); 
+    FAIL_IF_TRUE(alpacacore_install_sighandlers());
 
     return result;
 }
