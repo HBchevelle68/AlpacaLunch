@@ -1,2 +1,3 @@
 3.5 wheel used on Debian 9 dev-env
-3.7 is required for Debian 10 dev-env
+3.7 is required for Debian 10 dev-env - pip/pip3 install wolfssl
+
