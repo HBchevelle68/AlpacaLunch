@@ -5,6 +5,9 @@
 #include <core/macros.h>
 #include <core/logging.h>
 
+#define SCERT "/home/ap/AlpacaLunch/.testcerts/cert.pem"
+#define PKEY "/home/ap/AlpacaLunch/.testcerts/private.pem"
+
 ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count){
 	/* Init WolfSSL */
     FAIL_IF_TRUE(AlpacaComms_init_TLS(ctx));
@@ -102,6 +105,7 @@ ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *serv){
 	    return ALPACA_TLSCERT;
 	}
 
+    LOGDEBUG("Opening cert file %s\n", PKEY);
 	/* Load server key into wolfSSL_CTX */
 	if (wolfSSL_CTX_use_PrivateKey_file(serv->tls_ctx, PKEY, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
         LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d\n", ALPACA_TLSKEY);
