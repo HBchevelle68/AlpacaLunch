@@ -16,12 +16,10 @@ ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 ALPACATPOOLSRC  = $(SRCBASE)/threadpool
 ALPACAUTILSSRC	= $(SRCBASE)/utilities
 
-
 #
 # Header Directories
 #
 ALPACAINCLUDE= $(SRCBASE)
-#ALPACAINTERFACE = $(SRCBASE)/interfaces
 
 #
 # TEST DIRECTORIES
@@ -64,7 +62,6 @@ STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(AL
 ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o server.o crypto.o sighandler.o allu.o)
 ALPACACORE_TOBJS=$(addprefix $(ALPACACORESRC)/, main-test.o server-test.o crypto-test.o sighandler-test.o allu-test.o)
 ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o allu-debug.o) 
-
 
 #
 # ALPACA-MULTITHREADSERVER object files
@@ -109,8 +106,6 @@ ALLROBJS = $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS) $
 ALLTOBJS = $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS) $(ALPACATPOOL_TOBJS) $(ALPACACOMMS_TOBJS) $(ALPACAUTILS_TOBJS)
 ALLDOBJS = $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS) $(ALPACACOMMS_DOBJS) $(ALPACAUTILS_DOBJS)
 
-
-
 .PHONY: clean
 
 all: clean init-dirs \
@@ -124,10 +119,6 @@ release: clean init-dirs alpacalunch-release scrub
 test: clean init-dirs alpacalunch-release-test runtest scrub
 
 debug: clean init-dirs alpacalunch-debug scrub
-
-
-
-
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
@@ -150,8 +141,6 @@ alpacalunch-debug: $(ALLDOBJS)
 alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
-
-
 %.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
 
@@ -161,16 +150,13 @@ alpacalunch-debug-static: $(ALLDOBJS)
 %-debug.o: %.c $(DEPS)
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
-
-
 runtest:
 	sudo python3 $(COMPONENTALL) 
 	
-
 init-dirs:
 	mkdir -p $(HASH)
 	mkdir -p $(BIN)
-	mkdir -p $(BUILD)
+
 misc:
 	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS

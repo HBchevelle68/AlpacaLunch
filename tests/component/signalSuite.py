@@ -10,29 +10,6 @@ BINARY = "binaries/alpacalunch-release"
 
 class SignalSuite(unittest.TestCase):
 
-    '''
-    def _check_PID(self,pid):
-        try:
-            os.kill(pid, 0)
-
-        except OSError as err:
-            print("HERE\n")
-            if err.errno == errno.ESRCH:
-                print("NO PROCESS: %d" % pid)
-                return False
-            elif err.errno == errno.EPERM:
-                print("NO PROCESS1: %d" % pid)
-                # EPERM clearly means there's a process to deny access to
-                return True
-            else:
-                # According to "man 2 kill" possible error values are
-                # (EINVAL, EPERM, ESRCH)
-                print("NO PROCESS2: %d" % pid)
-                raise
-                #return False
-        else:
-            return True
-    '''
     def _is_running(self, pid):
         if os.path.isdir('/proc/{}'.format(pid)):
             return True

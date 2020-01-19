@@ -12,7 +12,11 @@ ALPACA_STATUS alpacacore_init(){
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
     DEBUGWARNING();
+
+    // Check for root
     FAIL_IF_TRUE(getuid()); 
+
+    // Install signal handlers
     FAIL_IF_TRUE(alpacacore_install_sighandlers());
 
     return result;
@@ -21,6 +25,7 @@ ALPACA_STATUS alpacacore_init(){
 
 /*
  * Small for now. Called by sighandler
+ * will get expandaed on
  */
 void alpacacore_exit(){
     alpacacore_server_clean();

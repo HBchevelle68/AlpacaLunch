@@ -5,6 +5,10 @@ import subprocess
 import time
 import os
 
+
+"""
+    Needs re-work as endpoint gets built out
+"""
 TSTFPATH = "/tmp/test.txt"
 HOST = 'localhost'
 PORT = 12345
@@ -24,6 +28,10 @@ def clean_wolfssl_sock(sock, secure_socket):
 
 class TLSSuite(unittest.TestCase):
     
+    """
+        Currently, test validation on this is poor and
+        hardcoded to check for a manual file drop in /tmp
+    """
     def _run_tls_conn_send(self):
 
         # Deploy binary
@@ -114,12 +122,12 @@ class TLSSuite(unittest.TestCase):
         results = self._run_tls_2conn()
         self.assertNotEqual(results, -1)
 
-
-
-
-
         # Final Sub-test 
         # Verify all data contents recieved
+        #
+        # **** TO DO ****
+        # THIS TEST IS DIRTY AND CHEAP, should be re-worked!!! 
+        #
         results = self._run_verify_file_contents()
         self.assertNotEqual(results, -1)
 

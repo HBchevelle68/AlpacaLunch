@@ -13,12 +13,10 @@
 #define DEBUGENABLE 1
 #endif 
 
-
 /*
  * Grab source file
  */ 
 #define __FNAME__ (strrchr(__FILE__, '/') + 1)
-
 
 /*
  * Warn that debug build is running
@@ -30,7 +28,6 @@ do { if (DEBUGENABLE){ \
         printf("****************************************\n"); \
       }                                                       \
 } while(0)
-
 
 
 /*

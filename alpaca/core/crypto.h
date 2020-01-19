@@ -17,9 +17,4 @@
 ALPACA_STATUS alpacacore_gen_hash(char* buf);
 
 
-
-
-
-
-
 #endif

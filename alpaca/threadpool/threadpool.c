@@ -6,10 +6,16 @@
 #include <interfaces/threadpool_interface.h>
 
 
+/*
+ * 3yr Old Code. Most likely pretty buggy
+ */
+
+
 
 /*
  * This function is broken. Undefined behavior when unlocking and
  * the calling thread does not posses the lock
+ * Atomics??? 
  */
 static 
 void threadpool_thread_safe_exit(ALtpool_t *tp){
@@ -99,7 +105,7 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
     }
 
 
-    // Finish up setting other vars
+    // FINISH up setting other vars
     pthread_mutex_lock(&(tp->tp_m_lock));
     tp->t_size = t_count;
     tp->q_status = EMPTY;
@@ -118,7 +124,6 @@ int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args)
         return -1;
     }
     
-    //AL_item_t item;
     ALtask_t *task = malloc(sizeof(ALtask_t));
 
     /*
@@ -126,7 +131,7 @@ int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args)
      */
     task->routine = routine;
     task->args = args;
-    //item = (void*)task;
+   
 
     pthread_mutex_lock(&(tp->tp_m_lock));
     AL_queue_enqueue(&(tp->queue), (AL_item_t)task);

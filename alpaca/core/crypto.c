@@ -1,10 +1,14 @@
 // Internal
 #include <core/crypto.h>
 #include <core/logging.h>
+#include <core/codes.h>
 
 
 
-
+/*
+ * 		TO DO
+ * 		Finish function.....
+ */
 
 /*
 ALPACA_STATUS alpacacore_gen_hash(char* buf){
@@ -15,8 +19,8 @@ ALPACA_STATUS alpacacore_gen_hash(char* buf){
 
     if ((ret = wc_InitSha256(&sha)) != 0) {
         LOGERROR("wc_InitSha256 failed");
-        return NS_SUCCESS;
+        return ALPACA_SUCCESS;
     }
-    
+    return ALPACA_SUCCESS;
 }
 */

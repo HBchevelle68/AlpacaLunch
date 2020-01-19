@@ -14,9 +14,4 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_TLSKEY   4
 
 
-// #define 
-
-
-
-
 #endif

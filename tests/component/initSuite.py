@@ -18,7 +18,7 @@ class InitSuite(unittest.TestCase):
         ret = make_process.wait()
         self.assertEqual(ret, 0)
         
-
+        # Clean dirty test file
         if os.path.isfile(TSTFPATH):
             os.remove(TSTFPATH)
 

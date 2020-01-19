@@ -30,6 +30,7 @@ int main(){
     LOGDEBUG("This is a test: %d\n", temp);
     LOGINFO("This is a test: %d\n", temp);
 
+    // START Threadpool Test
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -46,6 +47,12 @@ int main(){
 
 
 
+    /* TO DO
+     * 
+     * Needs some slight rework, core loop, should never really
+     * return. If it does should examine the cause.
+     * currently the way the loop is built there isn't a good reason to
+     */
     alpacacore_server_run(12345, 20);
 
 
@@ -53,6 +60,11 @@ int main(){
    
     return 0; 
 }
+
+
+/*
+ * Ignoring for now, will likely return to later
+ */ 
 
 #else
 #if __STDC_VERSION__ >= 199901L
