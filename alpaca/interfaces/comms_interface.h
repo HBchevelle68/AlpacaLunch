@@ -27,8 +27,8 @@
  * TO DO
  * This needs to be configurable at runtime
  */
-#define SCERT "../certs/cert.pem"
-#define PKEY "../certs/prvt.pem"
+#define SCERT "/home/ap/.certs/cert.pem"
+#define PKEY "/home/ap/.certs/private.pem"
  
 #define COMMSBUFSIZE 1500
 

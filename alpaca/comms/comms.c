@@ -94,16 +94,17 @@ ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *serv){
         LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_TLSINIT);
         return ALPACA_TLSINIT;
     }
-
+    LOGDEBUG("Opening cert file %s\n", SCERT);
     /* Load server cert into wolfSSL_CTX */
 	if (wolfSSL_CTX_use_certificate_file(serv->tls_ctx, SCERT, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
-	    LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d", ALPACA_TLSCERT);
+
+	    LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d\n", ALPACA_TLSCERT);
 	    return ALPACA_TLSCERT;
 	}
 
 	/* Load server key into wolfSSL_CTX */
 	if (wolfSSL_CTX_use_PrivateKey_file(serv->tls_ctx, PKEY, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
-        LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d", ALPACA_TLSKEY);
+        LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d\n", ALPACA_TLSKEY);
 	    return ALPACA_TLSKEY;
 	}
 
