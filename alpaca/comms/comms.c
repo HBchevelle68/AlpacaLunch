@@ -16,14 +16,14 @@ ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port,
 
     ctx->serv_addr->sin_family = AF_INET;          
     ctx->serv_addr->sin_addr.s_addr = INADDR_ANY;  
-    ctx->serv_addr->sin_port = BEU16(port);
+    ctx->serv_addr->sin_port = htons(port);
 
     FAIL_IF_TRUE(REUSEADDR(ctx->sock));
     FAIL_IF_TRUE(BIND(ctx->sock, ctx->serv_addr));
     FAIL_IF_TRUE(LISTEN(ctx->sock,listen_count));
     
     LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", ctx->sock, 
-                inet_ntoa(ctx->serv_addr->sin_addr), HU16(ctx->serv_addr->sin_port));
+                inet_ntoa(ctx->serv_addr->sin_addr), ntohs(ctx->serv_addr->sin_port));
 
 	return ALPACA_SUCCESS;
 }
