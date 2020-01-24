@@ -43,7 +43,9 @@ ALPACA_STATUS alpacacore_install_sighandlers(){
     sigaction(SIGINT, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
     sigaction(SIGALRM, &act, NULL);
+    #ifndef DEBUGENABLE
     sigaction(SIGTERM, &act, NULL);
+    #endif
 
     return result;
 }

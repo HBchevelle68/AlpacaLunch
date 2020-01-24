@@ -22,12 +22,6 @@
  */
 #include <core/codes.h>
 #include <core/server.h>
-
-/*
- * TO DO
- * This needs to be configurable at runtime
- */
-
  
 #define COMMSBUFSIZE 1500
 
