@@ -31,7 +31,10 @@ void alpacacore_signal_handler(int signum){
 
 }
 
-
+/*
+ * ToDO
+ * Explicitly catch all catchable signals, handle appropriately 
+ */
 ALPACA_STATUS alpacacore_install_sighandlers(){
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
