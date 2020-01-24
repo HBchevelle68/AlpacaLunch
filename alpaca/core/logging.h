@@ -32,9 +32,6 @@ do { if (DEBUGENABLE){ \
 
 /*
  * Logging  
- * 
- * TO DO
- * Create levels of logging
  */
 #define LOGINFO(fmt, ...) \
     do { if (DEBUGENABLE) printf((fmt), ##__VA_ARGS__); fflush(stdout); } while(0)

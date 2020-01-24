@@ -25,7 +25,6 @@
  
 #define COMMSBUFSIZE 1500
 
-
 /*
  * Defines base AlapcaLunch comms information
  */
@@ -50,18 +49,10 @@ typedef struct AlpacaCommsCtx {
 #define LISTEN(sock, lcnt) \
     (lcnt>0 ? listen(sock, lcnt) : listen(sock, 10))
 
-#define FILLSOCKADDR(serv, port) \
-    allu_server_t *temp = (allu_server_t*)serv;     \
-    temp->serv_addr->sin_family = AF_INET;          \
-    temp->serv_addr->sin_addr.s_addr = INADDR_ANY;  \
-    temp->serv_addr->sin_port = BEU16(port);        \
-
-
 /*
  * Comms module Interface
  *
  */
-
 extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
 
 extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);

@@ -7,7 +7,7 @@
 
 
 /*
- * 3yr Old Code. Most likely pretty buggy
+ * ******** 3yr Old Code. Most likely pretty buggy ********
  */
 
 
@@ -69,7 +69,16 @@ void *thread_loop(void *threadpool){
     pthread_exit(NULL);
 }
 
+/* tpool_init
+    @brief - Initializes a threadpool (ALtpool_t) and
+             returns a pointer to a allocated threadpool with
+             t_count threads available and able to queue up
+             q_size tasks.
+    @return - Returns a pointer to a threadpool if successful
+              and returns NULL if an error occured.
 
+    @param t_count - Thread count. Number of threads this pool will generate.
+*/
 ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 
     ALtpool_t *tp;
@@ -117,7 +126,16 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 }
 
 
+/* add_task
+    @brief - Adds a task (function) to the threadpool's queue to
+             be exececuted.
+    @return - Returns 0 if successful. Returns 1 if error occured
+            and task is not added to Queue.
 
+    @param tp - Threadpool to add task to.
+    @param routine - Function to add to queue
+    @param args - Arguments needed for function. If no args, then pass NULL;
+*/
 int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
 
     if(!tp){
@@ -150,7 +168,7 @@ int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args)
              waits for threads to join and frees memory
              and locks in proper order.
 
-    @tp - Threadpool to teardown
+    @param tp - Threadpool to teardown
 */
 static
 int threadpool_free_pool(ALtpool_t *tp){
@@ -190,7 +208,15 @@ int threadpool_free_pool(ALtpool_t *tp){
 }
 
 
+/* tpool_exit
+    @brief - Begins teardown of threadpool. Sets SHUTDOWN flag which
+             waits for all threads to join. Then deallocates all
+             memory.
+    @return - Returns 0 if successful. Returns 1 if error occured
+            and cannot guarantee memory was deallocated.
 
+    @param tp - Threadpool to teardown.
+*/
 int AlpacaThreadpool_exit(ALtpool_t *tp){
 
     tp->tp_status = SHUTDOWN;
