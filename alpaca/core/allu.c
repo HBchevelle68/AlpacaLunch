@@ -14,7 +14,10 @@ ALPACA_STATUS alpacacore_init(){
     DEBUGWARNING();
 
     // Check for root
-    FAIL_IF_TRUE(getuid()); 
+    #ifndef TALKATIVELLAMA
+    LOGDEBUG("TALKATIVELLAMA: %d\n", TALKATIVELLAMA);
+    FAIL_IF_TRUE(getuid());
+    #endif 
 
     // Install signal handlers
     FAIL_IF_TRUE(alpacacore_install_sighandlers());

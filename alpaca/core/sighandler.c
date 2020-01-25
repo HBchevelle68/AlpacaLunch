@@ -43,11 +43,11 @@ ALPACA_STATUS alpacacore_install_sighandlers(){
     
     act.sa_handler = alpacacore_signal_handler;
     sigaction(SIGHUP, &act, NULL);
-    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGTERM, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
     sigaction(SIGALRM, &act, NULL);
     #ifndef DEBUGENABLE
-    sigaction(SIGTERM, &act, NULL);
+    sigaction(SIGINT, &act, NULL);
     #endif
 
     return result;
