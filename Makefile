@@ -50,8 +50,8 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 CC= gcc
 CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -I$(ALPACAINCLUDE) -I$(CRYPTINC)
-DBG= -g3 -DTALKATIVELLAMA
-LFLAGS= -L$(CRYPTBASE)/lib -lm -lpthread
+DBG= -g3 -DTALKATIVELLAMA -pg
+LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
 STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
