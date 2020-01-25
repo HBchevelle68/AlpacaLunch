@@ -14,8 +14,8 @@ ALPACA_STATUS alpacacore_init(){
     DEBUGWARNING();
 
     // Check for root
-    #ifndef TALKATIVELLAMA
-    LOGDEBUG("TALKATIVELLAMA: %d\n", TALKATIVELLAMA);
+    #ifndef DEBUGENABLE
+    LOGDEBUG("DEBUGENABLE: %d\n", DEBUGENABLE);
     FAIL_IF_TRUE(getuid());
     #endif 
 
