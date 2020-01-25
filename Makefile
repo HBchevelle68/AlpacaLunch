@@ -151,7 +151,9 @@ alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
 runtest:
-	sudo python3 $(COMPONENTALL) 
+	@echo "\n***** RUNNING COMPONENT TESTS *****\n"
+	@sudo python3 $(COMPONENTALL) 
+	@echo "\n***** COMPONENT TESTS COMPLETE *****\n"
 	
 init-dirs:
 	mkdir -p $(HASH)
