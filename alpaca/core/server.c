@@ -10,7 +10,6 @@
 #include <interfaces/comms_interface.h>
 
 #include <core/server.h>
-#include <core/memory.h>
 #include <core/logging.h>
 #include <core/macros.h>
 #include <core/codes.h>
