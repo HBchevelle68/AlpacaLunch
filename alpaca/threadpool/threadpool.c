@@ -90,8 +90,9 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
     memset(tp, 0, sizeof(ALtpool_t));
 
 
-    // INIT THREADS
+    // INIT THREADS MEM
     if((tp->t_pool = malloc(sizeof(pthread_t) * t_count)) == NULL){
+        AlpacaThreadpool_exit(tp);
         return NULL;
     }
     memset(tp->t_pool, 0, (sizeof(pthread_t) * t_count));
@@ -101,14 +102,16 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
     AL_queue_init(&(tp->queue));
 
 
-    // INIT LOCK/COND VAR
+    // INIT LOCK/COND VARIABLE
     pthread_mutex_init(&(tp->tp_m_lock), NULL);
     pthread_cond_init(&(tp->q_cond), NULL);
     
 
     // START threads
     for(int i = 0; i < t_count; i++) {
+        // If any threads fail to be created, time to go
         if(pthread_create(&(tp->t_pool[i]), NULL, thread_loop, (void*)tp) != 0) {
+            AlpacaThreadpool_exit(tp);
             return NULL;
         }
     }
@@ -169,6 +172,10 @@ int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args)
              and locks in proper order.
 
     @param tp - Threadpool to teardown
+
+*********************************************************************
+    @bug this currently assumes tp is fully allocated and running
+         does not account for if a failue occured durin INIT
 */
 static
 int threadpool_free_pool(ALtpool_t *tp){
@@ -180,6 +187,7 @@ int threadpool_free_pool(ALtpool_t *tp){
      */ 
     if(tp != NULL){
         
+
         pthread_cond_broadcast(&(tp->q_cond));
         // Wait for threads to join
         for(int i = 0; i < tp->t_size; i++) {
