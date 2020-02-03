@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include
 /*
  * Suppress vscode's inability to detect volatility
  */ 
@@ -21,6 +21,7 @@
 /*
  * Warn that debug build is running
  */ 
+#ifdef TALKATIVELLAMA
 #define DEBUGWARNING() \
 do { if (DEBUGENABLE){ \
         printf("****************************************\n"); \
@@ -28,27 +29,48 @@ do { if (DEBUGENABLE){ \
         printf("****************************************\n"); \
       }                                                       \
 } while(0)
+#else
+#define DEBUGWARNING()
+#endif
 
 
 /*
  * Logging  
  */
+#ifdef TALKATIVELLAMA
 #define LOGINFO(fmt, ...) \
-    do { if (DEBUGENABLE) printf((fmt), ##__VA_ARGS__); fflush(stdout); } while(0)
+    do { printf((fmt), ##__VA_ARGS__); fflush(stdout); } while(0)
+#else
+#define LOGINFO(fmt, ...)
+#endif
 
+
+#ifdef TALKATIVELLAMA
 #define LOGDEBUG(fmt, ...) \
-    do { if (DEBUGENABLE) fprintf(stdout, "%s <DEBUG> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    do { fprintf(stdout, "%s <DEBUG> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
+#else
+#define LOGDEBUG(fmt, ...)
+#endif
 
+
+#ifdef TALKATIVELLAMA
 #define LOGERROR(fmt, ...) \
-    do { if (DEBUGENABLE) fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    do { fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
+#else
+#define LOGERROR(fmt, ...)
+#endif
+
+
 
 #define LOGTESTFILE(buff) \
         FILE* fp;                                 \
         fp = fopen("/tmp/test.txt", "a");         \
         fprintf(fp, "%s\n", buff);                \
         fclose(fp);
+
+
 
 
 #endif
