@@ -19,16 +19,17 @@
 #ifndef SNOW_ENABLED
 
 
+int testTemp = 0;
 
 int main(){
 
     
     FAIL_IF_TRUE(alpacacore_init());
-    int temp = 10;
+    
 
-    LOGERROR("This is a test: %d\n", temp);
-    LOGDEBUG("This is a test: %d\n", temp);
-    LOGINFO("This is a test: %d\n", temp);
+    LOGERROR("This is a test: %d\n", testTemp);
+    LOGDEBUG("This is a test: %d\n", testTemp);
+    LOGINFO("This is a test: %d\n", testTemp);
 
     // START Threadpool Test
     ALtpool_t* tpool = NULL;
@@ -40,8 +41,8 @@ int main(){
         LOGDEBUG("Threadpool is NULL!!!\n");
     }
     
-    temp = AlpacaThreadpool_exit(tpool);
-    LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", temp);
+    testTemp = AlpacaThreadpool_exit(tpool);
+    LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", testTemp);
 
     LOGDEBUG("End tests....\n");
 
