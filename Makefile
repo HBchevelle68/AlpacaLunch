@@ -47,8 +47,8 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 #
 # Build variables
 #
-CC= gcc
-CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+CC= gcc -std=c11
+CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DTALKATIVELLAMA -pg
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
