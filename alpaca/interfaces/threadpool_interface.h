@@ -3,32 +3,10 @@
 
 #include <stdint.h>
 #include <pthread.h>
+#include <stdatomic.h>
 
+#include <core/codes.h>
 #include <threadpool/alpacaqueue.h>
-
-
-
-
-/* **** TO DO ****
-	
-	in need of cleaning and tpool struct minor rework
-
- */
-
-
-enum STATUS {
-	NOTRUNNING  = 0x00,
-	INITIALIZED = 0x01,
-	GRACEFUL    = 0x02,
-	SHUTDOWN    = 0x04
-};
-
-
-
-enum Q_STATUS{
-	TODO = 	0,
-	EMPTY = 1
-};
 
 
 
@@ -37,7 +15,13 @@ enum Q_STATUS{
 typedef struct AlpacaLunch_task{
     void (*routine)(void *);
     void *args;
+    char name[256];
 } ALtask_t;
+
+typedef struct AlpacaLunch_thread {
+  pthread_t thread;
+  char name[256]; 
+} ALthread_t;
 
 
 
@@ -48,29 +32,27 @@ typedef struct AlpacaLunch_task{
     AL_queue_t *queue           - Queue holding tasks
     pthread_mutex_t q_lock  - Mutex to access queue of tasks
     pthread_mutex_t q_cond  - Condition variable for Queue
-    uint8_t tp_status       - Threadpool status flags
-    uint8_t q_status        - Queue status flags
     uint16_t t_size         - Number of threads for pool
     uint16_t q_size         - Number of tasks for pool
 */
 typedef struct AlpacaLunch_threadpool {
   
-  pthread_t *t_pool;
+  ALthread_t *t_pool;
   AL_queue_t queue;
   pthread_mutex_t tp_m_lock;
   pthread_cond_t q_cond;  	 
-  uint8_t tp_status;
-  uint8_t q_status;
   uint16_t t_size;
-
+  uint8_t teardown;
 } ALtpool_t;
 
 
-extern ALtpool_t* AlpacaThreadpool_init(unsigned int t_count);
+extern ALtpool_t* AlpacaThreadpool_init(uint32_t t_count);
 
-extern int AlpacaThreadpool_add_task(ALtpool_t *tp, void(*routine)(void*), void *args);
+extern int32_t AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name);
 
-extern int AlpacaThreadpool_exit(ALtpool_t *tp);
+extern int32_t AlpacaThreadpool_listThreads(ALtpool_t *tp);
+
+extern int32_t AlpacaThreadpool_exit(ALtpool_t *tp);
 
 
 

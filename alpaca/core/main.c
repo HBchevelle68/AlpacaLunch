@@ -9,8 +9,8 @@
 #include <core/macros.h>
 #include <core/sighandler.h>
 #include <core/allu.h>
-//#include <multithreadserver/multithreadserver.h>
 
+// Interfaces 
 #include <interfaces/threadpool_interface.h>
 
 /*
@@ -31,6 +31,7 @@ int main(){
     LOGINFO("This is a test: %d\n", temp);
 
     // START Threadpool Test
+    
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -45,7 +46,7 @@ int main(){
 
     LOGDEBUG("End tests....\n");
 
-
+    
 
     /* TO DO
      * 
