@@ -37,5 +37,4 @@ if __name__ == "__main__":
 
 
     # Run Component tests
-    result = unittest.TextTestRunner(verbosity=3).run(suite)
-    
+    result = unittest.TextTestRunner(verbosity=5).run(suite)
