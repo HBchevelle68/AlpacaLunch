@@ -37,11 +37,12 @@ void alpacacore_signal_handler(int signum){
  */
 ALPACA_STATUS alpacacore_install_sighandlers(){
     
-    ALPACA_STATUS result = ALPACA_SUCCESS;
-    struct sigaction act;
-    memset(&act, 0, sizeof(struct sigaction));
+    //ALPACA_STATUS result = ALPACA_SUCCESS;
+    //struct sigaction act;
+    //memset(&act, 0, sizeof(struct sigaction));
     
-    act.sa_handler = alpacacore_signal_handler;
+    //act.sa_handler = alpacacore_signal_handler;
+    /*
     sigaction(SIGHUP, &act, NULL);
     sigaction(SIGTERM, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
@@ -49,6 +50,15 @@ ALPACA_STATUS alpacacore_install_sighandlers(){
     #ifndef DEBUGENABLE
     sigaction(SIGINT, &act, NULL);
     #endif
+    */
 
-    return result;
+    signal(SIGHUP, alpacacore_signal_handler);
+    signal(SIGTERM,alpacacore_signal_handler);
+    signal(SIGQUIT,alpacacore_signal_handler);
+    signal(SIGALRM,alpacacore_signal_handler);
+    #ifndef DEBUGENABLE
+    signal(SIGINT, alpacacore_signal_handler;
+    #endif
+        
+    return ALPACA_SUCCESS;
 }
