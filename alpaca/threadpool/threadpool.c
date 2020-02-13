@@ -22,11 +22,10 @@ static const uint8_t FLAGOFF = 0;
  * Atomics??? 
  */
 static 
-void threadpool_thread_safe_exit(ALtpool_t *tp){
+void thread_safe_exit(ALtpool_t *tp){
     pthread_mutex_unlock(&(tp->tp_m_lock));
     pthread_exit(NULL);
 }
-
 
 
 /*
@@ -57,7 +56,7 @@ void *thread_loop(void *threadpool){
             __atomic_load(&(tp->teardown), &tearDownRet, __ATOMIC_SEQ_CST);
             if(tearDownRet){
                 // Exit
-                threadpool_thread_safe_exit(tp);
+                thread_safe_exit(tp);
             }
         }
 
@@ -74,6 +73,7 @@ void *thread_loop(void *threadpool){
     pthread_exit(NULL);
 }
 
+
 static
 ALPACA_STATUS createThreads(ALtpool_t *tp){
 
@@ -89,18 +89,16 @@ ALPACA_STATUS createThreads(ALtpool_t *tp){
     return ALPACA_SUCCESS;
 } 
 
-
-/* tpool_init
+/* 
  *    @brief - Initializes a threadpool (ALtpool_t) and
  *             returns a pointer to a allocated threadpool with
- *             t_count threads available and able to queue up
+ *             numThreads available and able to queue up
  *             q_size tasks.
+ *    @param numThreads - Thread count. Number of threads this pool will generate.
  *    @return - Returns a pointer to a threadpool if successful
  *              and returns NULL if an error occured.
- *
- *    @param t_count - Thread count. Number of threads this pool will generate.
  */
-ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
+ALtpool_t* AlpacaThreadpool_init(unsigned int numThreads){
 
     ALtpool_t *tp;
 
@@ -112,11 +110,11 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 
 
     // INIT THREADS MEM
-    if((tp->t_pool = malloc(sizeof(ALthread_t) * t_count)) == NULL){
+    if((tp->t_pool = malloc(sizeof(ALthread_t) * numThreads)) == NULL){
         AlpacaThreadpool_exit(tp);
         return NULL;
     }
-    memset(tp->t_pool, 0, (sizeof(ALthread_t) * t_count));
+    memset(tp->t_pool, 0, (sizeof(ALthread_t) * numThreads));
 
 
     // INIT QUEUE
@@ -128,7 +126,7 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
     pthread_cond_init(&(tp->q_cond), NULL);
 
     // SET THREAD COUNT
-    tp->t_size = t_count;
+    tp->t_size = numThreads;
     __atomic_fetch_and(&(tp->teardown), &FLAGOFF, __ATOMIC_SEQ_CST);
 
     // START threads
@@ -141,16 +139,16 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 }
 
 
-/* add_task
-    @brief - Adds a task (function) to the threadpool's queue to
-             be exececuted.
-    @return - Returns 0 if successful. Returns 1 if error occured
-            and task is not added to Queue.
-
-    @param tp - Threadpool to add task to.
-    @param routine - Function to add to queue
-    @param args - Arguments needed for function. If no args, then pass NULL;
-*/
+/* 
+ *   @brief - Adds a task (function) to the threadpool's queue to
+ *            be exececuted.
+ *   @return - Returns 0 if successful. Returns 1 if error occured
+ *           and task is not added to Queue.
+ *
+ *   @param tp - Threadpool to add task to.
+ *   @param routine - Function to add to queue
+ *   @param args - Arguments needed for function. If no args, then pass NULL;
+ */
 int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name){
 
     if(!tp){
@@ -178,6 +176,16 @@ int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, 
 
 
 
+char* AlpacaThreadpool_listThreads(ALtpool_t *tp){
+
+    if(!tp){
+        return NULL;
+    }
+    return NULL;
+}
+
+
+
 /*
     @brief - Private function called by threadpool_exit()
              waits for threads to join and frees memory
@@ -192,24 +200,21 @@ int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, 
 static
 int threadpool_free_pool(ALtpool_t *tp){
 
-
     /* 
      * Make sure thread pool got allocated
      * Repeat process of checking for allocated memory
      * Free if memory allocated
      */ 
-    if(tp != NULL){
+    if(tp != NULL) {
        /*
         * Atomically store 0x01 into threadpool teardown flag
         * then broadcast to sleeping threads to wake.
-        * After threads join, atomically store 0x00 into
+        * After threads join, atomically clear the 
         * threadpool teardown flag
         */
-        if(tp->t_pool != NULL){
+        if(tp->t_pool != NULL) {
         
-
             __atomic_store(&(tp->teardown), &FLAGON, __ATOMIC_SEQ_CST);
-
  
             for(int i = 0; i < tp->t_size; i++) {
                /*
@@ -241,7 +246,6 @@ int threadpool_free_pool(ALtpool_t *tp){
         /*
          * Finally lets clean up threadpool memory 
          */ 
-
         free(tp);
         tp = NULL;
     }
@@ -259,7 +263,7 @@ int threadpool_free_pool(ALtpool_t *tp){
 
     @param tp - Threadpool to teardown.
 */
-int AlpacaThreadpool_exit(ALtpool_t *tp){
+ALPACA_STATUS AlpacaThreadpool_exit(ALtpool_t *tp){
 
 
     if(threadpool_free_pool(tp)){

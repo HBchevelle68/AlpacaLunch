@@ -46,13 +46,13 @@ typedef struct AlpacaLunch_threadpool {
 } ALtpool_t;
 
 
-extern ALtpool_t* AlpacaThreadpool_init(uint32_t t_count);
+extern ALtpool_t* AlpacaThreadpool_init(uint32_t numThreads);
 
-extern int32_t AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name);
+extern int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name);
 
-extern int32_t AlpacaThreadpool_listThreads(ALtpool_t *tp);
+extern char* AlpacaThreadpool_listThreads(ALtpool_t *tp);
 
-extern int32_t AlpacaThreadpool_exit(ALtpool_t *tp);
+extern ALPACA_STATUS AlpacaThreadpool_exit(ALtpool_t *tp);
 
 
 
