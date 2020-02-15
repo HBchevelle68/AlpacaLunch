@@ -12,11 +12,14 @@
 
 // Interfaces 
 #include <interfaces/threadpool_interface.h>
+#include <interfaces/memory_interface.h>
 
 /*
  * Test harness
  */
 #ifndef SNOW_ENABLED
+
+
 
 
 
@@ -31,7 +34,7 @@ int main(){
     LOGINFO("This is a test: %d\n", temp);
 
     // START Threadpool Test
-    
+/*    
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -45,7 +48,7 @@ int main(){
     LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", temp);
 
     LOGDEBUG("End tests....\n");
-
+*/
     
 
     /* TO DO
@@ -54,8 +57,22 @@ int main(){
      * return. If it does should examine the cause.
      * currently the way the loop is built there isn't a good reason to
      */
-    alpacacore_server_run(12345, 20);
+    //alpacacore_server_run(12345, 20);
 
+
+    ALLU_Buffer_t *testBuff  = NULL;
+    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(ALLU_Buffer_t));
+    testBuff = AlpacaBuffer_init(4000);
+    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->size);
+    AlpacaBuffer_zero(&testBuff);
+    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->size);
+    AlpacaBuffer_free(&testBuff);
+    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
+
+    // For Test only! 
+    while(1){}
 
     alpacacore_exit();
    

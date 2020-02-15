@@ -13,7 +13,7 @@ ALPACA_STATUS alpacacore_init(){
 
     DEBUGWARNING();
 
-    // Check for root
+    // Check for root if in release
     #ifndef DEBUGENABLE
     LOGDEBUG("DEBUGENABLE: %d\n", DEBUGENABLE);
     FAIL_IF_TRUE(getuid());
