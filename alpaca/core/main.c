@@ -19,7 +19,44 @@
  */
 #ifndef SNOW_ENABLED
 
+char HELLOWORLD[] = "HELLO WORLD!";
 
+void memtest(void){
+
+    ALLU_Buffer_t *testBuff  = NULL;
+
+    // Test init
+    testBuff = AlpacaBuffer_init(4000);
+    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", testBuff, testBuff->size, testBuff->index);
+    
+    // Test ensureRoom and resize (GROW)
+    AlpacaBuffer_ensureRoom(&testBuff, 1024*10);
+    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", testBuff, testBuff->size, testBuff->index);
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->index);
+
+    // Test append
+    for(int i = 0; i<10; i++){
+        AlpacaBuffer_append(&testBuff, (uint8_t*)HELLOWORLD, 13);
+    }
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->index);
+
+
+    // Test zero
+    AlpacaBuffer_zero(&testBuff);
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->index);
+    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", testBuff, testBuff->size, testBuff->index);
+
+    // Test resize (SHRINK)
+    testBuff = AlpacaBuffer_resize(&testBuff, 1024);
+    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->index);
+    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", testBuff, testBuff->size, testBuff->index);
+
+    // Test free
+    AlpacaBuffer_free(&testBuff);
+    LOGDEBUG("Buffer [%p]\n", testBuff);
+   
+    while(1){}
+}
 
 
 
@@ -49,7 +86,7 @@ int main(){
 
     LOGDEBUG("End tests....\n");
 */
-    
+    memtest();
 
     /* TO DO
      * 
@@ -60,19 +97,8 @@ int main(){
     //alpacacore_server_run(12345, 20);
 
 
-    ALLU_Buffer_t *testBuff  = NULL;
-    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(ALLU_Buffer_t));
-    testBuff = AlpacaBuffer_init(4000);
-    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
-    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->size);
-    AlpacaBuffer_zero(&testBuff);
-    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
-    AlpacaMemory_dumpHex(testBuff->buffer, testBuff->size);
-    AlpacaBuffer_free(&testBuff);
-    LOGDEBUG("Buffer ptr: %p || sizeof ALLU_Buffer_t: %lu\n", testBuff, sizeof(*testBuff));
+    
 
-    // For Test only! 
-    while(1){}
 
     alpacacore_exit();
    

@@ -19,6 +19,9 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_TLSCERT  	(3)
 #define ALPACA_TLSKEY   	(4)
 #define ALPACA_MEM_NOBUFFER	(5)
+#define ALPACA_MEM_EXCEEDED	(6)
+#define ALPACA_MEM_RESZFAIL	(7)
+#define ALPACA_MEM_APNDFAIL	(8)
 
 
 #endif
