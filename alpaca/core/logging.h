@@ -63,7 +63,19 @@ do { if (DEBUGENABLE){ \
 #define LOGERROR(fmt, ...)
 #endif
 
+#ifdef TALKATIVELLAMA
+#define EPILOG \
+    do { fprintf(stdout, "%s <EPILOG> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+#else
+#define EPILOG
+#endif
 
+#ifdef TALKATIVELLAMA
+#define PROLOG \
+    do { fprintf(stdout, "%s <PROLOG> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+#else
+#define PROLOG
+#endif
 
 #define LOGTESTFILE(buff) \
         FILE* fp;                                 \
