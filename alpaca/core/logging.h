@@ -35,13 +35,9 @@ do { if (DEBUGENABLE){ \
 
 
 /*
- * Logging  
-<<<<<<< HEAD
+ * Logging
  */
 #ifdef TALKATIVELLAMA
-=======
- */ 
->>>>>>> 4-memory
 #define LOGINFO(fmt, ...) \
     do { fprintf(stdout, "%s <INFO> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
