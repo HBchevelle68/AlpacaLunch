@@ -62,7 +62,7 @@ void memtest(void){
 int testTemp = 0;
 
 int main(){
-
+    EPILOG;
     
     FAIL_IF_TRUE(alpacacore_init());
     
