@@ -1,14 +1,18 @@
-#include <stdio.h>    // std io
-#include <string.h>   // memset
-#include <stdlib.h>   // malloc and other mem functions
+#include <stdio.h> 
+#include <string.h>
+#include <stdlib.h>
+
+// Internal
+#include <core/logging.h>
+
 
 // Implements Interface 
 #include <interfaces/threadpool_interface.h>
 
 
-/*
- * ******** 3yr Old Code. Most likely pretty buggy ********
- */
+// For Atomics
+static const uint8_t FLAGON  = 1;
+static const uint8_t FLAGOFF = 0;
 
 
 
@@ -18,11 +22,10 @@
  * Atomics??? 
  */
 static 
-void threadpool_thread_safe_exit(ALtpool_t *tp){
+void thread_safe_exit(ALtpool_t *tp){
     pthread_mutex_unlock(&(tp->tp_m_lock));
     pthread_exit(NULL);
 }
-
 
 
 /*
@@ -36,24 +39,25 @@ void *thread_loop(void *threadpool){
 
     ALtpool_t *tp = (ALtpool_t *)threadpool;
     ALtask_t *to_execute;
+    uint8_t tearDownRet;
 
     while(1) {
-
-        if((tp->tp_status & SHUTDOWN)){ 
-            break;
-        }
-        
+       
         pthread_mutex_lock(&(tp->tp_m_lock));
-        while(AL_queue_isempty(&(tp->queue)) == 1){
-            if((tp->tp_status == GRACEFUL)){
-                 threadpool_thread_safe_exit(tp);
-            }
+        while(AL_queue_isempty(&(tp->queue))){
+            // Clear flag out variable
+            tearDownRet = 0;
 
             pthread_cond_wait(&(tp->q_cond), &(tp->tp_m_lock));
-            if((tp->tp_status == SHUTDOWN)){ 
-                threadpool_thread_safe_exit(tp);
-            }
 
+            /*
+             * Atomically load flag and check if teardown requested 
+             */
+            __atomic_load(&(tp->teardown), &tearDownRet, __ATOMIC_SEQ_CST);
+            if(tearDownRet){
+                // Exit
+                thread_safe_exit(tp);
+            }
         }
 
         // Pop task from Queue and release lock
@@ -69,17 +73,32 @@ void *thread_loop(void *threadpool){
     pthread_exit(NULL);
 }
 
-/* tpool_init
-    @brief - Initializes a threadpool (ALtpool_t) and
-             returns a pointer to a allocated threadpool with
-             t_count threads available and able to queue up
-             q_size tasks.
-    @return - Returns a pointer to a threadpool if successful
-              and returns NULL if an error occured.
 
-    @param t_count - Thread count. Number of threads this pool will generate.
-*/
-ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
+static
+ALPACA_STATUS createThreads(ALtpool_t *tp){
+
+    for(int i = 0; i < tp->t_size; i++) {
+        sprintf( &(tp->t_pool[i].name[0]), "Thread--%d", i);
+        // If any threads fail to be created, time to go
+        if(pthread_create(&(tp->t_pool[i].thread), NULL, thread_loop, (void*)tp) != 0) {
+            AlpacaThreadpool_exit(tp);
+            return ALPACA_FAILURE;
+        }
+    }
+
+    return ALPACA_SUCCESS;
+} 
+
+/* 
+ *    @brief - Initializes a threadpool (ALtpool_t) and
+ *             returns a pointer to a allocated threadpool with
+ *             numThreads available and able to queue up
+ *             q_size tasks.
+ *    @param numThreads - Thread count. Number of threads this pool will generate.
+ *    @return - Returns a pointer to a threadpool if successful
+ *              and returns NULL if an error occured.
+ */
+ALtpool_t* AlpacaThreadpool_init(unsigned int numThreads){
 
     ALtpool_t *tp;
 
@@ -91,11 +110,11 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
 
 
     // INIT THREADS MEM
-    if((tp->t_pool = malloc(sizeof(pthread_t) * t_count)) == NULL){
+    if((tp->t_pool = malloc(sizeof(ALthread_t) * numThreads)) == NULL){
         AlpacaThreadpool_exit(tp);
         return NULL;
     }
-    memset(tp->t_pool, 0, (sizeof(pthread_t) * t_count));
+    memset(tp->t_pool, 0, (sizeof(ALthread_t) * numThreads));
 
 
     // INIT QUEUE
@@ -105,44 +124,35 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int t_count){
     // INIT LOCK/COND VARIABLE
     pthread_mutex_init(&(tp->tp_m_lock), NULL);
     pthread_cond_init(&(tp->q_cond), NULL);
-    
+
+    // SET THREAD COUNT
+    tp->t_size = numThreads;
+    __atomic_fetch_and(&(tp->teardown), &FLAGOFF, __ATOMIC_SEQ_CST);
 
     // START threads
-    for(int i = 0; i < t_count; i++) {
-        // If any threads fail to be created, time to go
-        if(pthread_create(&(tp->t_pool[i]), NULL, thread_loop, (void*)tp) != 0) {
-            AlpacaThreadpool_exit(tp);
-            return NULL;
-        }
+    if(createThreads(tp) != ALPACA_SUCCESS){
+        AlpacaThreadpool_exit(tp);
+        return NULL;
     }
-
-
-    // FINISH up setting other vars
-    pthread_mutex_lock(&(tp->tp_m_lock));
-    tp->t_size = t_count;
-    tp->q_status = EMPTY;
-    tp->tp_status = INITIALIZED;
-    pthread_mutex_unlock(&(tp->tp_m_lock));
-
 
     return tp;
 }
 
 
-/* add_task
-    @brief - Adds a task (function) to the threadpool's queue to
-             be exececuted.
-    @return - Returns 0 if successful. Returns 1 if error occured
-            and task is not added to Queue.
-
-    @param tp - Threadpool to add task to.
-    @param routine - Function to add to queue
-    @param args - Arguments needed for function. If no args, then pass NULL;
-*/
-int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args){
+/* 
+ *   @brief - Adds a task (function) to the threadpool's queue to
+ *            be exececuted.
+ *   @return - Returns 0 if successful. Returns 1 if error occured
+ *           and task is not added to Queue.
+ *
+ *   @param tp - Threadpool to add task to.
+ *   @param routine - Function to add to queue
+ *   @param args - Arguments needed for function. If no args, then pass NULL;
+ */
+int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name){
 
     if(!tp){
-        return -1;
+        return ALPACA_FAILURE;
     }
     
     ALtask_t *task = malloc(sizeof(ALtask_t));
@@ -152,16 +162,26 @@ int AlpacaThreadpool_add_task(ALtpool_t *tp, void (*routine)(void*), void *args)
      */
     task->routine = routine;
     task->args = args;
+    strcpy(task->name, name);
    
 
     pthread_mutex_lock(&(tp->tp_m_lock));
     AL_queue_enqueue(&(tp->queue), (AL_item_t)task);
-    tp->q_status = TODO;
 
     pthread_mutex_unlock(&(tp->tp_m_lock)); // UNLOCK
     pthread_cond_broadcast(&(tp->q_cond));  // BCAST
 
-    return 0;
+    return ALPACA_SUCCESS;
+}
+
+
+
+char* AlpacaThreadpool_listThreads(ALtpool_t *tp){
+
+    if(!tp){
+        return NULL;
+    }
+    return NULL;
 }
 
 
@@ -185,34 +205,52 @@ int threadpool_free_pool(ALtpool_t *tp){
      * Repeat process of checking for allocated memory
      * Free if memory allocated
      */ 
-    if(tp != NULL){
+    if(tp != NULL) {
+       /*
+        * Atomically store 0x01 into threadpool teardown flag
+        * then broadcast to sleeping threads to wake.
+        * After threads join, atomically clear the 
+        * threadpool teardown flag
+        */
+        if(tp->t_pool != NULL) {
         
+            __atomic_store(&(tp->teardown), &FLAGON, __ATOMIC_SEQ_CST);
+ 
+            for(int i = 0; i < tp->t_size; i++) {
+               /*
+                * Wait for threads to join
+                */
+                pthread_cond_broadcast(&(tp->q_cond));
+                pthread_join(tp->t_pool[i].thread, NULL);
 
-        pthread_cond_broadcast(&(tp->q_cond));
-        // Wait for threads to join
-        for(int i = 0; i < tp->t_size; i++) {
-            pthread_join(tp->t_pool[i], NULL);
-        }
+            }
+            __atomic_fetch_and(&(tp->teardown), &FLAGOFF, __ATOMIC_SEQ_CST);
 
-        // All threads are done, now safe to destroy locks`
-        pthread_mutex_destroy(&(tp->tp_m_lock));
-        pthread_cond_destroy(&(tp->q_cond));
-
-
-        // Clean thread memory
-        if(tp->t_pool != NULL){
+            /*
+             * Clean thread memory
+             */ 
             free(tp->t_pool);
         }
 
-        // Clean queue memory
+        /*
+         * All threads are done, now safe to destroy locks
+         */ 
+        pthread_mutex_destroy(&(tp->tp_m_lock));
+        pthread_cond_destroy(&(tp->q_cond));
+        
+        /*
+         * Clean queue memory
+         */ 
         AL_queue_destroy(&(tp->queue));
 
-        // Finally lets clean up threadpool memory
+        /*
+         * Finally lets clean up threadpool memory 
+         */ 
         free(tp);
         tp = NULL;
     }
 
-    return 0;
+    return ALPACA_SUCCESS;
 }
 
 
@@ -225,12 +263,12 @@ int threadpool_free_pool(ALtpool_t *tp){
 
     @param tp - Threadpool to teardown.
 */
-int AlpacaThreadpool_exit(ALtpool_t *tp){
+ALPACA_STATUS AlpacaThreadpool_exit(ALtpool_t *tp){
 
-    tp->tp_status = SHUTDOWN;
+
     if(threadpool_free_pool(tp)){
         printf("ERROR in free_pool()\n");
         return 1;
     }
-    return 0;
+    return ALPACA_SUCCESS;
 }

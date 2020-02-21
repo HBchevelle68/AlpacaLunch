@@ -139,4 +139,5 @@ void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx){
 			ctx = NULL;
     	}
     }
+    wolfSSL_Cleanup();
 }

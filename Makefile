@@ -47,10 +47,10 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 #
 # Build variables
 #
-CC= gcc
-CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+CC= gcc -std=c11
+CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -I$(ALPACAINCLUDE) -I$(CRYPTINC)
-DBG= -g3 -DTALKATIVELLAMA -pg
+DBG= -g -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
@@ -104,17 +104,34 @@ ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o)
 # ALPACA-MEMORY object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, mem.o ) 
-ALPACAMEM_LOBJS=$(addprefix $(ALPACAMEMORYSRC)/, mem-PIC.o)
-ALPACAMEM_TOBJS=$(addprefix $(ALPACAMEMORYSRC)/, mem-test.o)
-ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, mem-debug.o) 
+ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory.o alpaca_buffer.o) 
+ALPACAMEM_LOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-PIC.o alpaca_buffer-PIC.o)
+ALPACAMEM_TOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-test.o alpaca_buffer-test.o)
+ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_buffer-debug.o) 
 
 #
 # Combining all modules into single varible
 #
-ALLROBJS = $(ALPACACORE_ROBJS) $(ALPACAMTHREADSERV_ROBJS) $(ALPACATPOOL_ROBJS) $(ALPACACOMMS_ROBJS) $(ALPACAUTILS_ROBJS) $(ALPACAMEM_ROBJS)
-ALLTOBJS = $(ALPACACORE_TOBJS) $(ALPACAMTHREADSERV_TOBJS) $(ALPACATPOOL_TOBJS) $(ALPACACOMMS_TOBJS) $(ALPACAUTILS_TOBJS) $(ALPACAMEM_TOBJS)
-ALLDOBJS = $(ALPACACORE_DOBJS) $(ALPACAMTHREADSERV_DOBJS) $(ALPACATPOOL_DOBJS) $(ALPACACOMMS_DOBJS) $(ALPACAUTILS_DOBJS) $(ALPACAMEM_DOBJS)
+ALLROBJS = $(ALPACACORE_ROBJS)       \
+		   $(ALPACAMTHREADSERV_ROBJS)\
+		   $(ALPACATPOOL_ROBJS) 	 \
+		   $(ALPACACOMMS_ROBJS) 	 \
+		   $(ALPACAUTILS_ROBJS) 	 \
+		   $(ALPACAMEM_ROBJS)
+
+ALLTOBJS = $(ALPACACORE_TOBJS) 		 \
+		   $(ALPACAMTHREADSERV_TOBJS)\
+		   $(ALPACATPOOL_TOBJS)		 \
+		   $(ALPACACOMMS_TOBJS)		 \
+		   $(ALPACAUTILS_TOBJS)		 \
+		   $(ALPACAMEM_TOBJS)
+
+ALLDOBJS = $(ALPACACORE_DOBJS) 		 \
+		   $(ALPACAMTHREADSERV_DOBJS)\
+		   $(ALPACATPOOL_DOBJS)		 \
+		   $(ALPACACOMMS_DOBJS)		 \
+		   $(ALPACAUTILS_DOBJS)		 \
+		   $(ALPACAMEM_DOBJS)		 
 
 .PHONY: clean
 
