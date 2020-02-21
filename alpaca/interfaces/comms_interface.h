@@ -25,16 +25,17 @@
  
 #define COMMSBUFSIZE 1500
 
+
 /*
  * Defines base AlapcaLunch comms information
  */
-typedef struct AlpacaCommsCtx {
+typedef struct AlpacaCommsServerCtx {
 
-    unsigned short sock;
-    struct sockaddr_in *serv_addr;
-    WOLFSSL_CTX *tls_ctx;
+    unsigned short serverSock;
+    struct sockaddr_in *servAddr;
+    WOLFSSL_CTX *wolf_ctx;
 
-} ALLU_comms_ctx;
+} ALLU_server_ctx;
 
 
 /* 
@@ -53,6 +54,14 @@ typedef struct AlpacaCommsCtx {
  * Comms module Interface
  *
  */
+
+
+extern ALPACA_STATUS AlpacaComms_initComms(void);
+extern ALPACA_STATUS AlpacaComms_cleanComms(void);
+
+
+
+
 extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
 
 extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);

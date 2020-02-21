@@ -18,10 +18,27 @@
  */ 
 #define __FNAME__ (strrchr(__FILE__, '/') + 1)
 
+
+/*
+ * Logging  
+ */
+#ifdef TALKATIVELLAMA
+
+#define LOGINFO(fmt, ...) \
+    do { fprintf(stdout, "%s <INFO> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
+
+#define LOGDEBUG(fmt, ...) \
+    do { fprintf(stdout, "%s <DEBUG> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
+
+#define LOGERROR(fmt, ...) \
+    do { fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
+
 /*
  * Warn that debug build is running
  */ 
-#ifdef TALKATIVELLAMA
 #define DEBUGWARNING() \
 do { if (DEBUGENABLE){ \
         printf("****************************************\n"); \
@@ -29,53 +46,21 @@ do { if (DEBUGENABLE){ \
         printf("****************************************\n"); \
       }                                                       \
 } while(0)
+
 #else
+#define LOGINFO(fmt, ...)
+#define LOGDEBUG(fmt, ...)
+#define LOGERROR(fmt, ...)
 #define DEBUGWARNING()
 #endif
 
 
-/*
- * Logging  
-<<<<<<< HEAD
- */ 
-=======
- */
-#ifdef TALKATIVELLAMA
->>>>>>> staging-part-0
-#define LOGINFO(fmt, ...) \
-    do { fprintf(stdout, "%s <INFO> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
-    __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
-#else
-#define LOGINFO(fmt, ...)
-#endif
-
-
-#ifdef TALKATIVELLAMA
-#define LOGDEBUG(fmt, ...) \
-    do { fprintf(stdout, "%s <DEBUG> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
-    __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
-#else
-#define LOGDEBUG(fmt, ...)
-#endif
-
-
-#ifdef TALKATIVELLAMA
-#define LOGERROR(fmt, ...) \
-    do { fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
-    __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
-#else
-#define LOGERROR(fmt, ...)
-#endif
-
-
-
+// For test for now
 #define LOGTESTFILE(buff) \
         FILE* fp;                                 \
         fp = fopen("/tmp/test.txt", "a");         \
         fprintf(fp, "%s\n", buff);                \
         fclose(fp);
-
-
 
 
 #endif
