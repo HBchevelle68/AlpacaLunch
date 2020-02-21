@@ -22,11 +22,13 @@ ALLU_comms_ctx *allu_serv = NULL;
 
 
 void alpacacore_server_clean(){
+    EPILOG;
     /*
      * For now this is just a rather useless wrapper
      * Leaving it for now in case of possible function exapansion
      */
     AlpacaComms_clean_comms_ctx(allu_serv);
+    PROLOG;
 }
 
 
@@ -59,6 +61,7 @@ ALPACA_STATUS alpacacore_server_loop(){
 
 ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count){
 
+    EPILOG;
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
     BUFALLOC(allu_serv, sizeof(ALLU_comms_ctx));
@@ -72,7 +75,7 @@ ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count){
     ret_status = alpacacore_server_loop();
 
     alpacacore_server_clean();
-
+    PROLOG;
     return ret_status;
 }
 
