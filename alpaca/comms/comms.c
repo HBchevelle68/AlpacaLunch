@@ -6,6 +6,7 @@
 #include <interfaces/memory_interface.h>
 #include <core/macros.h>
 #include <core/logging.h>
+#include <core/codes.h>
 
 #define SCERT "/home/ap/AlpacaLunch/.testcerts/cert.pem"
 #define PKEY "/home/ap/AlpacaLunch/.testcerts/private.pem"
@@ -15,7 +16,7 @@
 static const uint8_t FLAGON  = 1;
 static const uint8_t FLAGOFF = 0;
 
-static uint32_t wolfInitialized = 0;
+static uint8_t wolfInitialized = 0;
 ALLU_server_ctx* serverCtx = NULL; 
 
 ALPACA_STATUS AlpacaComms_initComms(void){
@@ -37,7 +38,7 @@ ALPACA_STATUS AlpacaComms_initComms(void){
         wolfSSL_Init();
         if ((serverCtx->wolf_ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL){
 
-            LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_TLSINIT);
+            LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_COMMS_TLSINIT);
             return ALPACA_COMMS_TLSINIT;
         }
 
@@ -47,7 +48,7 @@ ALPACA_STATUS AlpacaComms_initComms(void){
         LOGDEBUG("Opening cert file %s\n", SCERT);
         if (wolfSSL_CTX_use_certificate_file(serverCtx->wolf_ctx, SCERT, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
 
-            LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d\n", ALPACA_TLSCERT);
+            LOGERROR("wolfSSL_CTX_use_certificate_file ERROR: %d\n", ALPACA_COMMS_TLSCERT);
             return ALPACA_COMMS_TLSCERT;
         }
 
@@ -57,48 +58,12 @@ ALPACA_STATUS AlpacaComms_initComms(void){
         LOGDEBUG("Opening cert file %s\n", PKEY);
         if (wolfSSL_CTX_use_PrivateKey_file(serverCtx->wolf_ctx, PKEY, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
 
-            LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d\n", ALPACA_TLSKEY);
+            LOGERROR("wolfSSL_CTX_use_PrivateKey_file ERROR: %d\n", ALPACA_COMMS_TLSKEY);
             return ALPACA_COMMS_TLSKEY;
         }
 
-        /*
-         * Create underlying socket
-         */
-        if ((serverCtx->serverSock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
-            LOGERROR("Socket creation failure\n");
-            return ALPACA_FAILURE;
-        } 
-
-        /*
-         * Fill server structure
-         */
-        serverCtx->servAddr->sin_family = AF_INET;          
-        serverCtx->servAddr->sin_addr.s_addr = INADDR_ANY;  
-        serverCtx->servAddr->sin_port = htons(DEFAULTPORT);
-
-
-        /*
-         * Force kernel to let use re-use addr:port tuple
-         */
-        if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR|SO_REUSEPORT, &(int){1}, sizeof(uint32_t)) != ALPACA_SUCCESS){
-            LOGERROR("setsockopt failure\n");
+        if(AlpacaComms_createServSock(&serverCtx) != ALPACA_SUCCESS){
             return ALPACA_COMMS_SOCKERR;
-        }
-
-        /*
-         * Bind to address space 
-         */
-        if(bind(sock, (struct sockaddr*)addr, sizeof(struct sockaddr_in)) != ALPACA_SUCCESS){
-            LOGERROR("bind failure\n");
-            return ALPACA_COMMS_SOCKERR;
-        }
-
-        /*
-         * Begin to listen for connections
-         */
-        if(listen(sock, 10) != ALPACA_SUCCESS){
-            LOGERROR("listen failure\n");
-            return ALPACA_COMMS_SOCKERR;            
         }
 
         LOGDEBUG(">>> Sock_FD: %d Bound to %s:%hu <<<\n", serverCtx->serverSock, 
@@ -121,9 +86,9 @@ ALPACA_STATUS AlpacaComms_cleanComms(void){
          * Make sure we have a socket first 
          * close and set to 0
          */    
-        if(serverCtx->sock > 0) {
-            close(serverCtx->sock);
-            serverCtx->sock = 0;
+        if(serverCtx->serverSock > 0) {
+            close(serverCtx->serverSock);
+            serverCtx->serverSock = 0;
         }
         
         /*
@@ -164,17 +129,7 @@ ALPACA_STATUS AlpacaComms_cleanComms(void){
 
 
 
-
-
-ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count){
-	/* Init WolfSSL */
-    FAIL_IF_TRUE(AlpacaComms_init_TLS(ctx));
- 
-
-
-	return ALPACA_SUCCESS;
-}
-
+/*
  
 void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr){
 
@@ -184,9 +139,7 @@ void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, stru
         
     buff = (char*)calloc(COMMSBUFSIZE, sizeof(unsigned char));
                                  
-    /* 
-     * Wrap socket 
-     */ 
+ 
     l_tls = AlpacaComms_wrap_sock(ctx, cli_sock);
     
 
@@ -204,9 +157,7 @@ void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, stru
         memset(buff, 0, COMMSBUFSIZE);
     }
 
-    /*
-     * Free buffers and free wolfssl structs
-     */
+
     if(buff != NULL) {
           memset(buff, (unsigned char)0, COMMSBUFSIZE);
           free(buff);
@@ -215,9 +166,8 @@ void AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, stru
     wolfSSL_free(l_tls);
 }
 
-/*
- * TLS wrap a socket 
- */
+
+
 WOLFSSL* AlpacaComms_wrap_sock(ALLU_comms_ctx *ctx, uint16_t cli_sock){
 
     WOLFSSL* tls;
@@ -239,30 +189,4 @@ ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *serv){
 
     return result;
 }
-
-void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx){
-	
-	if(ctx != NULL){
-        
-        if(ctx->sock > 0) {
-            close(ctx->sock);
-        }
-        
-        if(ctx->tls_ctx != NULL){
-            wolfSSL_CTX_free(ctx->tls_ctx);
-        }
-        
-        if(ctx->serv_addr != NULL) {
-			memset(ctx->serv_addr, (unsigned char)0, sizeof(struct sockaddr_in));
-			free(ctx->serv_addr);
-			ctx->serv_addr = NULL;
-    	}
-        
-        if(ctx != NULL) {
-			memset(ctx, (unsigned char)0, sizeof(*ctx));
-			free(ctx);
-			ctx = NULL;
-    	}
-    }
-    wolfSSL_Cleanup();
-}
+*/

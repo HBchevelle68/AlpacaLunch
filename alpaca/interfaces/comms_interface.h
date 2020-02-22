@@ -9,6 +9,7 @@
 #include <stdlib.h> 
 #include <sys/types.h>
 #include <sys/socket.h> 
+#include <fcntl.h>
 
 /*
  * Wolfssl headers
@@ -59,17 +60,19 @@ typedef struct AlpacaCommsServerCtx {
 extern ALPACA_STATUS AlpacaComms_initComms(void);
 extern ALPACA_STATUS AlpacaComms_cleanComms(void);
 
+extern ALPACA_STATUS AlpacaComms_createServSock(ALLU_server_ctx** serverCtx);
 
 
 
-extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
 
-extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);
+//extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
 
-extern WOLFSSL* AlpacaComms_wrap_sock(ALLU_comms_ctx *ctx, uint16_t cli_sock);
+//extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);
 
-extern ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *ctx);
+//extern WOLFSSL* AlpacaComms_wrap_sock(ALLU_comms_ctx *ctx, uint16_t cli_sock);
 
-extern void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx);
+//extern ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *ctx);
+
+//extern void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx);
 
 #endif

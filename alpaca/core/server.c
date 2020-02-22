@@ -17,7 +17,7 @@
 
 
 
-ALLU_comms_ctx *allu_serv = NULL;
+//ALLU_comms_ctx *allu_serv = NULL;
 
 
 
@@ -27,7 +27,7 @@ void alpacacore_server_clean(){
      * For now this is just a rather useless wrapper
      * Leaving it for now in case of possible function exapansion
      */
-    AlpacaComms_clean_comms_ctx(allu_serv);
+    AlpacaComms_cleanComms();
     PROLOG;
 }
 
@@ -35,7 +35,7 @@ void alpacacore_server_clean(){
 
 /*
  * Currently single threaded 
- */
+ 
 
 static
 ALPACA_STATUS alpacacore_server_loop(){
@@ -44,10 +44,7 @@ ALPACA_STATUS alpacacore_server_loop(){
     socklen_t addrlen = sizeof(cliaddr);
     while(1){   
         cli_sock = accept(allu_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
-        /*
-         * Can be interuppted by sighandler
-         * or simply an error
-         */
+
         if(cli_sock != -1){
             LOGDEBUG("Client connected\n");
             AlpacaComms_connection_handler(allu_serv, cli_sock, &cliaddr);
@@ -79,3 +76,4 @@ ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count){
     return ret_status;
 }
 
+*/
