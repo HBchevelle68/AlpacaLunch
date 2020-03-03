@@ -1,3 +1,6 @@
+/**/
+
+
 // Implements interface 
 #include <interfaces/comms_interface.h>
 
@@ -7,10 +10,11 @@
 #include <core/macros.h>
 #include <core/logging.h>
 
+
 #define DEFAULTPORT 12345
 
-
-int setNonblocking(int fd)
+static
+int32_t __attribute__ ((unused))setNonblocking(int fd)
 {
     int flags;
 
@@ -27,7 +31,7 @@ int setNonblocking(int fd)
 } 
 
 
-ALPACA_STATUS AlpacaComms_createServSock(ALLU_server_ctx** serverCtx){
+ALPACA_STATUS AlpacaSock_createServSock(ALLU_server_ctx** serverCtx){
     
     /*
      * Create underlying socket
@@ -47,6 +51,8 @@ ALPACA_STATUS AlpacaComms_createServSock(ALLU_server_ctx** serverCtx){
 
     /*
      * Force kernel to let use re-use addr:port tuple
+     * 
+     * ****** WARNING! This is not portable to Unix!! ******
      */
     if(setsockopt((*serverCtx)->serverSock, SOL_SOCKET, SO_REUSEADDR|SO_REUSEPORT, &(int){1}, sizeof(uint32_t)) != ALPACA_SUCCESS){
         LOGERROR("setsockopt failure\n");

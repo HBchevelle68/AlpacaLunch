@@ -13,6 +13,7 @@
 // Interfaces 
 #include <interfaces/threadpool_interface.h>
 #include <interfaces/memory_interface.h>
+#include <interfaces/comms_interface.h>
 
 /*
  * Test harness
@@ -20,6 +21,38 @@
 #ifndef SNOW_ENABLED
 
 char HELLOWORLD[] = "HELLO WORLD!";
+ALLU_hinfo* my_hinfo = NULL;
+
+void unameTest(void){
+    char *IPbuffer;
+    my_hinfo = malloc(sizeof(ALLU_hinfo) * sizeof(uint8_t));
+    AlpacaNetUtils_getUname(my_hinfo);
+
+    printf("system name = %s\n", my_hinfo->host_uname.sysname);
+    printf("node name   = %s\n", my_hinfo->host_uname.nodename);
+    printf("release     = %s\n", my_hinfo->host_uname.release);
+    printf("version     = %s\n", my_hinfo->host_uname.version);
+    printf("machine     = %s\n", my_hinfo->host_uname.machine);
+
+    #ifdef _GNU_SOURCE
+       printf("domain name = %s\n", my_hinfo->host_uname.domainname);
+    #endif
+
+    AlpacaNetUtils_getHostEntry(my_hinfo);
+       // To convert an Internet network 
+    // address into ASCII string 
+
+    IPbuffer = inet_ntoa(*(struct in_addr*)(my_hinfo->host_entry->h_addr_list[0])); 
+   
+    printf("Host IP: %s\n", IPbuffer); 
+
+    AlpacaNetUtils_getIfAddrs(&my_hinfo);
+
+    if(my_hinfo){
+        free(my_hinfo);
+    }
+}
+
 
 void memtest(void){
 
@@ -59,11 +92,45 @@ void memtest(void){
 }
 
 
+void printTypeSizes(void){
+        // sizeof evaluates the size of a variable
+    printf("**** BUILT-IN TYPES ****\n");
+    printf("Size of int: %ld bytes\n", sizeof(int));
+    printf("Size of int*: %ld bytes\n", sizeof(int*));
+    printf("Size of int**: %ld bytes\n", sizeof(int**));
+    printf("Size of long int: %ld bytes\n", sizeof(long int));
+
+    printf("Size of float: %ld bytes\n", sizeof(float));
+    printf("Size of double: %ld bytes\n", sizeof(double));
+    printf("Size of char: %ld byte\n", sizeof(char));
+    printf("Size of char*: %ld byte\n", sizeof(char*));
+
+    printf("**** STRUCT TYPES ****\n");
+    printf("Size of struct ifaddrs: %ld bytes\n", sizeof(struct ifaddrs));
+    printf("Size of struct hostent: %ld bytes\n", sizeof(struct hostent));
+    printf("Size of struct utsname: %ld bytes\n", sizeof(struct utsname));
+    
+
+    printf("**** ALPACA TYPES ****\n");
+    printf("Size of ALLU_Buffer_t: %ld bytes\n", sizeof(ALLU_Buffer_t));
+    printf("Size of ALLU_Buffer_t*: %ld bytes\n", sizeof(ALLU_Buffer_t*));
+    printf("Size of ALLU_hinfo: %ld bytes\n", sizeof(ALLU_hinfo));
+    printf("Size of ALLU_hinfo*: %ld bytes\n", sizeof(ALLU_hinfo*));
+
+
+
+}
+
+
 int testTemp = 0;
 
 int main(){
     EPILOG;
-    
+    #ifndef DEBUGENABLE
+    AlpacaUtilities_daemonize();
+    #endif
+    unameTest();
+    printTypeSizes();
     FAIL_IF_TRUE(alpacacore_init());
     
 
@@ -72,7 +139,7 @@ int main(){
     LOGINFO("This is a test: %d\n", testTemp);
 
     // START Threadpool Test
-/*    
+
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -86,7 +153,7 @@ int main(){
     LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", testTemp);
 
     LOGDEBUG("End tests....\n");
-*/
+
     memtest();
 
     /* TO DO

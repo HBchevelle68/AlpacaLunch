@@ -10,6 +10,9 @@
 #include <sys/types.h>
 #include <sys/socket.h> 
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <ifaddrs.h>
 
 /*
  * Wolfssl headers
@@ -26,6 +29,11 @@
  
 #define COMMSBUFSIZE 1500
 
+typedef struct AlpacaNetHostInfo {
+	struct utsname host_uname;
+	struct hostent* host_entry; 
+	struct ifaddrs *ifaddr;
+} ALLU_hinfo; 
 
 /*
  * Defines base AlapcaLunch comms information
@@ -37,6 +45,8 @@ typedef struct AlpacaCommsServerCtx {
     WOLFSSL_CTX *wolf_ctx;
 
 } ALLU_server_ctx;
+
+
 
 
 /* 
@@ -60,9 +70,10 @@ typedef struct AlpacaCommsServerCtx {
 extern ALPACA_STATUS AlpacaComms_initComms(void);
 extern ALPACA_STATUS AlpacaComms_cleanComms(void);
 
-extern ALPACA_STATUS AlpacaComms_createServSock(ALLU_server_ctx** serverCtx);
-
-
+extern ALPACA_STATUS AlpacaNetUtils_getUname(ALLU_hinfo* allu_hinfo);
+extern ALPACA_STATUS AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
+extern ALPACA_STATUS AlpacaNetUtils_getHostEntry(ALLU_hinfo* allu_hinfo);
+extern ALPACA_STATUS AlpacaNetUtils_getIfAddrs(ALLU_hinfo** allu_hinfo);
 
 
 //extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);

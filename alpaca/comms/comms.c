@@ -62,7 +62,10 @@ ALPACA_STATUS AlpacaComms_initComms(void){
             return ALPACA_COMMS_TLSKEY;
         }
 
-        if(AlpacaComms_createServSock(&serverCtx) != ALPACA_SUCCESS){
+        /*
+         * Create underlying server socket
+         */
+        if(AlpacaSock_createServSock(&serverCtx) != ALPACA_SUCCESS){
             return ALPACA_COMMS_SOCKERR;
         }
 

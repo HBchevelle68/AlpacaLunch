@@ -86,19 +86,19 @@ ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue
 # ALPACA-COMMS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o) 
-ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o sock-PIC.o)
-ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o sock-test.o)
-ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o)
+ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o netutils.o) 
+ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o sock-PIC.o netutils-PIC.o)
+ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o sock-test.o netutils-test.o)
+ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o netutils-debug.o)
 
 #
 # ALPACA-UTILS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils.o ) 
-ALPACAUTILS_LOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-PIC.o)
-ALPACAUTILS_TOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-test.o)
-ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o) 
+ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils.o gen_utils.o) 
+ALPACAUTILS_LOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-PIC.o gen_utils-PIC.o)
+ALPACAUTILS_TOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-test.o gen_utils-test.o)
+ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-debug.o) 
 
 #
 # ALPACA-MEMORY object files
