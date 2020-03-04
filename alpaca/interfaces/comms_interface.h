@@ -4,11 +4,11 @@
  */
 #ifndef COMMS_INTERFACE_H
 #define COMMS_INTERFACE_H
+#define _GNU_SOURCE
 
 #include <stdint.h>  
 #include <stdlib.h> 
 #include <sys/types.h>
-#define _GNU_SOURCE
 #include <sys/socket.h> 
 #include <fcntl.h>
 #include <unistd.h>
@@ -30,11 +30,11 @@
  
 #define COMMSBUFSIZE 1500
 
-typedef struct AlpacaNetHostInfo {
+typedef struct AlpacaNetInfo {
 	struct utsname  host_uname;
 	struct hostent* host_entry; 
 	struct ifaddrs* interfaces;
-} ALLU_hinfo; 
+} ALLU_net_info; 
 
 /*
  * Defines base AlapcaLunch comms information
@@ -64,27 +64,22 @@ typedef struct AlpacaCommsServerCtx {
 
 /*
  * Comms module Interface
- *
  */
 
+// COMMS
+extern ALPACA_STATUS  AlpacaComms_initComms(void);
+extern ALPACA_STATUS  AlpacaComms_cleanComms(void);
 
-extern ALPACA_STATUS AlpacaComms_initComms(void);
-extern ALPACA_STATUS AlpacaComms_cleanComms(void);
+// SOCK
+extern ALPACA_STATUS  AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
 
-extern ALPACA_STATUS AlpacaNetUtils_getUname(ALLU_hinfo* allu_hinfo);
-extern ALPACA_STATUS AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
-extern ALPACA_STATUS AlpacaNetUtils_getHostEntry(ALLU_hinfo* allu_hinfo);
-extern ALPACA_STATUS AlpacaNetUtils_getIfAddrs(ALLU_hinfo** allu_hinfo);
+// NetInfo
+extern ALLU_net_info* AlpacaNetInfo_init(void);
+extern 			void  AlpacaNetInfo_clean(ALLU_net_info* allu_ni);
+extern ALPACA_STATUS  AlpacaNetInfo_getUname(ALLU_net_info* allu_ni);
+extern ALPACA_STATUS  AlpacaNetInfo_getHostEntry(ALLU_net_info* allu_ni);
+extern ALPACA_STATUS  AlpacaNetInfo_getIfAddrs(ALLU_net_info** allu_ni);
 
 
-//extern ALPACA_STATUS AlpacaComms_create_listen_sock(ALLU_comms_ctx *ctx, uint16_t port, uint32_t listen_count);
-
-//extern void  AlpacaComms_connection_handler(ALLU_comms_ctx *ctx, uint32_t cli_sock, struct sockaddr_in* cliaddr);
-
-//extern WOLFSSL* AlpacaComms_wrap_sock(ALLU_comms_ctx *ctx, uint16_t cli_sock);
-
-//extern ALPACA_STATUS AlpacaComms_init_TLS(ALLU_comms_ctx *ctx);
-
-//extern void AlpacaComms_clean_comms_ctx(ALLU_comms_ctx *ctx);
 
 #endif

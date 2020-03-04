@@ -22,37 +22,36 @@
 #ifndef SNOW_ENABLED
 
 char HELLOWORLD[] = "HELLO WORLD!";
-ALLU_hinfo* my_hinfo = NULL;
+ALLU_net_info* my_netInfo = NULL;
 
 void unameTest(void){
     struct ifaddrs *ifa;
     int s;
     char host[NI_MAXHOST];
     char *IPbuffer;
-    my_hinfo = malloc(sizeof(ALLU_hinfo) * sizeof(uint8_t));
-    AlpacaNetUtils_getUname(my_hinfo);
+    my_netInfo = AlpacaNetInfo_init();
 
-    printf("system name = %s\n", my_hinfo->host_uname.sysname);
-    printf("node name   = %s\n", my_hinfo->host_uname.nodename);
-    printf("release     = %s\n", my_hinfo->host_uname.release);
-    printf("version     = %s\n", my_hinfo->host_uname.version);
-    printf("machine     = %s\n", my_hinfo->host_uname.machine);
+    printf("system name = %s\n", my_netInfo->host_uname.sysname);
+    printf("node name   = %s\n", my_netInfo->host_uname.nodename);
+    printf("release     = %s\n", my_netInfo->host_uname.release);
+    printf("version     = %s\n", my_netInfo->host_uname.version);
+    printf("machine     = %s\n", my_netInfo->host_uname.machine);
 
     #ifdef _GNU_SOURCE
-       printf("domain name = %s\n", my_hinfo->host_uname.domainname);
+       printf("domain name = %s\n", my_netInfo->host_uname.domainname);
     #endif
 
-    AlpacaNetUtils_getHostEntry(my_hinfo);
+    
        // To convert an Internet network 
     // address into ASCII string 
-
-    IPbuffer = inet_ntoa(*(struct in_addr*)(my_hinfo->host_entry->h_addr_list[0])); 
-   
+    printf("here\n");
+    IPbuffer = inet_ntoa(*(struct in_addr*)(my_netInfo->host_entry->h_addr_list[0])); 
+    printf("here\n");
     printf("Host IP: %s\n", IPbuffer); 
-
-    AlpacaNetUtils_getIfAddrs(&my_hinfo);
+    printf("here\n");
+   
     
-    for (ifa = my_hinfo->interfaces; ifa != NULL; ifa = ifa->ifa_next) {
+    for (ifa = my_netInfo->interfaces; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == NULL)
             continue;  
 
@@ -63,18 +62,15 @@ void unameTest(void){
             if (s != 0)
             {
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
-                exit(EXIT_FAILURE);
+                return;
             }
             printf("\tInterface : <%s>\n",ifa->ifa_name );
             printf("\t  Address : <%s> %lu\n", host, strlen(host)); 
         }
     }
 
-    freeifaddrs(my_hinfo->interfaces);
 
-    if(my_hinfo){
-        free(my_hinfo);
-    }
+    AlpacaNetInfo_clean(my_netInfo);
 }
 
 
@@ -138,8 +134,8 @@ void printTypeSizes(void){
     printf("**** ALPACA TYPES ****\n");
     printf("Size of ALLU_Buffer_t: %ld bytes\n", sizeof(ALLU_Buffer_t));
     printf("Size of ALLU_Buffer_t*: %ld bytes\n", sizeof(ALLU_Buffer_t*));
-    printf("Size of ALLU_hinfo: %ld bytes\n", sizeof(ALLU_hinfo));
-    printf("Size of ALLU_hinfo*: %ld bytes\n", sizeof(ALLU_hinfo*));
+    printf("Size of ALLU_net_info: %ld bytes\n", sizeof(ALLU_net_info));
+    printf("Size of ALLU_net_info*: %ld bytes\n", sizeof(ALLU_net_info*));
 
 
 
@@ -163,7 +159,7 @@ int main(){
     LOGINFO("This is a test: %d\n", testTemp);
 
     // START Threadpool Test
-
+    /*
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -177,7 +173,7 @@ int main(){
     LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", testTemp);
 
     LOGDEBUG("End tests....\n");
-
+    */
     memtest();
 
     /* TO DO

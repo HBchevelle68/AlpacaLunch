@@ -86,10 +86,10 @@ ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue
 # ALPACA-COMMS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o netutils.o) 
-ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o sock-PIC.o netutils-PIC.o)
-ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o sock-test.o netutils-test.o)
-ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o netutils-debug.o)
+ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o netinfo.o) 
+ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o sock-PIC.o netinfo-PIC.o)
+ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o sock-test.o netinfo-test.o)
+ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o netinfo-debug.o)
 
 #
 # ALPACA-UTILS object files
