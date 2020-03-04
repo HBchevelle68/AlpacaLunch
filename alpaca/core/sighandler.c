@@ -10,7 +10,7 @@
 #include <core/allu.h>
 
 
-void alpacacore_signal_handler(int signum){
+void AlpacaCore_signalHandler(int signum){
     LOGDEBUG("RECV'd SIGNAL: %d\n", signum);
 
     switch (signum) {
@@ -22,7 +22,7 @@ void alpacacore_signal_handler(int signum){
         break;
 
     case SIGTERM:
-        alpacacore_exit();
+        AlpacaCore_exit();
         break;
     default:
         
@@ -35,7 +35,7 @@ void alpacacore_signal_handler(int signum){
  * ToDO
  * Explicitly catch all catchable signals, handle appropriately 
  */
-ALPACA_STATUS alpacacore_install_sighandlers(){
+ALPACA_STATUS AlpacaCore_installSigHandlers(){
     
     //ALPACA_STATUS result = ALPACA_SUCCESS;
     //struct sigaction act;
@@ -52,12 +52,12 @@ ALPACA_STATUS alpacacore_install_sighandlers(){
     #endif
     */
 
-    signal(SIGHUP, alpacacore_signal_handler);
-    signal(SIGTERM,alpacacore_signal_handler);
-    signal(SIGQUIT,alpacacore_signal_handler);
-    signal(SIGALRM,alpacacore_signal_handler);
+    signal(SIGHUP, AlpacaCore_signalHandler);
+    signal(SIGTERM,AlpacaCore_signalHandler);
+    signal(SIGQUIT,AlpacaCore_signalHandler);
+    signal(SIGALRM,AlpacaCore_signalHandler);
     #ifndef DEBUGENABLE
-    signal(SIGINT, alpacacore_signal_handler;
+    signal(SIGINT, AlpacaCore_signalHandler;
     #endif
         
     return ALPACA_SUCCESS;

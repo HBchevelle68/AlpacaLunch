@@ -151,7 +151,7 @@ int main(){
     #endif
     unameTest();
     printTypeSizes();
-    FAIL_IF_TRUE(alpacacore_init());
+    FAIL_IF_TRUE(AlpacaCore_init());
     
 
     LOGERROR("This is a test: %d\n", testTemp);
@@ -188,7 +188,7 @@ int main(){
     
 
 
-    alpacacore_exit();
+    AlpacaCore_exit();
    
     return 0; 
 }

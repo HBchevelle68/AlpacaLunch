@@ -21,7 +21,7 @@
 
 
 
-void alpacacore_server_clean(){
+void AlpacaCore_serverCleanST(){
     EPILOG;
     /*
      * For now this is just a rather useless wrapper
@@ -54,26 +54,17 @@ ALPACA_STATUS alpacacore_server_loop(){
     }
     return ALPACA_FAILURE;
 }
+*/
 
-
-ALPACA_STATUS alpacacore_server_run(uint16_t port, uint32_t listen_count){
+ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count){
 
     EPILOG;
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
-    BUFALLOC(allu_serv, sizeof(ALLU_comms_ctx));
-    BUFALLOC(allu_serv->serv_addr, sizeof(struct sockaddr_in));
 
-    ret_status = AlpacaComms_create_listen_sock(allu_serv, port, listen_count);
-    if(ret_status != ALPACA_SUCCESS){
-        return ret_status;
-    }
 
-    ret_status = alpacacore_server_loop();
-
-    alpacacore_server_clean();
+    AlpacaCore_serverCleanST();
     PROLOG;
     return ret_status;
 }
 
-*/

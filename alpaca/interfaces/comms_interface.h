@@ -65,7 +65,6 @@ typedef struct AlpacaCommsServerCtx {
 /*
  * Comms module Interface
  */
-
 // COMMS
 extern ALPACA_STATUS  AlpacaComms_initComms(void);
 extern ALPACA_STATUS  AlpacaComms_cleanComms(void);

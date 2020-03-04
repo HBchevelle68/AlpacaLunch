@@ -8,7 +8,7 @@
 #include <core/sighandler.h>
 
 
-ALPACA_STATUS alpacacore_init(){
+ALPACA_STATUS AlpacaCore_init(){
     EPILOG;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
@@ -21,7 +21,7 @@ ALPACA_STATUS alpacacore_init(){
     #endif 
 
     // Install signal handlers
-    FAIL_IF_TRUE(alpacacore_install_sighandlers());
+    FAIL_IF_TRUE(AlpacaCore_installSigHandlers());
 
     PROLOG;
     return result;
@@ -32,7 +32,7 @@ ALPACA_STATUS alpacacore_init(){
  * Small for now. Called by sighandler
  * will get expandaed on
  */
-void alpacacore_exit(){
-    alpacacore_server_clean();
+void AlpacaCore_exit(){
+    AlpacaCore_serverCleanST();
     exit(0);
 }
