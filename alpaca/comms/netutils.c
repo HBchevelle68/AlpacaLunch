@@ -2,6 +2,8 @@
 
 // Implements interface 
 #include <interfaces/comms_interface.h>
+#include <core/logging.h>
+
 
 #include <unistd.h>
 #include <sys/utsname.h>
@@ -9,10 +11,6 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <sys/types.h>
-
-
-
-
 
 
 
@@ -52,37 +50,10 @@ ALPACA_STATUS AlpacaNetUtils_getHostEntry(ALLU_hinfo* allu_hinfo){
  */
 ALPACA_STATUS AlpacaNetUtils_getIfAddrs(ALLU_hinfo** allu_hinfo){
 
-    struct ifaddrs *ifaddr, *ifa;
-    int s;
-    char host[NI_MAXHOST];
-
-    if (getifaddrs(&ifaddr) == -1) 
-    {
-        perror("getifaddrs");
-        exit(EXIT_FAILURE);
+    if (getifaddrs(&((*allu_hinfo)->interfaces)) == -1) {
+        LOGERROR("getifaddrs");
+        return ALPACA_FAILURE;
     }
-
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;  
-
-        s=getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in),host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-
-        if((ifa->ifa_addr->sa_family==AF_INET))
-        {
-            if (s != 0)
-            {
-                printf("getnameinfo() failed: %s\n", gai_strerror(s));
-                exit(EXIT_FAILURE);
-            }
-            printf("\tInterface : <%s>\n",ifa->ifa_name );
-            printf("\t  Address : <%s> %lu\n", host, strlen(host)); 
-        }
-    }
-
-    freeifaddrs(ifaddr);
 
 
 	return ALPACA_SUCCESS;

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE // Temp for test
 // Standard
 #include <stdio.h> 
 #include <time.h>
@@ -24,6 +25,9 @@ char HELLOWORLD[] = "HELLO WORLD!";
 ALLU_hinfo* my_hinfo = NULL;
 
 void unameTest(void){
+    struct ifaddrs *ifa;
+    int s;
+    char host[NI_MAXHOST];
     char *IPbuffer;
     my_hinfo = malloc(sizeof(ALLU_hinfo) * sizeof(uint8_t));
     AlpacaNetUtils_getUname(my_hinfo);
@@ -47,6 +51,26 @@ void unameTest(void){
     printf("Host IP: %s\n", IPbuffer); 
 
     AlpacaNetUtils_getIfAddrs(&my_hinfo);
+    
+    for (ifa = my_hinfo->interfaces; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;  
+
+        s = getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+
+        if((ifa->ifa_addr->sa_family==AF_INET))
+        {
+            if (s != 0)
+            {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+                exit(EXIT_FAILURE);
+            }
+            printf("\tInterface : <%s>\n",ifa->ifa_name );
+            printf("\t  Address : <%s> %lu\n", host, strlen(host)); 
+        }
+    }
+
+    freeifaddrs(my_hinfo->interfaces);
 
     if(my_hinfo){
         free(my_hinfo);

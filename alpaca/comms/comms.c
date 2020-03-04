@@ -8,6 +8,9 @@
 #include <core/logging.h>
 #include <core/codes.h>
 
+
+// TO DO
+// Needs to be dynamic
 #define SCERT "/home/ap/AlpacaLunch/.testcerts/cert.pem"
 #define PKEY "/home/ap/AlpacaLunch/.testcerts/private.pem"
 #define DEFAULTPORT 12345
@@ -16,7 +19,10 @@
 static const uint8_t FLAGON  = 1;
 static const uint8_t FLAGOFF = 0;
 
+// Static Globals
 static uint8_t wolfInitialized = 0;
+
+// Globals
 ALLU_server_ctx* serverCtx = NULL; 
 
 ALPACA_STATUS AlpacaComms_initComms(void){

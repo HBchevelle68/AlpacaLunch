@@ -8,6 +8,7 @@
 #include <stdint.h>  
 #include <stdlib.h> 
 #include <sys/types.h>
+#define _GNU_SOURCE
 #include <sys/socket.h> 
 #include <fcntl.h>
 #include <unistd.h>
@@ -30,9 +31,9 @@
 #define COMMSBUFSIZE 1500
 
 typedef struct AlpacaNetHostInfo {
-	struct utsname host_uname;
+	struct utsname  host_uname;
 	struct hostent* host_entry; 
-	struct ifaddrs *ifaddr;
+	struct ifaddrs* interfaces;
 } ALLU_hinfo; 
 
 /*
