@@ -1,6 +1,6 @@
 #include <interfaces/utility_interface.h>
 
-off_t AlpacaUtils_futils_fsize(const char *filename) {
+off_t AlpacaFileUtils_fsize(const char *filename) {
 	
     struct stat st; 
 

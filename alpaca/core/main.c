@@ -24,7 +24,7 @@
 char HELLOWORLD[] = "HELLO WORLD!";
 ALLU_net_info* my_netInfo = NULL;
 
-void unameTest(void){
+void netUtilsTest(void){
     struct ifaddrs *ifa;
     int s;
     char host[NI_MAXHOST];
@@ -42,13 +42,10 @@ void unameTest(void){
     #endif
 
     
-       // To convert an Internet network 
+    // To convert an Internet network 
     // address into ASCII string 
-    printf("here\n");
     IPbuffer = inet_ntoa(*(struct in_addr*)(my_netInfo->host_entry->h_addr_list[0])); 
-    printf("here\n");
     printf("Host IP: %s\n", IPbuffer); 
-    printf("here\n");
    
     
     for (ifa = my_netInfo->interfaces; ifa != NULL; ifa = ifa->ifa_next) {
@@ -135,7 +132,8 @@ void printTypeSizes(void){
     printf("Size of ALLU_Buffer_t: %ld bytes\n", sizeof(ALLU_Buffer_t));
     printf("Size of ALLU_Buffer_t*: %ld bytes\n", sizeof(ALLU_Buffer_t*));
     printf("Size of ALLU_net_info: %ld bytes\n", sizeof(ALLU_net_info));
-    printf("Size of ALLU_net_info*: %ld bytes\n", sizeof(ALLU_net_info*));
+    printf("Size of ALLU_server_ctx: %ld bytes\n", sizeof(ALLU_server_ctx));
+
 
 
 
@@ -149,7 +147,7 @@ int main(){
     #ifndef DEBUGENABLE
     AlpacaUtilities_daemonize();
     #endif
-    unameTest();
+    netUtilsTest();
     printTypeSizes();
     FAIL_IF_TRUE(AlpacaCore_init());
     
@@ -178,14 +176,11 @@ int main(){
 
     /* TO DO
      * 
-     * Needs some slight rework, core loop, should never really
+     * Needs rework, core loop, should never really
      * return. If it does should examine the cause.
      * currently the way the loop is built there isn't a good reason to
      */
     //alpacacore_server_run(12345, 20);
-
-
-    
 
 
     AlpacaCore_exit();

@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-extern off_t AlpacaUtils_futils_fsize(const char *filename);
+extern off_t AlpacaFileUtils_fsize(const char *filename);
+extern void AlpacaUtilities_daemonize(void);
 
 #endif

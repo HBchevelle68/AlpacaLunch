@@ -25,7 +25,12 @@ static uint8_t wolfInitialized = 0;
 // Globals
 ALLU_server_ctx* serverCtx = NULL; 
 
-ALPACA_STATUS AlpacaComms_initComms(void){
+
+
+/*
+ * @brief initialize 
+ */
+ALPACA_STATUS AlpacaComms_initServerComms(void){
 
 
     if(!(__atomic_load_n(&wolfInitialized, __ATOMIC_SEQ_CST))){
@@ -87,7 +92,7 @@ ALPACA_STATUS AlpacaComms_initComms(void){
 }
 
 
-ALPACA_STATUS AlpacaComms_cleanComms(void){
+ALPACA_STATUS AlpacaComms_cleanServerComms(void){
 
     if(__atomic_load_n(&wolfInitialized, __ATOMIC_SEQ_CST) && serverCtx != NULL){
         

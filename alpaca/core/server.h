@@ -17,7 +17,9 @@
 
 
 
- /* Funcs */
+/* 
+ * Single-threaded Server
+ */
 ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count);
 void AlpacaCore_serverCleanST();
 

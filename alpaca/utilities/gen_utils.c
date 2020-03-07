@@ -23,8 +23,9 @@ void AlpacaUtilities_daemonize(){
     }
 
     /* On success: The child process becomes session leader */
-    if (setsid() < 0)
+    if (setsid() < 0){
         exit(EXIT_FAILURE);
+    }
 
     /* Catch, ignore and handle signals */
     signal(SIGCHLD, SIG_IGN);
@@ -34,12 +35,14 @@ void AlpacaUtilities_daemonize(){
     pid = fork();
 
     /* An error occurred */
-    if (pid < 0)
+    if (pid < 0){
         exit(EXIT_FAILURE);
+    }
 
     /* Success: Let the parent terminate */
-    if (pid > 0)
+    if (pid > 0){
         exit(EXIT_SUCCESS);
+    }
 
     /* Set new file permissions */
     umask(0);
@@ -49,9 +52,7 @@ void AlpacaUtilities_daemonize(){
     chdir("/");
 
     /* Close all open file descriptors */
-    int x;
-    for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close (x);
+    for (int tempFd = sysconf(_SC_OPEN_MAX); tempFd >= 0; tempFd--){
+        close (tempFd);
     }
 }

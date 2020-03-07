@@ -21,22 +21,11 @@
 
 
 
-void AlpacaCore_serverCleanST(){
-    EPILOG;
-    /*
-     * For now this is just a rather useless wrapper
-     * Leaving it for now in case of possible function exapansion
-     */
-    AlpacaComms_cleanComms();
-    PROLOG;
-}
 
 
 
-/*
- * Currently single threaded 
  
-
+/*
 static
 ALPACA_STATUS alpacacore_server_loop(){
     struct sockaddr_in	cliaddr = {0};
@@ -68,3 +57,12 @@ ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count){
     return ret_status;
 }
 
+void AlpacaCore_serverCleanST(){
+    EPILOG;
+    /*
+     * For now this is just a rather useless wrapper
+     * Leaving it for now in case of possible function exapansion
+     */
+    AlpacaComms_cleanServerComms();
+    PROLOG;
+}

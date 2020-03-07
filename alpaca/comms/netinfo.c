@@ -26,7 +26,7 @@ extern ALLU_net_info* AlpacaNetInfo_init(void){
 		return NULL;
 	}
 
-	if (AlpacaNetInfo_getUname(new_netInfo)){
+	if (AlpacaNetInfo_getUname(&new_netInfo)){
 		AlpacaNetInfo_clean(new_netInfo);
 		return NULL;		
 	}
@@ -57,9 +57,9 @@ extern void AlpacaNetInfo_clean(ALLU_net_info* allu_ni){
  * @param allu_ni ALLU_net_info pointer to struct to fill
  * @return ALPACA_STATUS of success or failure  
  */
-ALPACA_STATUS AlpacaNetInfo_getUname(ALLU_net_info* allu_ni){
+ALPACA_STATUS AlpacaNetInfo_getUname(ALLU_net_info** allu_ni){
  
-   	if (uname(&(allu_ni->host_uname)) != 0) {
+   	if (uname(&((*allu_ni)->host_uname)) != 0) {
    		LOGERROR("Error getting uname\n");
    		return ALPACA_FAILURE;
    	}
