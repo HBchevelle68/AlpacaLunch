@@ -143,7 +143,7 @@ void printTypeSizes(void){
 int testTemp = 0;
 
 int main(){
-    EPILOG;
+    ENTRY;
     #ifndef DEBUGENABLE
     AlpacaUtilities_daemonize();
     #endif

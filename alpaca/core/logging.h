@@ -55,18 +55,18 @@ do { if (DEBUGENABLE){ \
 #endif
 
 #ifdef TALKATIVELLAMA
-#define EPILOG \
-    do { fprintf(stdout, "%s <EPILOG> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+#define ENTRY \
+    do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
-#define EPILOG
+#define ENTRY
 #endif
 
 
 #ifdef TALKATIVELLAMA
-#define PROLOG \
-    do { fprintf(stdout, "%s <PROLOG> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+#define LEAVING \
+    do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
-#define PROLOG
+#define LEAVING
 #endif
 
 #define LOGTESTFILE(buff) \

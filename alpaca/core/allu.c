@@ -9,7 +9,7 @@
 
 
 ALPACA_STATUS AlpacaCore_init(){
-    EPILOG;
+    ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
     DEBUGWARNING();
@@ -23,7 +23,7 @@ ALPACA_STATUS AlpacaCore_init(){
     // Install signal handlers
     FAIL_IF_TRUE(AlpacaCore_installSigHandlers());
 
-    PROLOG;
+    LEAVING;
     return result;
 }
 

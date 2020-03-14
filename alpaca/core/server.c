@@ -47,22 +47,22 @@ ALPACA_STATUS alpacacore_server_loop(){
 
 ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count){
 
-    EPILOG;
+    ENTRY;
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
     
 
 
     AlpacaCore_serverCleanST();
-    PROLOG;
+    LEAVING;
     return ret_status;
 }
 
 void AlpacaCore_serverCleanST(){
-    EPILOG;
+    ENTRY;
     /*
      * For now this is just a rather useless wrapper
      * Leaving it for now in case of possible function exapansion
      */
     AlpacaComms_cleanServerComms();
-    PROLOG;
+    LEAVING;
 }
