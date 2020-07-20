@@ -57,18 +57,18 @@ typedef struct AlpacaCommsServerCtx {
  * Comms module Interface
  */
 // COMMS
-extern ALPACA_STATUS  AlpacaComms_initServerComms(void);
-extern ALPACA_STATUS  AlpacaComms_cleanServerComms(void);
+ALPACA_STATUS  AlpacaComms_initServerComms(void);
+ALPACA_STATUS  AlpacaComms_cleanServerComms(void);
 
 // SOCK
-extern ALPACA_STATUS  AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
+ALPACA_STATUS  AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
 
 // NetInfo
-extern ALLU_net_info* AlpacaNetInfo_init(void);
-extern 			void  AlpacaNetInfo_clean(ALLU_net_info* allu_ni);
-extern ALPACA_STATUS  AlpacaNetInfo_getUname(ALLU_net_info** allu_ni);
-extern ALPACA_STATUS  AlpacaNetInfo_getHostEntry(ALLU_net_info* allu_ni);
-extern ALPACA_STATUS  AlpacaNetInfo_getIfAddrs(ALLU_net_info** allu_ni);
+ALLU_net_info* AlpacaNetInfo_init(void);
+void		   AlpacaNetInfo_clean(ALLU_net_info* allu_ni);
+ALPACA_STATUS  AlpacaNetInfo_getUname(ALLU_net_info** allu_ni);
+ALPACA_STATUS  AlpacaNetInfo_getHostEntry(ALLU_net_info* allu_ni);
+ALPACA_STATUS  AlpacaNetInfo_getIfAddrs(ALLU_net_info** allu_ni);
 
 
 
