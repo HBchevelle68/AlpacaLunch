@@ -134,9 +134,6 @@ void printTypeSizes(void){
     printf("Size of ALLU_net_info: %ld bytes\n", sizeof(ALLU_net_info));
     printf("Size of ALLU_server_ctx: %ld bytes\n", sizeof(ALLU_server_ctx));
 
-
-
-
 }
 
 

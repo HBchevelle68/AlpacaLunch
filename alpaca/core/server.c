@@ -23,21 +23,21 @@
 
 
 
-
- 
 /*
+ 
 static
-ALPACA_STATUS alpacacore_server_loop(){
+ALPACA_STATUS AlpacaCore_serverLoopST(){
     struct sockaddr_in	cliaddr = {0};
-    uint32_t cli_sock = 0;
+    uint16_t cli_sock = 0;
     socklen_t addrlen = sizeof(cliaddr);
     while(1){   
         cli_sock = accept(allu_serv->sock, (struct sockaddr*)(&cliaddr), &addrlen);
 
         if(cli_sock != -1){
             LOGDEBUG("Client connected\n");
-            AlpacaComms_connection_handler(allu_serv, cli_sock, &cliaddr);
+            //AlpacaComms_connection_handler(allu_serv, cli_sock, &cliaddr);
             close(cli_sock);
+            cli_sock = -1;
             memset(&cliaddr, 0, (size_t)addrlen);
         }
     }
@@ -45,11 +45,17 @@ ALPACA_STATUS alpacacore_server_loop(){
 }
 */
 
-ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count){
 
+
+ALPACA_STATUS AlpacaCore_serverRunST(uint16_t port, uint32_t listen_count){
     ENTRY;
+
 	ALPACA_STATUS ret_status = ALPACA_SUCCESS;
-    
+
+
+    // create single threaded server socket
+    // Listen
+    // Since ST, when a task comes in execute task then return
 
 
     AlpacaCore_serverCleanST();
