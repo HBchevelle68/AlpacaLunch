@@ -152,9 +152,8 @@ int main(){
     LOGERROR("This is a test: %d\n", testTemp);
     LOGDEBUG("This is a test: %d\n", testTemp);
     LOGINFO("This is a test: %d\n", testTemp);
-
     // START Threadpool Test
-    /*
+    
     ALtpool_t* tpool = NULL;
     tpool = AlpacaThreadpool_init(10);
     if(tpool != NULL){
@@ -168,7 +167,7 @@ int main(){
     LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", testTemp);
 
     LOGDEBUG("End tests....\n");
-    */
+    
     memtest();
 
     /* TO DO
