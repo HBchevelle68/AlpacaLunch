@@ -6,8 +6,6 @@
 // Internal
 #include <core/logging.h> 
 #include <core/crypto.h>
-#include <core/server.h>
-#include <core/macros.h>
 #include <core/sighandler.h>
 #include <core/allu.h>
 
@@ -17,10 +15,6 @@
 #include <interfaces/comms_interface.h>
 
 /*
- * Test harness
- */
-#ifndef SNOW_ENABLED
-
 char HELLOWORLD[] = "HELLO WORLD!";
 ALLU_net_info* my_netInfo = NULL;
 
@@ -135,18 +129,20 @@ void printTypeSizes(void){
     printf("Size of ALLU_server_ctx: %ld bytes\n", sizeof(ALLU_server_ctx));
 
 }
-
+*/
 
 int testTemp = 0;
 
 int main(){
     ENTRY;
-    #ifndef DEBUGENABLE
+
+#ifndef DEBUGENABLE
     AlpacaUtilities_daemonize();
-    #endif
-    netUtilsTest();
-    printTypeSizes();
-    FAIL_IF_TRUE(AlpacaCore_init());
+#endif
+
+    // NEED ERROR CHECKING!
+
+    AlpacaCore_init();
     
 
     LOGERROR("This is a test: %d\n", testTemp);
@@ -168,7 +164,6 @@ int main(){
 
     LOGDEBUG("End tests....\n");
     
-    memtest();
 
     /* TO DO
      * 
@@ -183,67 +178,3 @@ int main(){
    
     return 0; 
 }
-
-
-/*
- * Ignoring for now, will likely return to later
- */ 
-
-#else
-#if __STDC_VERSION__ >= 199901L
-   /*
-    * C99 or higher
-    * 
-    * Included for pid_t usage in snow.h 
-    */
-   #include <unistd.h>
-   #include <sys/types.h>
-#endif
-
-#include <snow.h>
-    snow_main();
-    
-#endif 
-
-#ifdef SNOW_ENABLED
-#include <core/server.h>
-#include <core/crypto.h>
-
-#define TEST_SUCCESS 1
-#define TEST_FAILURE 0
-/*
-int checkport(uint16_t testport){
-    struct sockaddr_in serv_addr;
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = BEU16(testport);
-    if (bind(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        if(errno == EADDRINUSE) {
-            return TEST_SUCCESS;
-        } 
-    }
-    return TEST_FAILURE;
-}
-
-describe(networking) {
-
-    
-    
-    after_each() {
-        alpacacore_server_clean();
-	}
-
-
-}
-
-describe(chacha20) {
-
-    it("Testing that crypto worked?") {
-
-	}
-
-
-}
-*/
-#endif

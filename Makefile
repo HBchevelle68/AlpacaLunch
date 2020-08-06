@@ -60,9 +60,9 @@ STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(AL
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o server.o crypto.o sighandler.o allu.o)
-ALPACACORE_TOBJS=$(addprefix $(ALPACACORESRC)/, main-test.o server-test.o crypto-test.o sighandler-test.o allu-test.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o server-debug.o crypto-debug.o sighandler-debug.o allu-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o crypto.o sighandler.o allu.o)
+ALPACACORE_TOBJS=$(addprefix $(ALPACACORESRC)/, main-test.o crypto-test.o sighandler-test.o allu-test.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o crypto-debug.o sighandler-debug.o allu-debug.o) 
 
 #
 # ALPACA-MULTITHREADSERVER object files

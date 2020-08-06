@@ -7,7 +7,6 @@
 
 // Internal
 #include <interfaces/memory_interface.h>
-#include <core/macros.h>
 #include <core/logging.h>
 
 
@@ -31,49 +30,3 @@ int32_t __attribute__ ((unused))setNonblocking(int fd)
 } 
 
 
-ALPACA_STATUS AlpacaSock_createServSock(ALLU_server_ctx** serverCtx){
-    
-    /*
-     * Create underlying socket
-     */
-    if (((*serverCtx)->serverSock = socket(AF_INET, SOCK_STREAM, 0)) == 0) { 
-        LOGERROR("Socket creation failure\n");
-        return ALPACA_FAILURE;
-    } 
-
-    /*
-     * Fill server structure
-     */
-    (*serverCtx)->servAddr->sin_family = AF_INET;          
-    (*serverCtx)->servAddr->sin_addr.s_addr = INADDR_ANY;  
-    (*serverCtx)->servAddr->sin_port = htons(DEFAULTPORT);
-
-
-    /*
-     * Force kernel to let use re-use addr:port tuple
-     * 
-     * ****** WARNING! This is not portable to Unix!! ******
-     */
-    if(setsockopt((*serverCtx)->serverSock, SOL_SOCKET, SO_REUSEADDR|SO_REUSEPORT, &(int){1}, sizeof(uint32_t)) != ALPACA_SUCCESS){
-        LOGERROR("setsockopt failure\n");
-        return ALPACA_COMMS_SOCKERR;
-    }
-
-    /*
-     * Bind to address space 
-     */
-    if(bind((*serverCtx)->serverSock, (struct sockaddr*)(*serverCtx)->servAddr, sizeof(struct sockaddr_in)) != ALPACA_SUCCESS){
-        LOGERROR("bind failure\n");
-        return ALPACA_COMMS_SOCKERR;
-    }
-
-    /*
-     * Begin to listen for connections
-     */
-    if(listen((*serverCtx)->serverSock, 10) != ALPACA_SUCCESS){
-        LOGERROR("listen failure\n");
-        return ALPACA_COMMS_SOCKERR;            
-    }
-
-    return ALPACA_SUCCESS;    
-}

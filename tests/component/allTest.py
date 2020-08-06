@@ -31,9 +31,9 @@ if __name__ == "__main__":
 
     # Add tests to the suite
     suite.addTests(loader.loadTestsFromModule(initSuite))
-    suite.addTests(loader.loadTestsFromModule(basicServerSuite))
+    #suite.addTests(loader.loadTestsFromModule(basicServerSuite))
     suite.addTests(loader.loadTestsFromModule(signalSuite))
-    suite.addTests(loader.loadTestsFromModule(tlsSuite))
+    #suite.addTests(loader.loadTestsFromModule(tlsSuite))
 
 
     # Run Component tests

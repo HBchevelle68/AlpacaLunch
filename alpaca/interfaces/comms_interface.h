@@ -26,7 +26,7 @@
  * Internal headers
  */
 #include <core/codes.h>
-#include <core/server.h>
+
  
 #define COMMSBUFSIZE 1500
 
@@ -40,28 +40,23 @@ typedef struct AlpacaNetInfo {
 	struct ifaddrs* interfaces;
 } ALLU_net_info; 
 
+
 /*
- * Defines base AlapcaLunch comms information
+ * A connection in Alpaca
  */
-typedef struct AlpacaCommsServerCtx {
-	uint8_t padding[6];
-    unsigned short serverSock;
-    struct sockaddr_in *servAddr;
-    WOLFSSL_CTX *wolf_ctx;
-
-} ALLU_server_ctx;
-
-
+typedef struct AlpacaComms_ConnCtx {
+    int16_t  sock;
+    WOLFSSL* ssl;
+} ALPACA_connCtx_t;
 
 /*
  * Comms module Interface
  */
-// COMMS
-ALPACA_STATUS  AlpacaComms_initServerComms(void);
-ALPACA_STATUS  AlpacaComms_cleanServerComms(void);
 
-// SOCK
-ALPACA_STATUS  AlpacaSock_createServSock(ALLU_server_ctx** serverCtx);
+
+
+
+
 
 // NetInfo
 ALLU_net_info* AlpacaNetInfo_init(void);

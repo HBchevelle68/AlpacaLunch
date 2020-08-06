@@ -11,10 +11,8 @@
  * Internal headers
  */ 
 #include <core/codes.h>
-#include <core/server.h>
 
 
-ALPACA_STATUS alpacacore_gen_hash(char* buf);
 
 
 #endif

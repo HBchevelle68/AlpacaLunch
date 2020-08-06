@@ -1,9 +1,6 @@
-
-
+#include <stdlib.h>
 // Internal
 #include <core/allu.h>
-#include <core/macros.h>
-#include <core/server.h>
 #include <core/logging.h>
 #include <core/sighandler.h>
 
@@ -15,13 +12,16 @@ ALPACA_STATUS AlpacaCore_init(){
     DEBUGWARNING();
 
     // Check for root if in release
-    #ifndef DEBUGENABLE
+#ifndef DEBUGENABLE
     LOGDEBUG("DEBUGENABLE: %d\n", DEBUGENABLE);
-    FAIL_IF_TRUE(getuid());
-    #endif 
+    
+    // NEED ERROR HANDLING!
+    getuid();
+#endif 
 
     // Install signal handlers
-    FAIL_IF_TRUE(AlpacaCore_installSigHandlers());
+    // NEED ERROR HANDLING!
+    AlpacaCore_installSigHandlers();
 
     LEAVING;
     return result;
@@ -33,6 +33,6 @@ ALPACA_STATUS AlpacaCore_init(){
  * will get expandaed on
  */
 void AlpacaCore_exit(){
-    AlpacaCore_serverCleanST();
+    
     exit(0);
 }
