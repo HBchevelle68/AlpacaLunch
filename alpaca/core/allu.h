@@ -5,8 +5,8 @@
 
 
 
-ALPACA_STATUS AlpacaCore_init();
-void AlpacaCore_exit();
+ALPACA_STATUS AlpacaCore_init(void);
+void AlpacaCore_exit(ALPACA_STATUS* code);
     
 
 #endif

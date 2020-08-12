@@ -13,20 +13,23 @@
 void AlpacaCore_signalHandler(int signum){
     LOGDEBUG("RECV'd SIGNAL: %d\n", signum);
 
+    ALPACA_STATUS result = ALPACA_SUCCESS; 
+
     switch (signum) {
     
-    case SIGHUP:
-    case SIGQUIT:
-    case SIGALRM:
-    case SIGINT:
-        break;
+        case SIGHUP:
+        case SIGQUIT:
+        case SIGALRM:
+        case SIGINT:
+            break;
 
-    case SIGTERM:
-        AlpacaCore_exit();
-        break;
-    default:
-        
-        break;
+        case SIGTERM:
+            AlpacaCore_exit(&result);
+            exit(result);
+            break;
+        default:
+            
+            break;
     }
 
 }
@@ -37,20 +40,8 @@ void AlpacaCore_signalHandler(int signum){
  */
 ALPACA_STATUS AlpacaCore_installSigHandlers(){
     
-    //ALPACA_STATUS result = ALPACA_SUCCESS;
-    //struct sigaction act;
-    //memset(&act, 0, sizeof(struct sigaction));
-    
-    //act.sa_handler = alpacacore_signal_handler;
-    /*
-    sigaction(SIGHUP, &act, NULL);
-    sigaction(SIGTERM, &act, NULL);
-    sigaction(SIGQUIT, &act, NULL);
-    sigaction(SIGALRM, &act, NULL);
-    #ifndef DEBUGENABLE
-    sigaction(SIGINT, &act, NULL);
-    #endif
-    */
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+
 
     signal(SIGHUP, AlpacaCore_signalHandler);
     signal(SIGTERM,AlpacaCore_signalHandler);
@@ -60,5 +51,5 @@ ALPACA_STATUS AlpacaCore_installSigHandlers(){
     signal(SIGINT, AlpacaCore_signalHandler;
     #endif
         
-    return ALPACA_SUCCESS;
+    return result;
 }

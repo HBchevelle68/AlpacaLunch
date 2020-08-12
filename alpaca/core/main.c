@@ -16,53 +16,8 @@
 
 /*
 char HELLOWORLD[] = "HELLO WORLD!";
-ALLU_net_info* my_netInfo = NULL;
-
-void netUtilsTest(void){
-    struct ifaddrs *ifa;
-    int s;
-    char host[NI_MAXHOST];
-    char *IPbuffer;
-    my_netInfo = AlpacaNetInfo_init();
-
-    printf("system name = %s\n", my_netInfo->host_uname.sysname);
-    printf("node name   = %s\n", my_netInfo->host_uname.nodename);
-    printf("release     = %s\n", my_netInfo->host_uname.release);
-    printf("version     = %s\n", my_netInfo->host_uname.version);
-    printf("machine     = %s\n", my_netInfo->host_uname.machine);
-
-    #ifdef _GNU_SOURCE
-       printf("domain name = %s\n", my_netInfo->host_uname.domainname);
-    #endif
-
-    
-    // To convert an Internet network 
-    // address into ASCII string 
-    IPbuffer = inet_ntoa(*(struct in_addr*)(my_netInfo->host_entry->h_addr_list[0])); 
-    printf("Host IP: %s\n", IPbuffer); 
-   
-    
-    for (ifa = my_netInfo->interfaces; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == NULL)
-            continue;  
-
-        s = getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-
-        if((ifa->ifa_addr->sa_family==AF_INET))
-        {
-            if (s != 0)
-            {
-                printf("getnameinfo() failed: %s\n", gai_strerror(s));
-                return;
-            }
-            printf("\tInterface : <%s>\n",ifa->ifa_name );
-            printf("\t  Address : <%s> %lu\n", host, strlen(host)); 
-        }
-    }
 
 
-    AlpacaNetInfo_clean(my_netInfo);
-}
 
 
 void memtest(void){
@@ -134,6 +89,7 @@ void printTypeSizes(void){
 int testTemp = 0;
 
 int main(){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
 #ifndef DEBUGENABLE
@@ -142,39 +98,19 @@ int main(){
 
     // NEED ERROR CHECKING!
 
-    AlpacaCore_init();
-    
+    result = AlpacaCore_init();
+    if(result){
+        LOGERROR("Initialization error code: %u\n", result);
+        goto done;
+    }
 
     LOGERROR("This is a test: %d\n", testTemp);
     LOGDEBUG("This is a test: %d\n", testTemp);
     LOGINFO("This is a test: %d\n", testTemp);
     // START Threadpool Test
-    
-    ALtpool_t* tpool = NULL;
-    tpool = AlpacaThreadpool_init(10);
-    if(tpool != NULL){
-        LOGDEBUG("Created thread pool of size: %d\n", tpool->t_size);
-    }
-    else{
-        LOGDEBUG("Threadpool is NULL!!!\n");
-    }
-    
-    testTemp = AlpacaThreadpool_exit(tpool);
-    LOGDEBUG("Return from AlpacaThreadpool_exit: %d\n", testTemp);
-
-    LOGDEBUG("End tests....\n");
-    
-
-    /* TO DO
-     * 
-     * Needs rework, core loop, should never really
-     * return. If it does should examine the cause.
-     * currently the way the loop is built there isn't a good reason to
-     */
-    //alpacacore_server_run(12345, 20);
-
-
-    AlpacaCore_exit();
    
+done:
+    AlpacaCore_exit(&result);
+    LOGINFO("Exiting with exit code:%u\n", result);
     return 0; 
 }

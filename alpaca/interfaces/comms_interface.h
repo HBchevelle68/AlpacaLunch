@@ -27,44 +27,38 @@
  */
 #include <core/codes.h>
 
+
+typedef enum AlpacaLunch_TLSVersion{
+	tls_1_2 = 0,
+	tls_1_3 = 1
+} Alpaca_tlsVersion_t;
  
-#define COMMSBUFSIZE 1500
+typedef struct AlpacaLunch_CommsCtx {
 
-/*
- * Defines base AlapcaLunch comms information
- */
-typedef struct AlpacaNetInfo {
-	uint8_t padding[2];
-	struct utsname  host_uname;	
-	struct hostent* host_entry; 
-	struct ifaddrs* interfaces;
-} ALLU_net_info; 
+	
 
+	ALPACA_STATUS (* connect)(void* ctx);
+	ALPACA_STATUS (* read) 	 (void* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (* write)	 (void* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (* close)	 (void* ctx);
 
-/*
- * A connection in Alpaca
- */
-typedef struct AlpacaComms_ConnCtx {
-    int16_t  sock;
-    WOLFSSL* ssl;
-} ALPACA_connCtx_t;
+	//close
 
-/*
- * Comms module Interface
- */
+} Alpaca_commsCtx_t;
 
+// Process networking Init/Cleanup
+ALPACA_STATUS AlpacaComms_init	  (Alpaca_tlsVersion_t v);
+ALPACA_STATUS AlpacaComms_cleanUp (void);
 
+// Networking context creation/destruction
+ALPACA_STATUS AlpacaComms_initCtx	(Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx);
 
-
-
-
-// NetInfo
-ALLU_net_info* AlpacaNetInfo_init(void);
-void		   AlpacaNetInfo_clean(ALLU_net_info* allu_ni);
-ALPACA_STATUS  AlpacaNetInfo_getUname(ALLU_net_info** allu_ni);
-ALPACA_STATUS  AlpacaNetInfo_getHostEntry(ALLU_net_info* allu_ni);
-ALPACA_STATUS  AlpacaNetInfo_getIfAddrs(ALLU_net_info** allu_ni);
-
+// Network I/O
+ALPACA_STATUS AlpacaComms_connect (Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_read	  (Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_write	  (Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_close   (Alpaca_commsCtx_t** ctx);
 
 
 #endif

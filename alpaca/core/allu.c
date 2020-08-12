@@ -1,11 +1,12 @@
 #include <stdlib.h>
 // Internal
+#include <interfaces/comms_interface.h>
 #include <core/allu.h>
 #include <core/logging.h>
 #include <core/sighandler.h>
 
 
-ALPACA_STATUS AlpacaCore_init(){
+ALPACA_STATUS AlpacaCore_init(void){
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
@@ -19,9 +20,13 @@ ALPACA_STATUS AlpacaCore_init(){
     getuid();
 #endif 
 
+
+
     // Install signal handlers
     // NEED ERROR HANDLING!
     AlpacaCore_installSigHandlers();
+
+    AlpacaComms_init(tls_1_2);
 
     LEAVING;
     return result;
@@ -32,7 +37,12 @@ ALPACA_STATUS AlpacaCore_init(){
  * Small for now. Called by sighandler
  * will get expandaed on
  */
-void AlpacaCore_exit(){
+void AlpacaCore_exit(ALPACA_STATUS* code){
     
-    exit(0);
+    *code = AlpacaComms_cleanUp();
+    if(*code){
+        LOGERROR("Error cleaning process comms\n");
+    }
+
+     
 }
