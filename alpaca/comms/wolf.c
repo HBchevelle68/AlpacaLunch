@@ -2,6 +2,7 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
 
+// Internal
 #include <interfaces/comms_interface.h>
 #include <core/codes.h>
 #include <core/logging.h>
@@ -18,8 +19,10 @@ static uint8_t 		wolfInitialized = 0;
 
 
 typedef struct WolfSSL_TLS_Version {
+
 	WOLFSSL_METHOD* (*server_method)(void); 
 	WOLFSSL_METHOD* (*client_method)(void);
+
 } ALPACA_TLSVersion_t;
 
 static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] = 
@@ -32,7 +35,6 @@ static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] =
 		wolfTLSv1_3_server_method, 
 		wolfTLSv1_3_client_method
 	}
-
 };
 
 

@@ -152,10 +152,14 @@ ALtpool_t* AlpacaThreadpool_init(unsigned int numThreads){
 int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name){
 
     if(!tp){
-        return ALPACA_FAILURE;
+        return ALPACA_ERROR_BADPARAM;
     }
     
     ALtask_t *task = malloc(sizeof(ALtask_t));
+    if(!task){
+        LOGERROR("Error allocating task in threadpool\n");
+        return ALPACA_ERROR_MALLOC;
+    }
 
     /*
      * Set task func ptr and func args 

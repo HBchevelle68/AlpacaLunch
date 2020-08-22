@@ -4,12 +4,10 @@
  */
 #ifndef COMMS_INTERFACE_H
 #define COMMS_INTERFACE_H
-#define _GNU_SOURCE
 
 #include <stdint.h>  
 #include <stdlib.h> 
 #include <sys/types.h>
-#include <sys/socket.h> 
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/utsname.h>
@@ -32,17 +30,17 @@ typedef enum AlpacaLunch_TLSVersion{
 	tls_1_2 = 0,
 	tls_1_3 = 1
 } Alpaca_tlsVersion_t;
+
+
  
 typedef struct AlpacaLunch_CommsCtx {
 
-	
+	void* netCtx;
 
 	ALPACA_STATUS (* connect)(void* ctx);
 	ALPACA_STATUS (* read) 	 (void* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (* write)	 (void* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (* close)	 (void* ctx);
-
-	//close
+	ALPACA_STATUS (* close)	 (void** ctx);
 
 } Alpaca_commsCtx_t;
 

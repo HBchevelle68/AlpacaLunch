@@ -44,12 +44,13 @@ CONTROLLER= $(DIR)/controller
 CONTROLLERSRC= $(CONTROLLER)/sassycontroller
 CONTROLLERTEST=$(CONTROLLER)/tests
 
+
 #
 # Build variables
 #
 CC= gcc -std=c11
 CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -I$(ALPACAINCLUDE) -I$(CRYPTINC)
+DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -fanalyzer -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 DBG= -g3 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
 TEST= -DSNOW_ENABLED
@@ -138,14 +139,13 @@ ALLDOBJS = $(ALPACACORE_DOBJS) 		 \
 all: clean init-dirs \
 	 alpacalunch-release alpacalunch-release-test \
 	 alpacalunch-debug \
-	 misc \
-	 scrub
+	 scrub misc
 
-release: clean init-dirs alpacalunch-release scrub
+release: init-dirs alpacalunch-release
 
-test: clean init-dirs alpacalunch-release-test runtest scrub
+test: init-dirs alpacalunch-release-test runtest
 
-debug: clean init-dirs alpacalunch-debug scrub
+debug: init-dirs alpacalunch-debug
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
@@ -186,14 +186,16 @@ init-dirs:
 	mkdir -p $(HASH)
 	mkdir -p $(BIN)
 
-misc:
+misc: 
 	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	
-scrub:
-	rm -f $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o  $(ALPACATPOOLSRC)/*.o $(TESTCOMPONENT)/*.pyc
 
 clean:
-	rm -fr $(BIN)/* $(ALPACACORESRC)/*.o $(ALPACATHREADSRC)/*.o  $(ALPACATPOOLSRC)/*.o \
-	$(TESTCOMPONENT)/*.pyc $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+	rm -fr $(BIN)/* $(ALLROBJS) $(ALLDOBJS) $(ALLTOBJS) $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+
+scrub:
+	rm -f $(ALLROBJS) $(ALLDOBJS) $(ALLTOBJS) 
+
+

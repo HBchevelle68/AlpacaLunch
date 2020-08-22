@@ -3,17 +3,25 @@
 
 #include <sys/socket.h>
 
-typedef AlpacaLunch_Socket{
+#include <wolfssl/ssl.h>
 
-	int 	 sock; // system returned fd
-	uint8_t  type; // socket type
-	wolfSSL* ctx;  	
+typedef struct AlpacaLunch_Socket{
+
+	int 	 		   fd;
+	uint8_t  		   type;
+	struct sockaddr_in peer;
+	WOLFSSL* 		   ssl;
 
 } Alpaca_sock_t;
 
 
 
-ALPACA_STATUS AlpacaSock_createSocket(void);
+
+ALPACA_STATUS AlpacaSock_create(void** ctx);
+ALPACA_STATUS AlpacaSock_close(void** ctx);
+
+
+int32_t AlpacaSock_setNonBlocking(int fd);
 
 
 #endif

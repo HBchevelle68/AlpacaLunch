@@ -1,13 +1,18 @@
+#define _POSIX_C_SOURCE 200809L 
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <time.h> 
+#include <time.h>
+#include <stdio.h>
+
+#include <interfaces/utility_interface.h>
 
 
-void AlpacaUtilities_daemonize(){
+
+void AlpacaUtilities_daemonize(void){
 
 	pid_t pid;
 
@@ -61,6 +66,30 @@ void AlpacaUtilities_daemonize(){
 
 
 
+/* 
+ * msleep(): Sleep for the requested number of milliseconds. 
+ */
+int AlpacaUtilities_mSleep(long msec){
 
+    struct timespec ts;
+    int res;
+
+    if (msec < 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000;
+
+    do {
+
+        // SLEEP
+        res = nanosleep(&ts, &ts);
+
+    } while (res && errno == EINTR);
+
+    return res;
+}
 
 

@@ -15,6 +15,8 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_COMMSINIT 	(2)
 #define ALAPCA_ERROR_WOLFINIT	(3)
 #define ALPACA_ERROR_WOLFNOINIT (4) 
+#define ALPACA_ERROR_SOCKCREATE	(5)
+
 
 /*
  * Memory Error Codes
@@ -33,6 +35,8 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_READ	  	(102)
 #define ALPACA_ERROR_WRITE	  	(103)
 #define ALPACA_ERROR_BADPARAM	(104)
+#define ALPACA_ERROR_MALLOC 	(104)
+
 
 
 

@@ -6,16 +6,16 @@
 
 
 // Internal
-#include <interfaces/memory_interface.h>
+//#include <interfaces/memory_interface.h>
+#include <comms/sock.h>
 #include <core/logging.h>
 #include <core/codes.h>
 
 
 #define DEFAULTPORT 12345
 
-static
-int32_t __attribute__ ((unused))setNonblocking(int fd)
-{
+
+int32_t AlpacaSock_setNonBlocking(int fd) {
     int flags;
 
     /* If system have O_NONBLOCK, use the Posix way to do it */
@@ -33,30 +33,85 @@ int32_t __attribute__ ((unused))setNonblocking(int fd)
 
 
 
-ALPACA_STATUS AlpacaSock_createSocket(void* a){
+ALPACA_STATUS AlpacaSock_createSocket(void** ctx){
 
-	ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
-	/*
-	int sockfd, connfd; 
-    struct sockaddr_in servaddr, cli; 
+	ALPACA_STATUS result = ALPACA_ERROR_SOCKCREATE;
+    
+	ENTRY;
+
+    /*
+     * Convert the opaque oparam to an Alpaca Socket
+     * then verify its validity 
+     */
+	Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)(*ctx);
+    if((*ctx) == NULL){
+        LOGERROR("Invalid param\n");
+        result = ALPACA_ERROR_BADPARAM;
+        goto done;
+    }
   
-    // socket create and varification 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sockfd == -1) { 
-        
-        exit(0); 
+    /*
+     * Create socket and verify
+     * 
+     * Socket created is set to non-blocking as well as setting the
+     * Close on Exec (CLOEXEC) flag to prevent file descriptor
+     * leaking into child processes 
+     */
+    sockPtr->fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
+    if(sockPtr->fd == -1) { 
+        LOGERROR("Failure to create socket\n");
+        result = ALPACA_ERROR_SOCKCREATE;
+        goto done;
     } 
-    else{
-
-    }
        
-    bzero(&servaddr, sizeof(servaddr)); 
-  
-    // assign IP, PORT 
-    servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
-    servaddr.sin_port = htons(PORT); 
-    }
-	*/
+    /*
+     * Set type accordingly
+     * Set ssl ptr and peer struct to NULL/0
+     */
+    sockPtr->type = SOCK_STREAM;
+    sockPtr->ssl  = NULL;
+    memset(&sockPtr->peer, 0, sizeof(struct sockaddr_in));
+
+    // Update return code
+    result = ALPACA_SUCCESS;
+
+done:
+    LEAVING;
     return result;
+}
+
+ALPACA_STATUS AlpacaSock_close(void** ctx){
+
+    ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
+    Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)(*ctx);
+    ENTRY;
+
+    /*
+     * Convert the opaque oparam to an Alpaca Socket
+     * then verify its validity 
+     */
+    
+    if((*ctx)) {
+
+        if(sockPtr->ssl){
+            wolfSSL_free(sockPtr->ssl);
+        }
+
+        if(sockPtr->fd > 0){
+            close(sockPtr->fd);
+            sockPtr->fd = -1;
+        }
+        
+        sockPtr->type = 0;
+        memset(&sockPtr->peer, 0, sizeof(struct sockaddr_in));
+        result = ALPACA_SUCCESS;
+    }
+    else {
+        LOGERROR("Invalid param\n");
+        result = ALPACA_ERROR_BADPARAM;
+    }
+    
+    LEAVING;
+    return result;
+
 }

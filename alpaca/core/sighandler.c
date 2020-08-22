@@ -11,7 +11,7 @@
 
 
 void AlpacaCore_signalHandler(int signum){
-    LOGDEBUG("RECV'd SIGNAL: %d\n", signum);
+    
 
     ALPACA_STATUS result = ALPACA_SUCCESS; 
 
