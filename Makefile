@@ -137,11 +137,11 @@ all: clean init-dirs \
 	 alpacalunch-debug \
 	 scrub misc
 
-release: init-dirs alpacalunch-release
+release: init-dirs alpacalunch-release scrub
 
 test: init-dirs alpacalunch-release-test runtest
 
-debug: init-dirs alpacalunch-debug
+debug: init-dirs alpacalunch-debug scrub
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
