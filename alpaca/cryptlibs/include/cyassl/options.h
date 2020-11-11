@@ -4,7 +4,7 @@
 /* wolfssl options.h
 * generated from configure options
 *
-* Copyright (C) 2006-2015 wolfSSL Inc.
+* Copyright (C) 2006-2020 wolfSSL Inc.
 *
 * This file is part of wolfSSL. (formerly known as CyaSSL)
 *
@@ -18,8 +18,8 @@
 extern "C" {
 #endif
 
-#undef  HAVE_FFDHE_2048
-#define HAVE_FFDHE_2048
+#undef  WOLFSSL_PUBLIC_MP
+#define WOLFSSL_PUBLIC_MP
 
 #undef  WOLFSSL_TLS13
 #define WOLFSSL_TLS13
@@ -29,6 +29,9 @@ extern "C" {
 
 #undef  HAVE_SUPPORTED_CURVES
 #define HAVE_SUPPORTED_CURVES
+
+#undef  HAVE_FFDHE_2048
+#define HAVE_FFDHE_2048
 
 #ifndef WOLFSSL_OPTIONS_IGNORE_SYS
 #undef  _POSIX_THREADS
@@ -50,6 +53,12 @@ extern "C" {
 #undef  HAVE_AESGCM
 #define HAVE_AESGCM
 
+#undef  WOLFSSL_AES_COUNTER
+#define WOLFSSL_AES_COUNTER
+
+#undef  WOLFSSL_AES_DIRECT
+#define WOLFSSL_AES_DIRECT
+
 #undef  WOLFSSL_SHA512
 #define WOLFSSL_SHA512
 
@@ -58,6 +67,9 @@ extern "C" {
 
 #undef  WOLFSSL_KEY_GEN
 #define WOLFSSL_KEY_GEN
+
+#undef  WOLFSSL_CERT_GEN
+#define WOLFSSL_CERT_GEN
 
 #undef  HAVE_HKDF
 #define HAVE_HKDF
@@ -98,6 +110,9 @@ extern "C" {
 #undef  WOLFSSL_SHA3
 #define WOLFSSL_SHA3
 
+#undef  WOLFSSL_SHAKE256
+#define WOLFSSL_SHAKE256
+
 #undef  HAVE_POLY1305
 #define HAVE_POLY1305
 
@@ -119,6 +134,9 @@ extern "C" {
 #undef  HAVE_EXTENDED_MASTER
 #define HAVE_EXTENDED_MASTER
 
+#undef  NO_RC4
+#define NO_RC4
+
 #undef  HAVE_ENCRYPT_THEN_MAC
 #define HAVE_ENCRYPT_THEN_MAC
 
@@ -139,6 +157,9 @@ extern "C" {
 
 #undef  WC_NO_ASYNC_THREADING
 #define WC_NO_ASYNC_THREADING
+
+#undef  HAVE_DH_DEFAULT_PARAMS
+#define HAVE_DH_DEFAULT_PARAMS
 
 #undef  NO_DES3
 #define NO_DES3

@@ -5,15 +5,15 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/alpaca/*",
+                "${workspaceFolder}/alpaca/**",
                 "${workspaceFolder}/alpaca/core/*",
                 "${workspaceFolder}/alpaca/multithreadserver/*",
                 "${workspaceFolder}/alpaca/threadpool/*",
-                "${workspaceFolder}/alpaca/cryptlibs/include/**",
-                "${workspaceFolder}/tests/lib"
+                "${workspaceFolder}/alpaca/cryptlibs/include/**"
             ],
-            "defines": [],
+            "defines": ["WOLFSSL_TLS13=1"],
             "compilerPath": "/usr/local/bin/gcc",
-            "cStandard": "c99",
+            "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
         }

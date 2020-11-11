@@ -11,7 +11,7 @@
 #include <interfaces/utility_interface.h>
 
 
-
+#if DEBUGENABLE
 void AlpacaUtilities_daemonize(void){
 
 	pid_t pid;
@@ -56,13 +56,18 @@ void AlpacaUtilities_daemonize(void){
 
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
-    chdir("/");
+    if(chdir("/")){
+        exit(1);
+    }
 
     /* Close all open file descriptors */
     for (int tempFd = sysconf(_SC_OPEN_MAX); tempFd >= 0; tempFd--){
         close (tempFd);
     }
 }
+#else
+void AlpacaUtilities_daemonize(void){return;}
+#endif
 
 
 

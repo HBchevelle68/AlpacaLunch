@@ -4,4 +4,10 @@ Last successful build with:
 
 August 11, 2020 
 WolfSSL 4.3.0
-./configure --prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs CFLAGS=-fPIC --enable-static --enable-harden --enable-keygen --enable-tls13 --disable-oldtls 
+./configure --prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs CFLAGS=-fPIC --enable-static --enable-harden --enable-keygen --enable-tls13 --disable-oldtls
+
+Sept 1, 2020
+./configure --prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs CFLAGS=-fPIC --enable-static --enable-harden --enable-keygen --enable-tls13 --enable-aesctr --disable-oldtls 
+
+November 11, 2020
+./configure --prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs CFLAGS=-fPIC --enable-static --enable-harden --enable-keygen --enable-certgen --enable-tls13 --enable-aesctr --disable-oldtls --enable-ssh

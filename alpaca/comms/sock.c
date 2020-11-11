@@ -33,18 +33,16 @@ int32_t AlpacaSock_setNonBlocking(int fd) {
 
 
 
-ALPACA_STATUS AlpacaSock_createSocket(void** ctx){
+ALPACA_STATUS AlpacaSock_create(Alpaca_sock_t* ctx) {
 
 	ALPACA_STATUS result = ALPACA_ERROR_SOCKCREATE;
-    
 	ENTRY;
 
     /*
      * Convert the opaque oparam to an Alpaca Socket
      * then verify its validity 
      */
-	Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)(*ctx);
-    if((*ctx) == NULL){
+    if(ctx == NULL){
         LOGERROR("Invalid param\n");
         result = ALPACA_ERROR_BADPARAM;
         goto done;
@@ -57,8 +55,8 @@ ALPACA_STATUS AlpacaSock_createSocket(void** ctx){
      * Close on Exec (CLOEXEC) flag to prevent file descriptor
      * leaking into child processes 
      */
-    sockPtr->fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
-    if(sockPtr->fd == -1) { 
+    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
+    if(ctx->fd == -1) { 
         LOGERROR("Failure to create socket\n");
         result = ALPACA_ERROR_SOCKCREATE;
         goto done;
@@ -68,9 +66,9 @@ ALPACA_STATUS AlpacaSock_createSocket(void** ctx){
      * Set type accordingly
      * Set ssl ptr and peer struct to NULL/0
      */
-    sockPtr->type = SOCK_STREAM;
-    sockPtr->ssl  = NULL;
-    memset(&sockPtr->peer, 0, sizeof(struct sockaddr_in));
+    ctx->type = SOCK_STREAM;
+    ctx->ssl  = NULL;
+    memset(&ctx->peer, 0, sizeof(struct sockaddr_in));
 
     // Update return code
     result = ALPACA_SUCCESS;
@@ -80,18 +78,17 @@ done:
     return result;
 }
 
-ALPACA_STATUS AlpacaSock_close(void** ctx){
+ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* ctx){
 
-    ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
-    Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)(*ctx);
+    ALPACA_STATUS  result  = ALPACA_ERROR_UNKNOWN;
+    Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)ctx;
     ENTRY;
 
     /*
      * Convert the opaque oparam to an Alpaca Socket
      * then verify its validity 
      */
-    
-    if((*ctx)) {
+    if(ctx) {
 
         if(sockPtr->ssl){
             wolfSSL_free(sockPtr->ssl);

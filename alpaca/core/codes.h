@@ -12,30 +12,37 @@ typedef uint32_t ALPACA_STATUS;
 /*
  * Comms Error Codes 
  */
-#define ALPACA_ERROR_COMMSINIT 	(2)
-#define ALAPCA_ERROR_WOLFINIT	(3)
-#define ALPACA_ERROR_WOLFNOINIT (4) 
-#define ALPACA_ERROR_SOCKCREATE	(5)
+#define ALPACA_ERROR_COMMSINIT 	        (2)
+#define ALAPCA_ERROR_WOLFINIT	        (3)
+#define ALPACA_ERROR_WOLFNOINIT         (4) 
+#define ALPACA_ERROR_SOCKCREATE	        (5)
+
+
+/**
+ * Crypto Error Codes 
+ */
+#define ALPACA_ERROR_CRYPTSETKEY  	    (20)
 
 
 /*
  * Memory Error Codes
  */
-#define ALPACA_MEM_NOBUFFER	  	(20)
-#define ALPACA_MEM_EXCEEDED	  	(21)
-#define ALPACA_MEM_RESZFAIL	  	(22)
-#define ALPACA_MEM_APNDFAIL	  	(23)
+#define ALPACA_ERROR_MEMNOBUFFER	  	(20)
+#define ALPACA_ERROR_MEMEXCEEDED	  	(21)
+#define ALPACA_ERROR_MEMRESZFAIL	  	(22)
+#define ALPACA_ERROR_MEMAPNDFAIL	  	(23)
 
 
 /*
  * Generic Codes
  */
-#define ALPACA_ERROR_UNKNOWN	(100)
-#define ALPACA_ERROR_OPEN	  	(101)
-#define ALPACA_ERROR_READ	  	(102)
-#define ALPACA_ERROR_WRITE	  	(103)
-#define ALPACA_ERROR_BADPARAM	(104)
-#define ALPACA_ERROR_MALLOC 	(104)
+#define ALPACA_ERROR_UNKNOWN	        (100)
+#define ALPACA_ERROR_OPEN	  	        (101)
+#define ALPACA_ERROR_READ	  	        (102)
+#define ALPACA_ERROR_WRITE	  	        (103)
+#define ALPACA_ERROR_BADPARAM	        (104)
+#define ALPACA_ERROR_MALLOC 	        (104)
+
 
 
 

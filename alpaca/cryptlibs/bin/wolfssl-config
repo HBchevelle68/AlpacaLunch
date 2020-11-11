@@ -1,7 +1,7 @@
 #! /bin/sh
  
 package="wolfssl"
-version="4.3.0"
+version="4.5.0"
 libs="-lwolfssl"
  
 prefix="/home/ap/AlpacaLunch/alpaca/cryptlibs"
@@ -18,8 +18,8 @@ infodir="${datarootdir}/info"
 mandir="${datarootdir}/man"
 includedir="${prefix}/include"
 target=""
-host="x86_64-unknown-linux-gnu"
-build="x86_64-unknown-linux-gnu"
+host="x86_64-pc-linux-gnu"
+build="x86_64-pc-linux-gnu"
  
 if test "$#" -eq 0; then
    cat <<EOF

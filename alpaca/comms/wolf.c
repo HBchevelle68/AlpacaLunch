@@ -38,8 +38,14 @@ static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] =
 };
 
 
-
-ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t v){
+/**
+ *  @brief Initializes the global WolfSSL contexts. These wolf contexts
+ *         can be found in wolf.c. contexts are used to generate new
+ *         ssl objects for client or server objects
+ *  
+ *  @param version - version of wolfssl comms  
+ */
+ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t version){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
@@ -52,34 +58,51 @@ ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t v){
         wolfSSL_Init();
         wolfInitialized = 1;
 
-        if ((procWolfServerCtx = wolfSSL_CTX_new(WOLFTLSVERSION[v].server_method())) == NULL){
+        if ((procWolfServerCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].server_method())) == NULL){
 
             LOGERROR("procWolfServerCtx ERROR: %d", ALAPCA_ERROR_WOLFINIT);
             result = ALAPCA_ERROR_WOLFINIT;
-            goto done;
+            goto exit;
         }
-        if ((procWolfClientCtx = wolfSSL_CTX_new(WOLFTLSVERSION[v].client_method())) == NULL){
+        if ((procWolfClientCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].client_method())) == NULL){
 
             LOGERROR("procWolfClientCtx ERROR: %d", ALAPCA_ERROR_WOLFINIT);
             result = ALAPCA_ERROR_WOLFINIT;
-            goto done;
+            goto exit;
         }
         
         
         result = ALPACA_SUCCESS;
     }
 
-done:
+exit:
     LEAVING;
     return result;
 }
+
+
+ALPACA_STATUS AlpacaWolf_create(uint8_t type){
+
+
+    switch(type){
+        
+    }
+    /*
+     if ((serv->tls_ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL){
+        LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_TLSINIT);
+        return ALPACA_TLSINIT;
+    }
+    */
+}
+
+
+
 
 
 
 ALPACA_STATUS AlpacaWolf_cleanUp(void){
 
     ALPACA_STATUS result = ALPACA_ERROR_WOLFNOINIT;
-   
     ENTRY;
 
     if(wolfInitialized){

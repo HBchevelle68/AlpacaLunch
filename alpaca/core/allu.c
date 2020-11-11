@@ -14,8 +14,6 @@ ALPACA_STATUS AlpacaCore_init(void){
 
     // Check for root if in release
 #ifndef DEBUGENABLE
-    LOGDEBUG("DEBUGENABLE: %d\n", DEBUGENABLE);
-    
     // NEED ERROR HANDLING!
     getuid();
 #endif 
@@ -25,9 +23,13 @@ ALPACA_STATUS AlpacaCore_init(void){
     // Install signal handlers
     // NEED ERROR HANDLING!
     AlpacaCore_installSigHandlers();
+    result = AlpacaComms_init(tls_1_2);
+    if(result){
+        LOGERROR("Error initializing Alpaca Comms");
+        goto finish;
+    }
 
-    AlpacaComms_init(tls_1_2);
-
+finish:
     LEAVING;
     return result;
 }
@@ -37,12 +39,15 @@ ALPACA_STATUS AlpacaCore_init(void){
  * Small for now. Called by sighandler
  * will get expandaed on
  */
-void AlpacaCore_exit(ALPACA_STATUS* code){
+ALPACA_STATUS AlpacaCore_exit(void){
+    ENTRY;
+    ALPACA_STATUS result = ALPACA_SUCCESS;
     
-    *code = AlpacaComms_cleanUp();
-    if(*code){
+    result = AlpacaComms_cleanUp();
+    if(result){
         LOGERROR("Error cleaning process comms\n");
     }
 
-     
+    LEAVING;
+    return result;
 }

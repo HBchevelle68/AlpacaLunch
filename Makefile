@@ -50,8 +50,8 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 #
 CC= gcc -std=c11
 CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA -fanalyzer -I$(ALPACAINCLUDE) -I$(CRYPTINC)
-DBG= -g3 -DTALKATIVELLAMA
+DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC) #-fanalyzer
+DBG= -g2 -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
 TEST= -DSNOW_ENABLED
 STATIC= -static
@@ -61,16 +61,15 @@ STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(AL
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o crypto.o sighandler.o allu.o)
-ALPACACORE_TOBJS=$(addprefix $(ALPACACORESRC)/, main-test.o crypto-test.o sighandler-test.o allu-test.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o crypto-debug.o sighandler-debug.o allu-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o crypto.o sighandler.o allu.o devtests.o)
+ALPACACORE_TOBJS=$(addprefix $(ALPACACORESRC)/, main-test.o crypto-test.o sighandler-test.o allu-test.o devtests-test.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o crypto-debug.o sighandler-debug.o allu-debug.o devtests-debug.o) 
 
 #
 # ALPACA-MULTITHREADSERVER object files
 # Build out seperate objs for release, test, debug 
 #
 ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
-ALPACAMTHREADSERV_LOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-PIC.o)
 ALPACAMTHREADSERV_TOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-test.o)
 ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
 
@@ -88,7 +87,6 @@ ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue
 # Build out seperate objs for release, test, debug 
 #
 ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o wolf.o) 
-ALPACACOMMS_LOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-PIC.o sock-PIC.o wolf-PIC.o)
 ALPACACOMMS_TOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-test.o sock-test.o wolf-test.o)
 ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wolf-debug.o)
 
@@ -97,7 +95,6 @@ ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wol
 # Build out seperate objs for release, test, debug 
 #
 ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils.o gen_utils.o) 
-ALPACAUTILS_LOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-PIC.o gen_utils-PIC.o)
 ALPACAUTILS_TOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-test.o gen_utils-test.o)
 ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-debug.o) 
 
@@ -106,7 +103,6 @@ ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-d
 # Build out seperate objs for release, test, debug 
 #
 ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory.o alpaca_buffer.o) 
-ALPACAMEM_LOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-PIC.o alpaca_buffer-PIC.o)
 ALPACAMEM_TOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-test.o alpaca_buffer-test.o)
 ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_buffer-debug.o) 
 

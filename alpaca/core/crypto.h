@@ -12,7 +12,8 @@
  */ 
 #include <core/codes.h>
 
-
+ALPACA_STATUS MyEncrypt(uint8_t* plain, uint32_t plainLength, uint8_t* cipher);
+ALPACA_STATUS MyDecrypt(uint8_t* plain, uint32_t plainLength, uint8_t* cipher);
 
 
 #endif

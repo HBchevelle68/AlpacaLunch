@@ -24,7 +24,7 @@ void AlpacaCore_signalHandler(int signum){
             break;
 
         case SIGTERM:
-            AlpacaCore_exit(&result);
+            AlpacaCore_exit();
             exit(result);
             break;
         default:

@@ -1,3 +1,4 @@
+#include <string.h>
 
 #include <core/logging.h>
 #include <interfaces/memory_interface.h>
@@ -43,7 +44,7 @@ ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
 	 * Check if invalid buffer passed
 	 */
 	if(!(*alluBuffer)){
-		return ALPACA_MEM_NOBUFFER;
+		return ALPACA_ERROR_MEMNOBUFFER;
 	}
 
 	/*
@@ -83,7 +84,7 @@ ALPACA_STATUS AlpacaBuffer_append(ALLU_Buffer_t **alluBuffer, uint8_t *data, siz
 	 * Check if invalid buffer passed
 	 */
 	if(!(*alluBuffer)){
-		return ALPACA_MEM_NOBUFFER;
+		return ALPACA_ERROR_MEMNOBUFFER;
 	}
 	/*
 	 * Make sure there is enough memory to handle the transfer
@@ -91,12 +92,13 @@ ALPACA_STATUS AlpacaBuffer_append(ALLU_Buffer_t **alluBuffer, uint8_t *data, siz
 	 */
 	if((AlpacaBuffer_ensureRoom(alluBuffer, size)) != ALPACA_SUCCESS){
 
-		return ALPACA_MEM_APNDFAIL;
+		return ALPACA_ERROR_MEMAPNDFAIL;
 	}
 	LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", *alluBuffer, (*alluBuffer)->size, (*alluBuffer)->index);
 	
 	// Perform the transfer 
 	memmove(((*alluBuffer)->buffer + (*alluBuffer)->index), data, size);
+	//memcpy(((*alluBuffer)->buffer + (*alluBuffer)->index), data, size);
 	
 	// Adjust the cursor accordingly 
 	(*alluBuffer)->index += size;
@@ -157,7 +159,7 @@ ALPACA_STATUS AlpacaBuffer_ensureRoom(ALLU_Buffer_t **alluBuffer, size_t memNeed
 	 * Check if invalid buffer passed
 	 */
 	if(!(*alluBuffer)){
-		return ALPACA_MEM_NOBUFFER;
+		return ALPACA_ERROR_MEMNOBUFFER;
 	}
 
 	/*
@@ -170,7 +172,7 @@ ALPACA_STATUS AlpacaBuffer_ensureRoom(ALLU_Buffer_t **alluBuffer, size_t memNeed
  		if(((*alluBuffer) = AlpacaBuffer_resize(alluBuffer, newSize)) == NULL){
  			
  			// Failure occured during resize
- 			return ALPACA_MEM_RESZFAIL;
+ 			return ALPACA_ERROR_MEMRESZFAIL;
  		}
  	}
 
@@ -183,7 +185,7 @@ ALPACA_STATUS  AlpacaBuffer_zero(ALLU_Buffer_t **alluBuffer){
 	 * Check if invalid buffer passed
 	 */
 	if(!(*alluBuffer)){
-		return ALPACA_MEM_NOBUFFER;
+		return ALPACA_ERROR_MEMNOBUFFER;
 	}
 
 	AlpacaMemory_zero((*alluBuffer)->buffer, (*alluBuffer)->size , ((*alluBuffer)->size - (*alluBuffer)->index));

@@ -17,8 +17,8 @@ typedef struct AlpacaLunch_Socket{
 
 
 
-ALPACA_STATUS AlpacaSock_create(void** ctx);
-ALPACA_STATUS AlpacaSock_close(void** ctx);
+ALPACA_STATUS AlpacaSock_create(Alpaca_sock_t* ctx);
+ALPACA_STATUS AlpacaSock_close (Alpaca_sock_t* ctx);
 
 
 int32_t AlpacaSock_setNonBlocking(int fd);
