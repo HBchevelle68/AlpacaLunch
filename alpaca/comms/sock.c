@@ -8,8 +8,10 @@
 // Internal
 //#include <interfaces/memory_interface.h>
 #include <comms/sock.h>
+#include <comms/wolf.h>
 #include <core/logging.h>
 #include <core/codes.h>
+
 
 
 #define DEFAULTPORT 12345
@@ -78,30 +80,57 @@ done:
     return result;
 }
 
-ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* ctx){
 
-    ALPACA_STATUS  result  = ALPACA_ERROR_UNKNOWN;
-    Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)ctx;
+ALPACA_STATUS AlpacaSock_setPeer(Alpaca_sock_t* alpacasock, char* ipstr, uint16_t port){
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+
+    /* 
+     * Initialize the server address struct with zeros 
+     */
+    memset(&(alpacasock->peer), 0, sizeof(struct sockaddr_in));
+
+    /*
+     * Fill in the server address
+     */
+    alpacasock->peer.sin_family = AF_INET;
+    alpacasock->peer.sin_port   = htons(port);
+
+    /* Get the server IPv4 address from the command line call */
+    if (inet_pton(AF_INET, ipstr, &alpacasock->peer.sin_addr) != 1) {
+        LOGERROR("Error invalid address\n");
+        result = ALPACA_ERROR_SOCKSETPEER;
+    }
+
+    LEAVING;
+    return result;
+}
+
+
+ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
     /*
      * Convert the opaque oparam to an Alpaca Socket
      * then verify its validity 
      */
-    if(ctx) {
+    if(alpacasock) {
 
-        if(sockPtr->ssl){
-            wolfSSL_free(sockPtr->ssl);
+        if(alpacasock->ssl){
+            AlpacaWolf_close(alpacasock);
         }
 
-        if(sockPtr->fd > 0){
-            close(sockPtr->fd);
-            sockPtr->fd = -1;
+        if(alpacasock->fd > 0){
+            close(alpacasock->fd);
+            alpacasock->fd = -1;
         }
         
-        sockPtr->type = 0;
-        memset(&sockPtr->peer, 0, sizeof(struct sockaddr_in));
-        result = ALPACA_SUCCESS;
+        alpacasock->type = 0;
+        memset(&alpacasock->peer, 0, sizeof(struct sockaddr_in));
+        
     }
     else {
         LOGERROR("Invalid param\n");

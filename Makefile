@@ -135,13 +135,13 @@ ALLDOBJS = $(ALPACACORE_DOBJS) 		 \
 all: clean init-dirs \
 	 alpacalunch-release alpacalunch-release-test \
 	 alpacalunch-debug \
-	 scrub misc
+	 scrub misc success
 
-release: init-dirs alpacalunch-release
+release: init-dirs alpacalunch-release scrub success
 
 test: init-dirs alpacalunch-release-test runtest
 
-debug: init-dirs alpacalunch-debug
+debug: init-dirs alpacalunch-debug scrub success
 
 #
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
@@ -193,5 +193,8 @@ clean:
 
 scrub:
 	rm -f $(ALLROBJS) $(ALLDOBJS) $(ALLTOBJS) 
+
+success:
+	@echo "\n\033[38;5;084m***** SUCCESS *****\033[0m"
 
 

@@ -12,25 +12,30 @@ typedef uint32_t ALPACA_STATUS;
 /*
  * Comms Error Codes 
  */
-#define ALPACA_ERROR_COMMSINIT 	        (2)
-#define ALAPCA_ERROR_WOLFINIT	        (3)
-#define ALPACA_ERROR_WOLFNOINIT         (4) 
-#define ALPACA_ERROR_SOCKCREATE	        (5)
+#define ALAPCA_ERROR_WOLFINIT	        (2)
+#define ALPACA_ERROR_WOLFNOINIT         (3)
+#define ALPACA_ERROR_WOLFSSLCREATE      (4)
+#define ALPACA_ERROR_WOLFSSLCONNECT     (5)
+#define ALPACA_ERROR_COMMSINIT 	        (10)
+#define ALPACA_ERROR_COMMSCONNECT       (11)
+#define ALPACA_ERROR_SOCKCREATE	        (20)
+#define ALPACA_ERROR_SOCKSETPEER        (21)
+
 
 
 /**
  * Crypto Error Codes 
  */
-#define ALPACA_ERROR_CRYPTSETKEY  	    (20)
+#define ALPACA_ERROR_CRYPTSETKEY  	    (30)
 
 
 /*
  * Memory Error Codes
  */
-#define ALPACA_ERROR_MEMNOBUFFER	  	(20)
-#define ALPACA_ERROR_MEMEXCEEDED	  	(21)
-#define ALPACA_ERROR_MEMRESZFAIL	  	(22)
-#define ALPACA_ERROR_MEMAPNDFAIL	  	(23)
+#define ALPACA_ERROR_MEMNOBUFFER	  	(50)
+#define ALPACA_ERROR_MEMEXCEEDED	  	(51)
+#define ALPACA_ERROR_MEMRESZFAIL	  	(52)
+#define ALPACA_ERROR_MEMAPNDFAIL	  	(53)
 
 
 /*

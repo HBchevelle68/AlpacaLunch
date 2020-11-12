@@ -14,7 +14,9 @@
 #include <comms/wolf.h>
 #include <comms/sock.h>
 
-#define DEFAULTPORT 12345
+#define DEFAULTPORT  12345
+#define MAXRETRIES   5
+#define THREESECONDS (3*1000)
 
 
 // Process level variables 
@@ -67,9 +69,9 @@ ALPACA_STATUS AlpacaComms_cleanUp (void){
 /**
  *	@brief Initialize a generic Alpaca Comms context object
  *
- *  @param ctx  - Double Pointer to caller comms context object to 
- * 			      allocate and initialize
- * 	@param type - Comms type
+ *  @param ctx Double Pointer to caller comms context object to 
+ * 			   allocate and initialize
+ * 	@param type Comms type
  *  @return ALPACA_STATUS
  */
 ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
@@ -115,15 +117,20 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 	switch(type) {
 
 		case ALPACA_COMMSTYPE_TLS12:
-				result = AlpacaWolf_create((*ctx)->AlpacaSock->ssl, ALPACA_COMMSTYPE_TLS12);
-				if(((*ctx)->AlpacaSock->ssl) == NULL){
+				/**
+				 * Create Client ssl object
+				 */
+				result = AlpacaWolf_createClientSSL((*ctx)->AlpacaSock, ALPACA_COMMSTYPE_TLS12);
+				if(((*ctx)->AlpacaSock) == NULL){
 					LOGERROR("Error generating ssl object");
-					goto exit;
 				}
-				(*ctx)->connect = NULL;
-				(*ctx)->read    = NULL;
-				(*ctx)->write   = NULL;
-				(*ctx)->close   = NULL;
+				(*ctx)->connect = AlpacaWolf_connect;
+				//(*ctx)->read    = AlpacaWolf_recv;
+				(*ctx)->write   = AlpacaWolf_send;
+				(*ctx)->close   = AlpacaWolf_close;
+
+				// Set status 
+				(*ctx)->status  = ALPACA_COMMSSTATUS_NOTCONN;
 		
 		case ALPACA_COMMSTYPE_TLS13:
 			result = ALPACA_FAILURE;
@@ -145,8 +152,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 exit:
 	// Clean up if required
 	if((result != ALPACA_SUCCESS) && (*ctx)){
-		free((*ctx));
-		(*ctx) = NULL;
+		AlpacaComms_destroyCtx(ctx);
 	}
 
 	LEAVING;
@@ -155,9 +161,73 @@ exit:
 
 
 /**
+ *	@brief Perform TCP handshake and then perform underlying comms connect
+ * 	
+ *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
+ *  @param ipstr IP address in string format of peer to connect to
+ *  @param port port to connect to
+ *  
+ *  @return ALPACA_STATUS  
+ */
+ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port){
+	
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+	int32_t ret = 0;
+	uint8_t attempts = 0;
+
+	if(!(*ctx)){
+		LOGERROR("Error invalid context passed");
+		result = ALPACA_ERROR_BADPARAM;
+		goto exit;
+	}
+
+	/**
+	 * Set the peer information
+	 */
+	result = AlpacaSock_setPeer((*ctx)->AlpacaSock, ipstr, port);
+	if(result){
+		LOGERROR("Bailing on connect attempt...");
+		goto exit;
+	}
+
+	while(attempts < MAXRETRIES){
+		/* Connect to the server */
+		if ((ret = connect((*ctx)->AlpacaSock->fd, 
+						   (struct sockaddr*) &((*ctx)->AlpacaSock->peer),
+						   sizeof((*ctx)->AlpacaSock->peer))) == -1) 
+		{
+			LOGERROR("Error failed to connect\n");
+			attempts++;
+			AlpacaUtilities_mSleep(THREESECONDS);
+			continue;
+		}
+		(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
+		break;		
+	}
+
+	if(ret != 0){
+		result = ALPACA_ERROR_COMMSCONNECT;
+		goto exit;
+	}
+
+	/* If here we are good to go */
+	result = (*ctx)->connect((*ctx)->AlpacaSock);
+	if()
+
+
+exit:
+	LEAVING;
+	return result;
+}
+
+
+
+/**
  *	@brief Tear down of an Alpaca Comms context object to
  * 		   incudle memory clean up
- * 	@param  ctx - pointer to Alpaca_commsCtx_t object to tear down
+ * 	@param ctx pointer to Alpaca_commsCtx_t object to tear down
+ * 
  *  @return ALPACA_STATUS  
  */
 ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
@@ -165,28 +235,34 @@ ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 
-	if(ctx){
+	if((*ctx)) {
 		/*
 		* If our custom socket is allocated clean up
 		*/
-		if(ctx->AlpacaSock){
-			AlpacaSock_close(ctx->AlpacaSock);
+		if((*ctx)->AlpacaSock){
+			AlpacaSock_close((*ctx)->AlpacaSock);
+			free((*ctx)->AlpacaSock);
+			(*ctx)->AlpacaSock = NULL;
 		}
-		goto exit;
+
+		free((*ctx));
+		*ctx = NULL;
 	}
-	// Invalid param
-	result = ALPACA_ERROR_BADPARAM;
-	LOGERROR("Pointer to Comms CTX appears invalid...points to %p...will not allocate\n", *ctx);
-	
-exit:
+	else {
+		// Invalid param
+		result = ALPACA_ERROR_BADPARAM;
+		LOGERROR("Pointer to Comms CTX appears invalid...points to %p...will not allocate\n", *ctx);
+	}
+
 	LEAVING;
 	return result;
 }
 
 
+
 /*
 // Network I/O
-ALPACA_STATUS AlpacaComms_connect (Alpaca_commsCtx_t* ctx);
+
 ALPACA_STATUS AlpacaComms_read	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_write	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_close   (Alpaca_commsCtx_t* ctx);

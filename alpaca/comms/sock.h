@@ -5,9 +5,14 @@
 
 #include <wolfssl/ssl.h>
 
+/**
+ * @struct AlpacaLunch_Socket (Alpaca_sock_t)
+ * @brief  Alpaca_sock_t represent a socket to include
+ * 		   the TCP/UDP sock and SSL object
+ */
 typedef struct AlpacaLunch_Socket{
 
-	int 	 		   fd;
+	int 	 		   fd; /**< Some documentation for the member BoxStruct#fd. */
 	uint8_t  		   type;
 	struct sockaddr_in peer;
 	WOLFSSL* 		   ssl;
@@ -17,8 +22,9 @@ typedef struct AlpacaLunch_Socket{
 
 
 
-ALPACA_STATUS AlpacaSock_create(Alpaca_sock_t* ctx);
-ALPACA_STATUS AlpacaSock_close (Alpaca_sock_t* ctx);
+ALPACA_STATUS AlpacaSock_create (Alpaca_sock_t* alpacasock);
+ALPACA_STATUS AlpacaSock_close  (Alpaca_sock_t* alpacasock);
+ALPACA_STATUS AlpacaSock_setPeer(Alpaca_sock_t* alpacasock, char* ipstr, uint16_t port);
 
 
 int32_t AlpacaSock_setNonBlocking(int fd);

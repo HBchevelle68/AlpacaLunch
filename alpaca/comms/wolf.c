@@ -43,7 +43,9 @@ static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] =
  *         can be found in wolf.c. contexts are used to generate new
  *         ssl objects for client or server objects
  *  
- *  @param version - version of wolfssl comms  
+ *  @param version version of wolfssl comms  
+ *  
+ *  @return ALPACA_STATUS
  */
 ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t version){
 
@@ -80,19 +82,49 @@ exit:
     return result;
 }
 
+/**
+ *  @brief Create a client side underlying SSL object of the type specified
+ *  
+ *  @param alpacasock Alpaca_sock_t pointer to custom socket
+ *  @param type unsigned byte int representing the ssl type
+ * 
+ *  @return ALPACA_STATUS
+ */
+ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock ,uint8_t type){
 
-ALPACA_STATUS AlpacaWolf_create(uint8_t type){
-
+    ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
+    ENTRY;
 
     switch(type){
-        
+
+        case ALPACA_COMMSTYPE_TLS12:
+            /**
+             * Create ssl object
+             */
+            result = ALPACA_SUCCESS;
+            if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
+                LOGERROR("Error from wolfSSL_new, no SSL object created");
+                result = ALPACA_ERROR_WOLFSSLCREATE;
+            }
+            
+        case ALPACA_COMMSTYPE_TLS13:
+			result = ALPACA_FAILURE;
+			LOGERROR("TLS 1.3 not supported yet");
+
+		case ALPACA_COMMSTYPE_UDP:
+			result = ALPACA_FAILURE;
+			LOGERROR("UDP not supported yet");
+
+		case ALPACA_COMMSTYPE_SSH:
+			result = ALPACA_FAILURE;
+			LOGERROR("SSH not supported yet");
+		default:
+			result = ALPACA_ERROR_UNKNOWN;
+			LOGERROR("Invalid comms type passed -> %d", type);
     }
-    /*
-     if ((serv->tls_ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL){
-        LOGERROR("wolfSSL_CTX_new ERROR: %d", ALPACA_TLSINIT);
-        return ALPACA_TLSINIT;
-    }
-    */
+
+    LEAVING;
+    return result;
 }
 
 
@@ -100,6 +132,97 @@ ALPACA_STATUS AlpacaWolf_create(uint8_t type){
 
 
 
+
+/**
+ *  @brief Perform TLS handshake. Should only be called after 
+ *         TCP handshake successful.
+ * 
+ *  @param alpacasock Alpaca_sock_t pointer to custom socket
+ * 
+ *  @return ALPACA_STATUS 
+ */
+ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    int ret = 0;
+    ENTRY;
+
+    /* Verify pointers */
+    if(alpacasock && alpacasock->ssl){
+        /*
+         * Wrap std TCP socket in wolf
+         * then perform TLS handshake 
+         */
+        if(wolfSSL_set_fd(alpacasock->ssl, alpacasock->fd) != SSL_SUCCESS){
+            LOGERROR("wolfSSL_set_fd error\n");
+            result = ALPACA_ERROR_WOLFSSLCREATE;
+        }
+        
+        if ((ret = wolfSSL_connect(alpacasock->ssl)) != SSL_SUCCESS) {
+            LOGERROR("ERROR failed to connect to wolfSSL");
+            result = ALPACA_ERROR_WOLFSSLCONNECT;
+        }
+    }
+    else {
+        LOGERROR("Error invalid pointer passed");
+        result = ALPACA_ERROR_BADPARAM;
+    }
+
+    LEAVING;
+    return result;
+}
+
+/**
+ *  @brief Send data through set SSL connection   
+ *         
+ *  @param alpacasock Alpaca_sock_t pointer to custom socket
+ *  @param buf pointer to buffer to send
+ *  @param len length of data to send
+ *  @param out out variable of bytes successfully sent
+ * 
+ *  @return ALPACA_STATUS 
+ */
+ALPACA_STATUS AlpacaWolf_send (Alpaca_sock_t* alpacasock, void* buf, size_t len, ssize_t* out){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+
+
+
+
+    LEAVING;
+    return result;
+}
+
+
+
+
+/**
+ *  @brief Close and free underlying SSL object  
+ *         
+ *  @param alpacasock Alpaca_sock_t pointer to custom socket
+ * 
+ *  @return ALPACA_STATUS 
+ */
+ALPACA_STATUS AlpacaWolf_close(Alpaca_sock_t* alpacasock) {
+    
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+    
+    if(alpacasock && alpacasock->ssl) {
+        wolfSSL_free(alpacasock->ssl);
+        alpacasock->ssl = NULL;
+    }
+    else {
+        result = ALPACA_ERROR_BADPARAM;
+        LOGERROR("No SSL object to free");
+    }
+
+    LEAVING;
+    return result;   
+}
+
+/**
+ *  @brief
+ */
 ALPACA_STATUS AlpacaWolf_cleanUp(void){
 
     ALPACA_STATUS result = ALPACA_ERROR_WOLFNOINIT;
