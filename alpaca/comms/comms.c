@@ -8,6 +8,7 @@
 
 
 // Internal
+#include <interfaces/utility_interface.h>
 #include <interfaces/memory_interface.h>
 #include <core/logging.h>
 #include <core/codes.h>
@@ -213,7 +214,9 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 
 	/* If here we are good to go */
 	result = (*ctx)->connect((*ctx)->AlpacaSock);
-	if()
+	if(result){
+		LOGERROR("TLS handshake failed!");
+	}
 
 
 exit:
