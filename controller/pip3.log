@@ -3,5 +3,6 @@ This log outlines all of the pip installs required to make the controller functi
 Current pip installs required:
 cmd2
 wolfssl
+wolfcrypt
 
 
