@@ -11,7 +11,7 @@ if __name__ == "__main__":
                             help='Servers to connect to. Can be IPs or Domain Names')
     cli_parser.add_argument('-p', '--port', default=443, type=int,
                             help='Port to connect to. Defaults to 443.')
-
-    herder = Herder(cli_parser.parse_args())
+    args = cli_parser.parse_args()
+    herder = Herder(args.username, args.server, args.port)
 
     sys.exit(herder.cmdloop())
