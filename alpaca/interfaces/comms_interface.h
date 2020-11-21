@@ -53,10 +53,11 @@ typedef struct AlpacaLunch_CommsCtx {
 
 	Alpaca_sock_t* AlpacaSock;
 
-	ALPACA_STATUS (* connect)(Alpaca_sock_t* ctx);
-	ALPACA_STATUS (* read) 	 (Alpaca_sock_t* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (* write)	 (Alpaca_sock_t* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (* close)	 (Alpaca_sock_t* ctx);
+	ALPACA_STATUS (*connect)(Alpaca_sock_t* ctx);
+	//ALPACA_STATUS (*listen) (Alpaca_sock_t* ctx);	
+	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*close)  (WOLFSSL* ctx);
 
 	uint8_t status;
 
@@ -71,10 +72,12 @@ ALPACA_STATUS AlpacaComms_initCtx	(Alpaca_commsCtx_t** ctx, uint8_t type);
 ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx);
 
 // Network I/O
-ALPACA_STATUS AlpacaComms_connect (Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port);
-ALPACA_STATUS AlpacaComms_read	  (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_write	  (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_close   (Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port);
+ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx)__attribute__((unused)) ;
+ALPACA_STATUS AlpacaComms_read	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
+ALPACA_STATUS AlpacaComms_write	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
+ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t** ctx);
+
 
 
 #endif

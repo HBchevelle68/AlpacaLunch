@@ -19,9 +19,10 @@
 #define MAXRETRIES   5
 #define THREESECONDS (3*1000)
 
+#define TEST_IP "127.0.0.1"
 
 // Process level variables 
-Alpaca_commsCtx_t coreComms;
+Alpaca_commsCtx_t *coreComms;
 
 
 
@@ -41,6 +42,12 @@ ALPACA_STATUS AlpacaComms_init(Alpaca_tlsVersion_t version){
 	result = AlpacaWolf_init(version);
 	if(result != ALPACA_SUCCESS){
 		LOGERROR("Error during TLS layer init Version:%d\n", version);
+		goto exit;
+	}
+
+	result = AlpacaComms_initCtx(&coreComms, version);
+	if(!coreComms && result != ALPACA_SUCCESS){
+		LOGERROR("Error creating core comms context. Result:%d Version:%d\n", result, version);
 		goto exit;
 	}
 
@@ -122,7 +129,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 				 * Create Client ssl object
 				 */
 				result = AlpacaWolf_createClientSSL((*ctx)->AlpacaSock, ALPACA_COMMSTYPE_TLS12);
-				if(((*ctx)->AlpacaSock) == NULL){
+				if(((*ctx)->AlpacaSock) == NULL) {
 					LOGERROR("Error generating ssl object");
 				}
 				(*ctx)->connect = AlpacaWolf_connect;
@@ -162,6 +169,48 @@ exit:
 
 
 /**
+ *	@brief Tear down of an Alpaca Comms context object to
+ * 		   incudle memory clean up
+ * 	@param ctx pointer to Alpaca_commsCtx_t object to tear down
+ * 
+ *  @return ALPACA_STATUS  
+ */
+ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
+	
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+
+	if((*ctx)) {
+		/*
+		* If our custom socket is allocated clean up
+		*/
+		if((*ctx)->AlpacaSock){
+
+			/* If we are connected, close both layers */
+			if((*ctx)->status & (ALPACA_COMMSSTATUS_CONN | ALPACA_COMMSSTATUS_TLSCONN)){
+				AlpacaComms_close(ctx);
+			}
+			
+			AlpacaSock_close((*ctx)->AlpacaSock);
+			free((*ctx)->AlpacaSock);
+			(*ctx)->AlpacaSock = NULL;
+		}
+
+		free((*ctx));
+		*ctx = NULL;
+	}
+	else {
+		// Invalid param
+		result = ALPACA_ERROR_BADPARAM;
+		LOGERROR("Pointer to Comms CTX appears invalid...points to %p...will not allocate\n", *ctx);
+	}
+
+	LEAVING;
+	return result;
+}
+
+
+/**
  *	@brief Perform TCP handshake and then perform underlying comms connect
  * 	
  *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
@@ -192,8 +241,14 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 
+	/** 
+	 * Loop attempting to connect to supplied peer
+	 * If a failure is detected sleep for 3 seconds before
+	 * retrying. Retry up to MAXRETRIES
+	 */
 	while(attempts < MAXRETRIES){
 		/* Connect to the server */
+		LOGINFO("Attepmt #%d to establish TCP connection to %s:%d", attempts+1, ipstr, port);
 		if ((ret = connect((*ctx)->AlpacaSock->fd, 
 						   (struct sockaddr*) &((*ctx)->AlpacaSock->peer),
 						   sizeof((*ctx)->AlpacaSock->peer))) == -1) 
@@ -218,55 +273,52 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		LOGERROR("TLS handshake failed!");
 	}
 
-
 exit:
 	LEAVING;
 	return result;
 }
 
-
-
 /**
- *	@brief Tear down of an Alpaca Comms context object to
- * 		   incudle memory clean up
- * 	@param ctx pointer to Alpaca_commsCtx_t object to tear down
+ *	@brief Tear down Alpaca Socket to include any underlying comms
+ * 	       contexts such as tls, udp, etc. No memory is free'd
  * 
+ *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
  *  @return ALPACA_STATUS  
  */
-ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
-	
+ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 
-	if((*ctx)) {
-		/*
-		* If our custom socket is allocated clean up
-		*/
-		if((*ctx)->AlpacaSock){
-			AlpacaSock_close((*ctx)->AlpacaSock);
-			free((*ctx)->AlpacaSock);
-			(*ctx)->AlpacaSock = NULL;
-		}
-
-		free((*ctx));
-		*ctx = NULL;
-	}
-	else {
-		// Invalid param
+	if((*ctx) || !(*ctx)->AlpacaSock){
+		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p, ctx->AlpacaSock:%p ", (*ctx), (*ctx)->AlpacaSock);
 		result = ALPACA_ERROR_BADPARAM;
-		LOGERROR("Pointer to Comms CTX appears invalid...points to %p...will not allocate\n", *ctx);
+		goto exit;
 	}
 
+	// Close top layer comms
+	result = (*ctx)->close((*ctx)->AlpacaSock->ssl);
+	if(result != ALPACA_SUCCESS){
+		LOGERROR("Failure to close security comms layer");
+		goto exit;
+	}
+
+	// Close bottom layer 
+	result = AlpacaSock_close((*ctx)->AlpacaSock);
+	if(result != ALPACA_SUCCESS){
+		LOGERROR("Failure to close security comms layer");
+	}
+
+exit:
 	LEAVING;
-	return result;
+	return result;	
 }
 
 
 
-/*
-// Network I/O
 
+
+
+/*
 ALPACA_STATUS AlpacaComms_read	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_write	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_close   (Alpaca_commsCtx_t* ctx);
 */

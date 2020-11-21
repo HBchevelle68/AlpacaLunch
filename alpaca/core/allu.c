@@ -18,8 +18,6 @@ ALPACA_STATUS AlpacaCore_init(void){
     getuid();
 #endif 
 
-
-
     // Install signal handlers
     // NEED ERROR HANDLING!
     AlpacaCore_installSigHandlers();

@@ -133,7 +133,7 @@ ALLDOBJS = $(ALPACACORE_DOBJS) 		 \
 .PHONY: clean
 
 all: clean init-dirs \
-	 alpacalunch-release alpacalunch-release-test \
+	 alpacalunch-release\
 	 alpacalunch-debug \
 	 scrub misc success
 
@@ -147,7 +147,9 @@ debug: init-dirs alpacalunch-debug scrub success
 # RELEASE, RELEASE TEST, RELEASE STATIC(broken) builds
 #
 alpacalunch-release: $(ALLROBJS)
+	$(call PG,Linking Release Build)
 	$(CC) $(CFLAGS) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
+	$(call PG,Done)
 
 alpacalunch-release-test: $(ALLTOBJS)
 	$(CC) $(CFLAGS) $(TEST) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
@@ -159,18 +161,22 @@ alpacalunch-release-static: $(ALLROBJS)
 # DEBUG, DEBUG STATIC(broken) builds
 #
 alpacalunch-debug: $(ALLDOBJS)
+	$(call PG,Linking Debug Build)
 	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
+	$(call PG,Done)
 
 alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 %.o: %.c $(DEPS)
+	#@echo "\033[1;93mcompiling: $(notdir $<)\033[0m" 
 	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
 
 %-test.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(TEST) $(DBG) $(RELEASE) $< -o $@
 
 %-debug.o: %.c $(DEPS)
+	#echo "\033[1;93mcompiling: $(notdir $<)\033[0m"
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
 runtest:
@@ -192,9 +198,23 @@ clean:
 	rm -fr $(BIN)/* $(ALLROBJS) $(ALLDOBJS) $(ALLTOBJS) $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
 
 scrub:
+	$(call PY,Cleaning *.o's)
 	rm -f $(ALLROBJS) $(ALLDOBJS) $(ALLTOBJS) 
 
 success:
-	@echo "\n\033[38;5;084m***** SUCCESS *****\033[0m"
+	@echo "\033[38;5;084m[+] BUILD COMPLETE\033[0m"
+
+
+#
+# Functions
+#
+
+define PY
+	@echo "\033[1;93m[*] $(1) \033[0m"
+endef
+define PG
+	@echo "\033[38;5;084m[+] $(1) \033[0m"
+endef
+
 
 

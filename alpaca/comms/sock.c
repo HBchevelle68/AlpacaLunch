@@ -117,26 +117,27 @@ ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
      * Convert the opaque oparam to an Alpaca Socket
      * then verify its validity 
      */
-    if(alpacasock) {
-
-        if(alpacasock->ssl){
-            AlpacaWolf_close(alpacasock);
-        }
-
-        if(alpacasock->fd > 0){
-            close(alpacasock->fd);
-            alpacasock->fd = -1;
-        }
-        
-        alpacasock->type = 0;
-        memset(&alpacasock->peer, 0, sizeof(struct sockaddr_in));
-        
-    }
-    else {
+    if(!alpacasock) {
         LOGERROR("Invalid param\n");
         result = ALPACA_ERROR_BADPARAM;
+        goto exit;
     }
     
+    if(alpacasock->ssl){
+        LOGERROR("Underlying comms layer still valid. Close security layer first");
+        result = ALPACA_ERROR_BADSTATE;
+        goto exit;            
+    }
+
+    if(alpacasock->fd > 0){
+        close(alpacasock->fd);
+        alpacasock->fd = -1;
+    }
+    
+    alpacasock->type = 0;
+    memset(&alpacasock->peer, 0, sizeof(struct sockaddr_in));
+
+exit:
     LEAVING;
     return result;
 

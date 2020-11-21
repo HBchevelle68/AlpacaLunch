@@ -94,6 +94,10 @@ ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock ,uint8_t type
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
+    if(!alpacasock || !(alpacasock->ssl)){
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
 
     switch(type){
 
@@ -101,28 +105,34 @@ ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock ,uint8_t type
             /**
              * Create ssl object
              */
-            result = ALPACA_SUCCESS;
             if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
                 LOGERROR("Error from wolfSSL_new, no SSL object created");
                 result = ALPACA_ERROR_WOLFSSLCREATE;
             }
-            
+            result = ALPACA_SUCCESS;
+            break;
+
         case ALPACA_COMMSTYPE_TLS13:
 			result = ALPACA_FAILURE;
 			LOGERROR("TLS 1.3 not supported yet");
+            break;
 
 		case ALPACA_COMMSTYPE_UDP:
 			result = ALPACA_FAILURE;
 			LOGERROR("UDP not supported yet");
+            break;
 
 		case ALPACA_COMMSTYPE_SSH:
 			result = ALPACA_FAILURE;
 			LOGERROR("SSH not supported yet");
+            break;
+
 		default:
 			result = ALPACA_ERROR_UNKNOWN;
 			LOGERROR("Invalid comms type passed -> %d", type);
     }
-
+    
+exit:
     LEAVING;
     return result;
 }
@@ -181,7 +191,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_send (Alpaca_sock_t* alpacasock, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaWolf_send (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
@@ -202,19 +212,17 @@ ALPACA_STATUS AlpacaWolf_send (Alpaca_sock_t* alpacasock, void* buf, size_t len,
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_close(Alpaca_sock_t* alpacasock) {
+ALPACA_STATUS AlpacaWolf_close(WOLFSSL* sslCtx) {
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
     
-    if(alpacasock && alpacasock->ssl) {
-        wolfSSL_free(alpacasock->ssl);
-        alpacasock->ssl = NULL;
+    if(sslCtx) {
+        wolfSSL_free(sslCtx);
+        sslCtx = NULL;
     }
-    else {
-        result = ALPACA_ERROR_BADPARAM;
-        LOGERROR("No SSL object to free");
-    }
+
+    LOGERROR("No SSL object to free");
 
     LEAVING;
     return result;   
