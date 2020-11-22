@@ -16,7 +16,7 @@
 
 
 
-
+#if DEBUGENABLE
 static
 void memtest(void){
 
@@ -90,8 +90,11 @@ void BasicCrypto(void){
     memset(plain, 0, 64);
     MyDecrypt(plain, 64, cipher);
 }
-
-
+#else
+static inline void memtest(void){return;}
+static inline void printTypeSizes(void){return;}
+static inline void BasicCrypto(void){return;}
+#endif
 
 void DevTests(void){
     printTypeSizes();
@@ -99,3 +102,4 @@ void DevTests(void){
     memtest();
     return;
 }
+

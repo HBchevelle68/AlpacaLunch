@@ -46,8 +46,8 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_READ	  	        (102)
 #define ALPACA_ERROR_WRITE	  	        (103)
 #define ALPACA_ERROR_BADPARAM	        (104)
-#define ALPACA_ERROR_MALLOC 	        (104)
-#define ALPACA_ERROR_BADSTATE           (105)
+#define ALPACA_ERROR_MALLOC 	        (105)
+#define ALPACA_ERROR_BADSTATE           (106)
 
 
 

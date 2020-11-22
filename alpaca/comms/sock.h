@@ -24,8 +24,6 @@ typedef struct AlpacaLunch_Socket{
 
 ALPACA_STATUS AlpacaSock_create (Alpaca_sock_t* alpacasock);
 ALPACA_STATUS AlpacaSock_close  (Alpaca_sock_t* alpacasock);
-ALPACA_STATUS AlpacaSock_setPeer(Alpaca_sock_t* alpacasock, char* ipstr, uint16_t port);
-
 
 int32_t AlpacaSock_setNonBlocking(int fd);
 

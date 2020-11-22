@@ -56,7 +56,7 @@ do { if (DEBUGENABLE){ \
 
 #ifdef TALKATIVELLAMA
 #define ENTRY \
-    do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    //do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
 #define ENTRY
 #endif
@@ -64,7 +64,7 @@ do { if (DEBUGENABLE){ \
 
 #ifdef TALKATIVELLAMA
 #define LEAVING \
-    do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    //do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
 #define LEAVING
 #endif

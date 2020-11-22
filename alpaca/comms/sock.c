@@ -3,6 +3,7 @@
 
 // Implements interface 
 #include <interfaces/comms_interface.h>
+#include <interfaces/memory_interface.h>
 
 
 // Internal
@@ -57,7 +58,7 @@ ALPACA_STATUS AlpacaSock_create(Alpaca_sock_t* ctx) {
      * Close on Exec (CLOEXEC) flag to prevent file descriptor
      * leaking into child processes 
      */
-    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
+    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0); 
     if(ctx->fd == -1) { 
         LOGERROR("Failure to create socket\n");
         result = ALPACA_ERROR_SOCKCREATE;
@@ -81,33 +82,6 @@ done:
 }
 
 
-ALPACA_STATUS AlpacaSock_setPeer(Alpaca_sock_t* alpacasock, char* ipstr, uint16_t port){
-
-    ALPACA_STATUS result = ALPACA_SUCCESS;
-    ENTRY;
-
-    /* 
-     * Initialize the server address struct with zeros 
-     */
-    memset(&(alpacasock->peer), 0, sizeof(struct sockaddr_in));
-
-    /*
-     * Fill in the server address
-     */
-    alpacasock->peer.sin_family = AF_INET;
-    alpacasock->peer.sin_port   = htons(port);
-
-    /* Get the server IPv4 address from the command line call */
-    if (inet_pton(AF_INET, ipstr, &alpacasock->peer.sin_addr) != 1) {
-        LOGERROR("Error invalid address\n");
-        result = ALPACA_ERROR_SOCKSETPEER;
-    }
-
-    LEAVING;
-    return result;
-}
-
-
 ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
 
     ALPACA_STATUS result = ALPACA_SUCCESS;
@@ -124,7 +98,7 @@ ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
     }
     
     if(alpacasock->ssl){
-        LOGERROR("Underlying comms layer still valid. Close security layer first");
+        LOGERROR("Underlying comms layer still valid. Close security layer first [%p]\n", alpacasock->ssl);
         result = ALPACA_ERROR_BADSTATE;
         goto exit;            
     }

@@ -49,10 +49,10 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 # Build variables
 #
 CC= gcc -std=c11
-CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -flto -s -O2 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
+CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -ffast-math -flto -s -O3 -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
 DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC) #-fanalyzer
 DBG= -g2 -DTALKATIVELLAMA
-LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread
+LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread -Wl,--gc-sections
 TEST= -DSNOW_ENABLED
 STATIC= -static
 STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(SNOW)
@@ -169,14 +169,12 @@ alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
 %.o: %.c $(DEPS)
-	#@echo "\033[1;93mcompiling: $(notdir $<)\033[0m" 
 	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
 
 %-test.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(TEST) $(DBG) $(RELEASE) $< -o $@
 
 %-debug.o: %.c $(DEPS)
-	#echo "\033[1;93mcompiling: $(notdir $<)\033[0m"
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
 runtest:

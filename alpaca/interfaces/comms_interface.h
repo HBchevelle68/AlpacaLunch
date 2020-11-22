@@ -53,15 +53,16 @@ typedef struct AlpacaLunch_CommsCtx {
 
 	Alpaca_sock_t* AlpacaSock;
 
-	ALPACA_STATUS (*connect)(Alpaca_sock_t* ctx);
+	ALPACA_STATUS (*connect)(Alpaca_sock_t** ctx);
 	//ALPACA_STATUS (*listen) (Alpaca_sock_t* ctx);	
 	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*close)  (WOLFSSL* ctx);
+	ALPACA_STATUS (*close)  (WOLFSSL** ctx);
 
 	uint8_t status;
 
 } Alpaca_commsCtx_t;
+extern Alpaca_commsCtx_t *coreComms;
 
 // Process networking Init/Cleanup
 ALPACA_STATUS AlpacaComms_init	  (Alpaca_tlsVersion_t version);

@@ -16,24 +16,33 @@
 #include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
 
-
+extern Alpaca_commsCtx_t *coreComms;
 
 int main(){
-    ALPACA_STATUS result = ALPACA_SUCCESS;
+    
     ENTRY;
+    ALPACA_STATUS result = ALPACA_SUCCESS;
 
-
+    /** 
+     * Immediately daemonize ourself according to *nix spec
+     * See more in daemon(7)
+     * 
+     * When debug is enabled this is an empty function
+     */
     AlpacaUtilities_daemonize();
 
-    
-
+    /** 
+     * When debug is enabled this is an empty function
+     */
     result = AlpacaCore_init();
-    if(result){
-        LOGERROR("Initialization error code: %u\n", result);
+    if(result != ALPACA_SUCCESS){
+        LOGERROR("Global initialization error! [%u]\n", result);
         goto done;
     }
-
     
+
+    // FOR TEST ONLY! Doesn't belong here
+    AlpacaComms_connect(&coreComms, "127.0.0.1", 44444);
 
     //DevTests();
    

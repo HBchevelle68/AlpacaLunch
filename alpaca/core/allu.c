@@ -21,13 +21,15 @@ ALPACA_STATUS AlpacaCore_init(void){
     // Install signal handlers
     // NEED ERROR HANDLING!
     AlpacaCore_installSigHandlers();
+
+
     result = AlpacaComms_init(tls_1_2);
     if(result){
-        LOGERROR("Error initializing Alpaca Comms");
-        goto finish;
+        LOGERROR("Error initializing Alpaca Comms\n");
+        goto exit;
     }
 
-finish:
+exit:
     LEAVING;
     return result;
 }
