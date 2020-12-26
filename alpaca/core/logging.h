@@ -7,7 +7,7 @@
 /*
  * Suppress vscode's inability to detect volatility
  */ 
-#ifndef TALKATIVELLAMA
+#if !defined(TALKATIVELLAMA) || !defined(VERBOSELLAMA)
 #define DEBUGENABLE 0
 #else
 #define DEBUGENABLE 1
@@ -47,6 +47,12 @@ do { if (DEBUGENABLE){ \
       }                                                       \
 } while(0)
 
+
+#define LOGTESTFILE(buff) \
+        FILE* fp;                                 \
+        fp = fopen("/tmp/test.txt", "a");         \
+        fprintf(fp, "%s\n", buff);                \
+        fclose(fp);
 #else
 #define LOGINFO(fmt, ...)
 #define LOGDEBUG(fmt, ...)
@@ -54,26 +60,21 @@ do { if (DEBUGENABLE){ \
 #define DEBUGWARNING()
 #endif
 
-#ifdef TALKATIVELLAMA
+#ifdef VERBOSELLAMA
 #define ENTRY \
-    //do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
 #define ENTRY
 #endif
 
 
-#ifdef TALKATIVELLAMA
+#ifdef VERBOSELLAMA
 #define LEAVING \
-    //do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
 #else
 #define LEAVING
 #endif
 
-#define LOGTESTFILE(buff) \
-        FILE* fp;                                 \
-        fp = fopen("/tmp/test.txt", "a");         \
-        fprintf(fp, "%s\n", buff);                \
-        fclose(fp);
 
 
 #endif

@@ -130,7 +130,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 				/**
 				 * Create Client ssl object
 				 */
-				result = AlpacaWolf_createClientSSL(&((*ctx)->AlpacaSock), ALPACA_COMMSTYPE_TLS12);
+				result = AlpacaWolf_createClientSSL((*ctx)->AlpacaSock, ALPACA_COMMSTYPE_TLS12);
 				if(((*ctx)->AlpacaSock) == NULL) {
 					LOGERROR("Error generating ssl object");
 					goto exit;
@@ -298,7 +298,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	}
 
 	/* TLS handhake */
-	result = (*ctx)->connect(&((*ctx)->AlpacaSock));
+	result = (*ctx)->connect((*ctx)->AlpacaSock);
 	if(result){
 		LOGERROR("TLS handshake failed!\n");
 		goto exit;
@@ -341,7 +341,7 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	}
 
 	// Close top layer comms
-	result = (*ctx)->close(&(ptr->ssl));
+	result = (*ctx)->close(ptr->ssl);
 	if(result != ALPACA_SUCCESS){
 		LOGERROR("Failure to close security comms layer");
 		goto exit;

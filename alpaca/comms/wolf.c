@@ -58,22 +58,27 @@ ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t version){
          * Currently this is only support TLS 1.2, 
          */
         wolfSSL_Init();
-        wolfInitialized = 1;
-
+        procWolfClientCtx = NULL;
+        procWolfServerCtx = NULL;
+        
+        /*
         if ((procWolfServerCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].server_method())) == NULL){
 
             LOGERROR("procWolfServerCtx ERROR: %d\n", ALAPCA_ERROR_WOLFINIT);
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
+        wolfSSL_CTX_set_verify(procWolfServerCtx, SSL_VERIFY_NONE, 0);
+        */
         if ((procWolfClientCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].client_method())) == NULL){
-
             LOGERROR("procWolfClientCtx ERROR: %d\n", ALAPCA_ERROR_WOLFINIT);
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
-        wolfSSL_CTX_set_verify(procWolfServerCtx, SSL_VERIFY_NONE, 0);
+        
         wolfSSL_CTX_set_verify(procWolfClientCtx, SSL_VERIFY_NONE, 0);
+
+        wolfInitialized = 1;
         result = ALPACA_SUCCESS;
     }
 
@@ -90,13 +95,13 @@ exit:
  * 
  *  @return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t** alpacasock ,uint8_t type){
+ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock ,uint8_t type){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
-    if(!(*alpacasock) || ((*alpacasock)->ssl)){
+    if(!alpacasock || (alpacasock->ssl)){
         result = ALPACA_ERROR_BADPARAM;
-        LOGERROR(" Bad param(s) -> alpacasock:[%p] alpacasock->ssl:[%p]\n",(*alpacasock), (*alpacasock)->ssl);
+        LOGERROR(" Bad param(s) -> alpacasock:[%p] alpacasock->ssl:[%p]\n",alpacasock, alpacasock->ssl);
         goto exit;
     }
 
@@ -106,9 +111,7 @@ ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t** alpacasock ,uint8_t typ
             /**
              * Create ssl object
              */
-            
-            //wolfSSL_set_verify(procWolfClientCtx, SSL_VERIFY_NONE, 0)
-            if (((*alpacasock)->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
+            if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
                 LOGERROR("Error from wolfSSL_new, no SSL object created\n");
                 result = ALPACA_ERROR_WOLFSSLCREATE;
             }
@@ -142,10 +145,6 @@ exit:
 
 
 
-
-
-
-
 /**
  *  @brief Perform TLS handshake. Should only be called after 
  *         TCP handshake successful.
@@ -154,28 +153,23 @@ exit:
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t** alpacasock){
+ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
     ALPACA_STATUS result = ALPACA_SUCCESS;
-    int ret = 0;
-    int err = 0;
-    char buffer[80];
     ENTRY;
 
     /* Verify pointers */
-    if((*alpacasock) && (*alpacasock)->ssl){
+    if(alpacasock && alpacasock->ssl){
         /*
-         * Wrap std TCP socket in wolf
+         * Wrap bottom layer TCP socket in wolf
          * then perform TLS handshake 
          */
-        if(wolfSSL_set_fd((*alpacasock)->ssl, (*alpacasock)->fd) != SSL_SUCCESS){
+        if(wolfSSL_set_fd(alpacasock->ssl, alpacasock->fd) != SSL_SUCCESS){
             LOGERROR("wolfSSL_set_fd error\n");
             result = ALPACA_ERROR_WOLFSSLCREATE;
         }
         
-        if ((ret = wolfSSL_connect((*alpacasock)->ssl)) != SSL_SUCCESS) {
+        if (wolfSSL_connect(alpacasock->ssl) != SSL_SUCCESS) {
             LOGERROR("ERROR failed to connect to wolfSSL\n");
-            err = wolfSSL_get_error((*alpacasock)->ssl, ret);
-            printf("error = %d, %s\n", err, wolfSSL_ERR_error_string(err, buffer));
             result = ALPACA_ERROR_WOLFSSLCONNECT;
         }
     }
@@ -219,14 +213,14 @@ ALPACA_STATUS AlpacaWolf_send (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* 
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_close(WOLFSSL** sslCtx) {
+ALPACA_STATUS AlpacaWolf_close(WOLFSSL* sslCtx) {
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
-    //LOGDEBUG("SSL OBJ: %p\n", *sslCtx);
-    if(*sslCtx) {
-        wolfSSL_free(*sslCtx);
-        *sslCtx = NULL;
+    LOGDEBUG("SSL OBJ: %p\n", sslCtx);
+    if(sslCtx) {
+        wolfSSL_free(sslCtx);
+        sslCtx = NULL;
         goto done;
     }
 

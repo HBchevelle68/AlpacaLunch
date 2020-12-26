@@ -8,12 +8,12 @@
 ALPACA_STATUS AlpacaWolf_init(Alpaca_tlsVersion_t version);
 ALPACA_STATUS AlpacaWolf_cleanUp(void);
 
-ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t** alpacasock, uint8_t type);
+ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock, uint8_t type);
 
-ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t** alpacasock);
+ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock);
 ALPACA_STATUS AlpacaWolf_send   (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaWolf_recv   (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaWolf_close  (WOLFSSL** sslCtx);
+ALPACA_STATUS AlpacaWolf_close  (WOLFSSL* sslCtx);
 
 
 #endif
