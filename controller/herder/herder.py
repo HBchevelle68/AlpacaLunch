@@ -31,29 +31,34 @@ class Herder(cmd2.Cmd):
         """A command line tool to control your ever growing herd of Alpacas through various hutches.
 
         :param server: ip or hostname of the hutch to connect to
-        :param port: port to use when connecting ot the hutch
+        :param port: port to use when connecting to the hutch
         :param username: username for authentication to a hutch
         :param password: plaintext password for authentication to a hutch
         :param timeout: socket timeout for connection attempt, if not specified, defaults to 5 seconds
         """
 
-        hutch_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        hutch_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         context = wolfssl.SSLContext(wolfssl.PROTOCOL_TLSv1_2)
+        context.verify_mode = wolfssl.CERT_NONE
+        #context.load_verify_locations(cafile="./hutch-cert-dungpile.crt")
 
         hutch_secure_socket = context.wrap_socket(hutch_socket)
-
-        hutch_secure_socket.settimeout(timeout)
 
         try:
             hutch_secure_socket.connect((server, port))
 
-            hutch_secure_socket.write("Testing 1 2 3...")
+            print("Sucessfully Connected!")
+
+            hutch_secure_socket.write("Testing 1 2 3...\n")
 
             print(hutch_secure_socket.read())
 
         except socket.error as error:
+            print("Error: exception received...")
             print(error)
+
+
 
     # @cmd2.with_argparser(connect_parser)
     def do_connect(self, args):
