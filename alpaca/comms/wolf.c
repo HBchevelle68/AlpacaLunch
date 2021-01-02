@@ -123,16 +123,6 @@ ALPACA_STATUS AlpacaWolf_createClientSSL(Alpaca_sock_t* alpacasock ,uint8_t type
 			LOGERROR("TLS 1.3 not supported yet\n");
             break;
 
-		case ALPACA_COMMSTYPE_UDP:
-			result = ALPACA_FAILURE;
-			LOGERROR("UDP not supported yet\n");
-            break;
-
-		case ALPACA_COMMSTYPE_SSH:
-			result = ALPACA_FAILURE;
-			LOGERROR("SSH not supported yet\n");
-            break;
-
 		default:
 			result = ALPACA_ERROR_UNKNOWN;
 			LOGERROR("Invalid comms type passed -> %d\n", type);
