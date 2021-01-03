@@ -23,7 +23,7 @@ typedef uint32_t ALPACA_STATUS;
 
 
 
-/**
+/*
  * Crypto Error Codes 
  */
 #define ALPACA_ERROR_CRYPTSETKEY  	    (30)
@@ -36,6 +36,12 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_MEMEXCEEDED	  	(51)
 #define ALPACA_ERROR_MEMRESZFAIL	  	(52)
 #define ALPACA_ERROR_MEMAPNDFAIL	  	(53)
+
+/*
+ * Threadpool Error Codes
+ */
+#define ALPACA_ERROR_TPOOLINIT  	  	(60)
+
 
 
 /*
