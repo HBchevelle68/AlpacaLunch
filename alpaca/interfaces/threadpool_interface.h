@@ -9,16 +9,18 @@
 #include <threadpool/alpacaqueue.h>
 
 #define ALPACA_TPOOL_INACTIVE 0
-#define ALPACA_TPOOL_ATTRINIT 1
-#define ALPACA_TPOOL_LOCKINIT 2
-#define ALPACA_TPOOL_READY    4  
+#define ALPACA_TPOOL_POOLINIT 1
+#define ALPACA_TPOOL_ATTRINIT 2
+#define ALPACA_TPOOL_LOCKINIT 4
+#define ALPACA_TPOOL_READY    8  
 
 
 
 typedef struct AlpacaThread
 {
-  pthread_t   thrd;
-
+  pthread_t thrd;
+  uint8_t   atid;
+  uint8_t   active;
   /* data */
 }Alpaca_thrd_t;
 

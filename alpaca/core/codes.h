@@ -43,7 +43,6 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_TPOOLINIT  	  	(60)
 
 
-
 /*
  * Generic Codes
  */
