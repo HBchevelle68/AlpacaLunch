@@ -11,9 +11,11 @@
 // Interfaces 
 #include <interfaces/memory_interface.h>
 #include <interfaces/utility_interface.h>
+#include <interfaces/threadpool_interface.h>
 
 
-
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 
 
 #if DEBUGENABLE
@@ -90,16 +92,79 @@ void BasicCrypto(void){
     memset(plain, 0, 64);
     MyDecrypt(plain, 64, cipher);
 }
+
+
+
 #else
-static inline void memtest(void){return;}
-static inline void printTypeSizes(void){return;}
-static inline void BasicCrypto(void){return;}
+static inline void mem_api_test(void){}
+static inline void printTypeSizes(void){}
+static inline void BasicCrypto(void){}
+//static inline void threadpool_api_test(void){}
 #endif
 
+static int diff(int a, int b){
+    return a-b;
+}
+
+void test_diff(void)//our test function 2
+{
+    CU_ASSERT(1==diff(3,2));
+    CU_ASSERT(-3==diff(3,6));
+    CU_ASSERT(-9==diff(-3,6));
+    CU_ASSERT(-6==diff(0,6));
+}
+/*
+static
+void threadpool_api_test(void) {
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+
+    //result = AlpacaThreadpool_initPool((uint8_t)10);
+    
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    
+    
+}
+*/
+
+int init_suite(void) { return 0; }
+int clean_suite(void) { return 0; }
+
 void DevTests(void){
+
+    CU_pSuite pSuite1 = NULL;
+
+    // Initialize CUnit test registry
+    if (CUE_SUCCESS != CU_initialize_registry()){
+        exit(CU_get_error());
+    }
+
+    // Add suite1 to registry
+    pSuite1 = CU_add_suite("TEST SUITE", init_suite, clean_suite);
+    if (NULL == pSuite1) {
+        CU_cleanup_registry();
+        exit(CU_get_error());
+    }
+
+    // add test1 to suite1
+    if ((NULL == CU_add_test(pSuite1,"Testing Diff Func", test_diff)))
+    {
+        CU_cleanup_registry();
+        exit(CU_get_error());
+    }
+
+
+    CU_basic_run_tests();// OUTPUT to the screen
+
+    CU_cleanup_registry();//Cleaning the Registry
+    //return CU_get_error();
+
+/*
     printTypeSizes();
     BasicCrypto();
-    memtest();
-    return;
+    mem_api_test();
+    threadpool_api_test();
+*/
+    exit(CU_get_error());
 }
 

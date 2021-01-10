@@ -23,6 +23,8 @@ int main(){
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
+    DevTests();
+
     /** 
      * Immediately daemonize ourself according to *nix spec
      * See more in daemon(7)

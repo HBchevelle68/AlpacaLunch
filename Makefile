@@ -52,6 +52,7 @@ CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -ffast-math -flto 
 DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 DBG= -g2 -Og -DTALKATIVELLAMA
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread -Wl,--gc-sections
+UNITTEST= -lcunit
 STATIC= -static
 STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) 
 
@@ -141,7 +142,7 @@ alpacalunch-release-static: $(ALLROBJS)
 #
 alpacalunch-debug: $(ALLDOBJS)
 	$(call PG, Linking Debug Build)
-	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) -o $(BIN)/$@
+	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) $(UNITTEST) -o $(BIN)/$@
 	$(call PG, $@ Done)
 
 alpacalunch-debug-static: $(ALLDOBJS)

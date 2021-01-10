@@ -45,7 +45,7 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
     }
     proc_pool.status |= ALPACA_TPOOL_POOLINIT;
     for(uint8_t i = 0; i < max_thrds; i++) {
-        proc_pool.pool[i].atid = i;
+        proc_pool.pool[i].aptid = i;
     }
     
     
@@ -85,7 +85,7 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
 
     /*
      * It is not entirely clear, but at this point
-     * result must be 0 or ALPACA_SUCCESS. hop over
+     * result must be 0 (ALPACA_SUCCESS). hop over
      * cleanup.
      */
     goto exit;

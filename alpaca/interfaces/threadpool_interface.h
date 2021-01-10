@@ -15,26 +15,48 @@
 #define ALPACA_TPOOL_READY    8  
 
 
+/**
+ * @brief Alpaca thread structure
+ * 
+ * thrd - posix thread
+ * aptid - alapaca threadpool ID
+ * active - bool, is the thread active
+ */
+typedef struct AlpacaThread {
 
-typedef struct AlpacaThread
-{
   pthread_t thrd;
-  uint8_t   atid;
+  uint8_t   aptid;
   uint8_t   active;
-  /* data */
-}Alpaca_thrd_t;
+
+} Alpaca_thrd_t;
 
 
 
-
-typedef struct AlpacaThreadPool
-{
+/**
+ * @brief Alpaca Threadpool structure
+ *        
+ * @note  Exepected to be used as an event based
+ *        threadpool 
+ * 
+ * 
+ * pool - allocated array of Alpaca_thrd_t's
+ *        These are our actual threads
+ * lock - mutex for pool access 
+ * lock_attr - attricutes of aformentioned lock
+ * max_threads - max alloed threads for this pool
+ * active_threads - number of actively executing threads
+ * status - bit flag of threadpool status 
+ * 
+ */
+typedef struct AlpacaThreadPool {
+  
   Alpaca_thrd_t*      pool;
   pthread_mutex_t     lock;
   pthread_mutexattr_t lock_attr;
   uint8_t  max_threads;
   uint8_t  active_threads;
   uint8_t  status;
+
 } Alpaca_tPool_t;
 
 
