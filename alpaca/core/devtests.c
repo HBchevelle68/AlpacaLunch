@@ -102,6 +102,7 @@ static inline void BasicCrypto(void){}
 //static inline void threadpool_api_test(void){}
 #endif
 
+#ifdef ALPACAUNIT
 static int diff(int a, int b){
     return a-b;
 }
@@ -113,25 +114,15 @@ void test_diff(void)//our test function 2
     CU_ASSERT(-9==diff(-3,6));
     CU_ASSERT(-6==diff(0,6));
 }
-/*
-static
-void threadpool_api_test(void) {
-
-    ALPACA_STATUS result = ALPACA_SUCCESS;
-
-    //result = AlpacaThreadpool_initPool((uint8_t)10);
-    
-    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    
-    
-}
-*/
 
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
+#else
+
+#endif
 
 void DevTests(void){
-
+/*
     CU_pSuite pSuite1 = NULL;
 
     // Initialize CUnit test registry
@@ -158,13 +149,13 @@ void DevTests(void){
 
     CU_cleanup_registry();//Cleaning the Registry
     //return CU_get_error();
-
+*/
 /*
     printTypeSizes();
     BasicCrypto();
     mem_api_test();
     threadpool_api_test();
 */
-    exit(CU_get_error());
+//   exit(CU_get_error());
 }
 

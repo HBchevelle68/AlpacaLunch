@@ -62,7 +62,7 @@ STATICBUILD-CFLAGS = -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(AL
 #
 ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, main.o crypto.o sighandler.o allu.o devtests.o)
 ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, main-debug.o crypto-debug.o sighandler-debug.o allu-debug.o devtests-debug.o) 
-
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, main-unit.o crypto-unit.o sighandler-unit.o allu-unit.o devtests-unit.o)
 #
 # ALPACA-MULTITHREADSERVER object files
 # Build out seperate objs for release, test, debug 
@@ -76,6 +76,7 @@ ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug
 #
 ALPACATPOOL_ROBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool.o alpacaqueue.o) 
 ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue-debug.o) 
+ALPACATPOOL_UOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-unit.o alpacaqueue-unit.o) 
 
 #
 # ALPACA-COMMS object files
@@ -83,6 +84,7 @@ ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue
 #
 ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o wolf.o) 
 ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wolf-debug.o)
+ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o sock-unit.o wolf-unit.o)
 
 #
 # ALPACA-UTILS object files
@@ -90,6 +92,7 @@ ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wol
 #
 ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils.o gen_utils.o) 
 ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-debug.o) 
+ALPACAUTILS_UOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-unit.o gen_utils-unit.o) 
 
 #
 # ALPACA-MEMORY object files
@@ -97,6 +100,7 @@ ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-d
 #
 ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory.o alpaca_buffer.o) 
 ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_buffer-debug.o) 
+ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buffer-unit.o) 
 
 #
 # Combining all modules into single varible
@@ -113,18 +117,28 @@ ALLDOBJS = $(ALPACACORE_DOBJS) 		 \
 		   $(ALPACATPOOL_DOBJS)		 \
 		   $(ALPACACOMMS_DOBJS)		 \
 		   $(ALPACAUTILS_DOBJS)		 \
-		   $(ALPACAMEM_DOBJS)		 
+		   $(ALPACAMEM_DOBJS)		
 
-.PHONY: clean
+ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
+		   $(ALPACAMTHREADSERV_UOBJS)\
+		   $(ALPACATPOOL_UOBJS)		 \
+		   $(ALPACACOMMS_UOBJS)		 \
+		   $(ALPACAUTILS_UOBJS)		 \
+		   $(ALPACAMEM_UOBJS) 
+
+.PHONY: release debug unittest clean scrub
 
 all: clean init-dirs \
 	 alpacalunch-release\
 	 alpacalunch-debug \
+	 alpacalunch-unittest \
 	 scrub misc success
 
 release: init-dirs scrub alpacalunch-release scrub success
 
 debug: init-dirs scrub alpacalunch-debug scrub success
+
+unittest: init-dirs scrub alpacalunch-unittest scrub success
 
 #
 # RELEASE, RELEASE STATIC(broken) builds
@@ -148,10 +162,21 @@ alpacalunch-debug: $(ALLDOBJS)
 alpacalunch-debug-static: $(ALLDOBJS)
 	$(CC) $(DBGCFLAGS) $(DBG) $(STATIC) $^ $(CRYPTSTATIC) -o $(BIN)/$@
 
+#
+# DEBUG, DEBUG STATIC(broken) builds
+#
+alpacalunch-unittest: $(ALLUOBJS)
+	$(call PG, Linking Unit Test Build)
+	$(CC) $(DBGCFLAGS) $(DBG) $^ $(CRYPTSTATIC) $(LFLAGS) $(UNITTEST) -o $(BIN)/$@
+	$(call PG, $@ Done)
+
 %.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
 
 %-debug.o: %.c $(DEPS)
+	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
+
+%-unit.o: %.c $(DEPS)
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
 
 runtest:
@@ -170,24 +195,29 @@ misc:
 	
 
 clean:
-	rm -fr $(BIN)/* $(ALLROBJS) $(ALLDOBJS) $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
+	rm -fr $(BIN)/* $(ALLROBJS) $(ALLDOBJS) $(ALLUOBJS) $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
 
 scrub:
 	$(call PY, Cleaning...)
-	rm -f $(ALLROBJS) $(ALLDOBJS) 
-
+	rm -f $(ALLROBJS) $(ALLDOBJS) $(ALLUOBJS)
+	
 success:
 	$(call PG, BUILD COMPLETE) 
 
 #
 # Functions
 #
+
+# Print Yellow
 define PY
 	@echo "\033[1;93m[*] $(1) \033[0m"
 endef
+# Print Green
 define PG
 	@echo "\033[38;5;084m[+] $(1) \033[0m"
 endef
+
+
 
 
 
