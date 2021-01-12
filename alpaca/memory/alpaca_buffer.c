@@ -3,7 +3,7 @@
 #include <core/logging.h>
 #include <interfaces/memory_interface.h>
 
-/*
+/**
  *	@brief initializes a ALLU_Buffer_t structure which 
  *		   represnts a ALLU buffer
  *	
@@ -32,7 +32,7 @@ ALLU_Buffer_t * AlpacaBuffer_init(size_t size){
 	return buff;
 }
 
-/*
+/**
  *	@brief free's the respective buffer and set ptr to NULL
  *	
  *	@param alluBuffer by ref ptr to ALLU_Buffer_t* struct
@@ -63,7 +63,7 @@ ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
 	return ALPACA_SUCCESS;
 }
 
-/*
+/**
  *	@brief Appends the data for a given size to the respective
  *		   ALLU_Buffer_t struct. 
  *
@@ -106,7 +106,7 @@ ALPACA_STATUS AlpacaBuffer_append(ALLU_Buffer_t **alluBuffer, uint8_t *data, siz
 	return ALPACA_SUCCESS;	
 }
 
-/*
+/**
  *	@brief Resize the respective structure. This can be used
  *		   to SHRINK a ALLU_Buffer as well grow
  *	

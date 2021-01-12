@@ -2,6 +2,7 @@
 #include <CUnit/CUnit.h>
 
 #include <core/logging.h>
+#include <core/codes.h>
 #include <interfaces/memory_interface.h>
 
 ALLU_Buffer_t *alpaca_buffer;
@@ -58,6 +59,8 @@ void memtest (void){
 
 void AlpacaUnit_memory_base(void){
 
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+
     CU_ASSERT_PTR_NULL(alpaca_buffer);
     
     alpaca_buffer = AlpacaBuffer_init(4000);
@@ -65,17 +68,25 @@ void AlpacaUnit_memory_base(void){
     CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
     CU_ASSERT_EQUAL(alpaca_buffer->size, 4000);
 
-    AlpacaBuffer_free(&alpaca_buffer);
+    result = AlpacaBuffer_free(&alpaca_buffer);
     CU_ASSERT_PTR_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
 
     alpaca_buffer = AlpacaBuffer_init(MAXMEM);
     CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
     CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
     CU_ASSERT_EQUAL(alpaca_buffer->size, MAXMEM);
-    
 
-    AlpacaBuffer_free(&alpaca_buffer);
+    result = AlpacaBuffer_free(&alpaca_buffer);
     CU_ASSERT_PTR_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+
+    alpaca_buffer = AlpacaBuffer_init(MAXMEM+1);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_MEMNOBUFFER);
 
     return;
 }
