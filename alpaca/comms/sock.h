@@ -12,10 +12,10 @@
  */
 typedef struct AlpacaLunch_Socket{
 
-	int 	 		   fd; /**< Some documentation for the member BoxStruct#fd. */
-	uint8_t  		   type;
+	int fd; 
+	uint8_t type;
 	struct sockaddr_in peer;
-	WOLFSSL* 		   ssl;
+	WOLFSSL* ssl;
 
 } Alpaca_sock_t;
 

@@ -8,7 +8,6 @@
 #include <core/crypto.h>
 #include <core/sighandler.h>
 #include <core/allu.h>
-#include <core/devtests.h>
 
 // Interfaces 
 #include <interfaces/threadpool_interface.h>
@@ -18,12 +17,11 @@
 
 extern Alpaca_commsCtx_t *coreComms;
 
-int main(){
+int main(int argc, char** argv){
     
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
-    DevTests();
 
     /** 
      * Immediately daemonize ourself according to *nix spec
