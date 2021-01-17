@@ -32,10 +32,12 @@ typedef uint32_t ALPACA_STATUS;
 /*
  * Memory Error Codes
  */
+#define ALPACA_ERROR_MEMINIT    	  	(49)
 #define ALPACA_ERROR_MEMNOBUFFER	  	(50)
 #define ALPACA_ERROR_MEMEXCEEDED	  	(51)
 #define ALPACA_ERROR_MEMRESZFAIL	  	(52)
 #define ALPACA_ERROR_MEMAPNDFAIL	  	(53)
+#define ALPACA_ERROR_MEMFREEFAIL	  	(54)
 
 /*
  * Threadpool Error Codes

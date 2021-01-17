@@ -53,13 +53,14 @@ int main(){
         exit(CU_get_error());
     }
 
-    // add test1 to suite1
-    if ((NULL == CU_add_test(pSuite1,"AlpacaUnit Memory Base", AlpacaUnit_memory_base)))
-    {
+    if ((NULL == CU_add_test(pSuite1,"AlpacaBuffer_init/AlpacaBuffer_free", AlpacaUnit_buffer_base)) || 
+        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_append", AlpacaUnit_buffer_append))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }
 
+
+    
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
 

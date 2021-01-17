@@ -1,12 +1,17 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 
+#include <unittests/alpaca_unit.h>
+
 #include <core/logging.h>
 #include <core/codes.h>
 #include <interfaces/memory_interface.h>
 
+
+
 ALLU_Buffer_t *alpaca_buffer;
 static char HELLOWORLD[] = "HELLO WORLD!";
+static const uint32_t HWSTRSZ = 12;
 
 
 int AlpacaUnit_memory_initSuite(void){
@@ -21,72 +26,142 @@ int AlpacaUnit_memory_cleanSuite(void){
     return 0;
 }
 
-static __attribute__((unused))
-void memtest (void){
 
-    // Test init
-    alpaca_buffer = AlpacaBuffer_init(4000);
-    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", alpaca_buffer, alpaca_buffer->size, alpaca_buffer->index);
-    
-    // Test ensureRoom and resize (GROW)
-    AlpacaBuffer_ensureRoom(&alpaca_buffer, 1024*10);
-    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", alpaca_buffer, alpaca_buffer->size, alpaca_buffer->index);
-    AlpacaMemory_dumpHex(alpaca_buffer->buffer, alpaca_buffer->index);
-
-    // Test append
-    for(int i = 0; i<10; i++){
-        AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, 13);
-    }
-    AlpacaMemory_dumpHex(alpaca_buffer->buffer, alpaca_buffer->index);
-
-
-    // Test zero
-    AlpacaBuffer_zero(&alpaca_buffer);
-    AlpacaMemory_dumpHex(alpaca_buffer->buffer, alpaca_buffer->index);
-    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", alpaca_buffer, alpaca_buffer->size, alpaca_buffer->index);
-
-    // Test resize (SHRINK)
-    alpaca_buffer = AlpacaBuffer_resize(&alpaca_buffer, 1024);
-    AlpacaMemory_dumpHex(alpaca_buffer->buffer, alpaca_buffer->index);
-    LOGDEBUG("Buffer [%p] Size [%lu] Used [%lu]\n", alpaca_buffer, alpaca_buffer->size, alpaca_buffer->index);
-
-    // Test free
-    AlpacaBuffer_free(&alpaca_buffer);
-    LOGDEBUG("Buffer [%p]\n", alpaca_buffer);
-    
-    return; 
-}
-
-void AlpacaUnit_memory_base(void){
+void AlpacaUnit_buffer_base(void){
 
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
+    /*
+     * Verify base allocation and member assignment
+     */
     CU_ASSERT_PTR_NULL(alpaca_buffer);
-    
-    alpaca_buffer = AlpacaBuffer_init(4000);
+    result = AlpacaBuffer_init(&alpaca_buffer, FOUR_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
     CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
-    CU_ASSERT_EQUAL(alpaca_buffer->size, 4000);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, FOUR_KB);
 
+    /*
+     * Verify base de-allocation and pointer cleanup
+     */
     result = AlpacaBuffer_free(&alpaca_buffer);
-    CU_ASSERT_PTR_NULL(alpaca_buffer);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
 
-    alpaca_buffer = AlpacaBuffer_init(MAXMEM);
+    /*
+     * Verify base allocation and member assignment
+     * to max allowed buffer size
+     */
+    result = AlpacaBuffer_init(&alpaca_buffer, MAXMEM);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
     CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
     CU_ASSERT_EQUAL(alpaca_buffer->size, MAXMEM);
 
+    /*
+     * Verify base de-allocation and pointer cleanup
+     */
     result = AlpacaBuffer_free(&alpaca_buffer);
-    CU_ASSERT_PTR_NULL(alpaca_buffer);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-
-    alpaca_buffer = AlpacaBuffer_init(MAXMEM+1);
     CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    /*
+     * Verify that attempts to allocate past max allowed
+     * gracefully fails
+     */
+    result = AlpacaBuffer_init(&alpaca_buffer, MAXMEM+1);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    /*
+     * Verify de-allocation gracefully fails with
+     * invalid pointer
+     */
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_MEMNOBUFFER);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    return;
+}
+
+void AlpacaUnit_buffer_append(void){
+    
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+
+    /*
+     * Baseline append test, verify data can be
+     * written accurately, repeticiously, and verified
+     */
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    AlpacaBuffer_init(&alpaca_buffer,TEN_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, TEN_KB);
+
+    for(int i = 0; i<300; i++){
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+        CU_ASSERT_EQUAL(alpaca_buffer->index, (HWSTRSZ*(i+1)));
+        CU_ASSERT_NSTRING_EQUAL((alpaca_buffer->buffer+(HWSTRSZ*i)),HELLOWORLD,HWSTRSZ);
+    }
 
     result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(alpaca_buffer);
-    CU_ASSERT_EQUAL(result, ALPACA_ERROR_MEMNOBUFFER);
 
+    /*
+     * Test appends ability to properly expand memory
+     * on-demand 
+     */
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    AlpacaBuffer_init(&alpaca_buffer,ONE_KB);
+
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    for(int i = 0; i<86; i++){
+
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+        CU_ASSERT_EQUAL(alpaca_buffer->index, (HWSTRSZ*(i+1)));
+        CU_ASSERT_NSTRING_EQUAL((alpaca_buffer->buffer+(HWSTRSZ*i)),HELLOWORLD,HWSTRSZ);
+    }
+
+    // Save old values for ASSERTs
+    size_t prev_index = alpaca_buffer->index;
+    size_t prev_size  = alpaca_buffer->size;
+
+    // Should see proper resizing
+    for(int i = 0; i<85; i++){
+
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+        CU_ASSERT_EQUAL(alpaca_buffer->index, prev_index+(HWSTRSZ*(i+1)));
+        CU_ASSERT_EQUAL(alpaca_buffer->size, prev_size+(HWSTRSZ*(i+1)));
+        CU_ASSERT_NSTRING_EQUAL((alpaca_buffer->buffer+(prev_index+(HWSTRSZ*i))),HELLOWORLD,HWSTRSZ);
+    }
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    
+    
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    AlpacaBuffer_init(&alpaca_buffer,FOUR_KB);
+
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, FOUR_KB);
+
+    
     return;
 }
