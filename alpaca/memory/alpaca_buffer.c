@@ -142,7 +142,6 @@ ALPACA_STATUS AlpacaBuffer_resize(ALLU_Buffer_t **alluBuffer, size_t memNeeded) 
 	}
 	
 	if((result = AlpacaBuffer_init(&tmp, memNeeded)) != ALPACA_SUCCESS){
-		result = ALPACA_ERROR_MEMRESZFAIL;
 		goto exit;
 	}
 

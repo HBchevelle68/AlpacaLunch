@@ -54,7 +54,8 @@ int main(){
     }
 
     if ((NULL == CU_add_test(pSuite1,"AlpacaBuffer_init/AlpacaBuffer_free", AlpacaUnit_buffer_base)) || 
-        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_append", AlpacaUnit_buffer_append))){
+        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_append", AlpacaUnit_buffer_append)) ||
+        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_resize", AlpacaUnit_buffer_resize))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }

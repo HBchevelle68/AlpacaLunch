@@ -46,6 +46,18 @@ CONTROLLER= $(DIR)/controller
 CONTROLLERSRC= $(CONTROLLER)/sassycontroller
 CONTROLLERTEST=$(CONTROLLER)/tests
 
+
+#
+# Options
+#
+MEMCHECK=0
+RUNUNIT=0
+
+#
+# Valgrind
+#
+VALGRIND= valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
+
 #
 # Build variables
 # Release Compilation and Lining
@@ -160,13 +172,14 @@ all: clean init-dirs \
 	 alpacalunch-release\
 	 alpacalunch-debug \
 	 alpacalunch-unittest \
-	 scrub misc success
+	 scrub misc success \
+	 rununittest
 
 release: init-dirs prescrub alpacalunch-release scrub success
 
 debug: init-dirs prescrub alpacalunch-debug scrub success
 
-unittest: init-dirs prescrub alpacalunch-unittest scrub success
+unittest: init-dirs prescrub alpacalunch-unittest scrub success rununittest
 
 #
 # RELEASE, RELEASE STATIC(broken) builds
@@ -207,11 +220,21 @@ alpacalunch-unittest: $(ALLUOBJS)
 %-unit.o: %.c $(DEPS)
 	$(CC) -c $(UNIT) $(UNITCFLAGS) $< -o $@
 
-runtest:
+runcomponenttest:
 	@echo "\n***** RUNNING COMPONENT TESTS *****\n"
-	@sudo python3 $(COMPONENTALL) 
+	#@sudo python3 $(COMPONENTALL) 
 	@echo "\n***** COMPONENT TESTS COMPLETE *****\n"
 	
+rununittest:
+ifeq ($(MEMCHECK),$(filter $(MEMCHECK),1 Yes yes YES True true TRUE))
+
+		$(VALGRIND) $(BIN)/alpacalunch-unittest
+
+else ifeq ($(RUNUNIT),$(filter $(RUNUNIT),1 Yes yes YES True true TRUE))
+
+		$(BIN)/alpacalunch-unittest
+endif
+
 init-dirs:
 	mkdir -p $(HASH)
 	mkdir -p $(BIN)
