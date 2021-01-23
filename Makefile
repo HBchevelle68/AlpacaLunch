@@ -52,6 +52,10 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 #
 MEMCHECK=0
 RUNUNIT=0
+TALKBUGGYTOME=0
+ifeq ($(TALKBUGGYTOME),$(filter $(TALKBUGGYTOME),1 Yes yes YES True true TRUE))
+	UNITDBG= -DTALKATIVELLAMA
+endif
 
 #
 # Valgrind
@@ -71,7 +75,7 @@ DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 
 # Unit Test Compilation and Lining
 UNIT= -g -O2
-UNITCFLAGS= -Werror -Wall -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(UNITINCLUDE)
+UNITCFLAGS= -Werror -Wall $(UNITDBG) -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(UNITINCLUDE)
 UNITLFLAGS= -lcunit -L$(UNITTESTBASE)
 
 # Static Compilation and Lining
@@ -168,11 +172,11 @@ ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
 
 .PHONY: clean
 
-all: clean init-dirs \
-	 alpacalunch-release\
-	 alpacalunch-debug \
+all: clean init-dirs 	  \
+	 alpacalunch-release  \
+	 alpacalunch-debug 	  \
 	 alpacalunch-unittest \
-	 scrub misc success \
+	 scrub misc success   \
 	 rununittest
 
 release: init-dirs prescrub alpacalunch-release scrub success

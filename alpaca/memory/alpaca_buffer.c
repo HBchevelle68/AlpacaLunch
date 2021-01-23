@@ -210,15 +210,9 @@ exit:
 }
 
 /**
- *	@brief Verifies there is enough room left to write to the buffer
- *		   ensuring valid memory writes
- *	
- *	@note  If there is not enough room a reallocation will occur to 
- *         expand buffer
+ *	@brief Zero's out all memory in buffer and sets index accordingly
  *	
  *	@param alluBuffer by ref ptr to ALLU_Buffer_t* struct
- *	@param data by ptr to src data to copy from
- *	@param size amount from data to copy from
  *	@return ALPACA_STATUS
  */
 ALPACA_STATUS  AlpacaBuffer_zero(ALLU_Buffer_t **alluBuffer){
@@ -230,7 +224,7 @@ ALPACA_STATUS  AlpacaBuffer_zero(ALLU_Buffer_t **alluBuffer){
 		return ALPACA_ERROR_MEMNOBUFFER;
 	}
 
-	AlpacaMemory_zero((*alluBuffer)->buffer, (*alluBuffer)->size , ((*alluBuffer)->size - (*alluBuffer)->index));
+	AlpacaMemory_zero((*alluBuffer)->buffer, (*alluBuffer)->size , (*alluBuffer)->size);
 	(*alluBuffer)->index = 0;
 
 	return ALPACA_SUCCESS;

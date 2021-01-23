@@ -353,7 +353,6 @@ void AlpacaUnit_buffer_resize(void){
      * Attempt to Resize (SHRINK) a buffer that has been written to below the min 
      * amount needed to preserve data. Should fail gracefully and data be intact
      *************************************************************************************/
-
     result = AlpacaBuffer_init(&alpaca_buffer, FOUR_KB);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
@@ -380,6 +379,174 @@ void AlpacaUnit_buffer_resize(void){
     result = AlpacaBuffer_free(&alpaca_buffer);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(alpaca_buffer); 
+
+    return;
+}
+
+void AlpacaUnit_buffer_ensureRoom(void){
+    
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    size_t prev_index = 0;
+    size_t prev_size = 0;
+
+    /*************************************************************************************
+     * Baseline evaluation
+     *************************************************************************************/
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    result = AlpacaBuffer_init(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    result = AlpacaBuffer_ensureRoom(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    /*************************************************************************************
+     * Test ability to expand
+     *************************************************************************************/
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    result = AlpacaBuffer_init(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    result = AlpacaBuffer_ensureRoom(&alpaca_buffer, FOUR_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, FOUR_KB);
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    
+    /*************************************************************************************
+     * Test ability to expand and preserve
+     *************************************************************************************/
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    result = AlpacaBuffer_init(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    for(int i = 0; i<300; i++){
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    }
+    prev_index = alpaca_buffer->index;
+    prev_size = alpaca_buffer->size;
+
+    result = AlpacaBuffer_ensureRoom(&alpaca_buffer, FOUR_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, prev_index);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, prev_size+FOUR_KB);
+
+    for(int i = 0; i<300; i++){
+        CU_ASSERT_NSTRING_EQUAL((alpaca_buffer->buffer+(HWSTRSZ*i)), HELLOWORLD, HWSTRSZ);
+    }
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    /*************************************************************************************
+     * Test ability to catch bad params
+     * First a null pointer to a buffer
+     * Next test that we can't expand past MAXMEM
+     *************************************************************************************/
+
+    result = AlpacaBuffer_ensureRoom(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_MEMNOBUFFER);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+
+
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    result = AlpacaBuffer_init(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    for(int i = 0; i<300; i++){
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    }
+
+    prev_index = alpaca_buffer->index;
+    prev_size = alpaca_buffer->size;
+
+    result = AlpacaBuffer_ensureRoom(&alpaca_buffer, MAXMEM+1);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, prev_index);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, prev_size);
+
+    for(int i = 0; i<300; i++){
+        CU_ASSERT_NSTRING_EQUAL((alpaca_buffer->buffer+(HWSTRSZ*i)), HELLOWORLD, HWSTRSZ);
+    }
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+    return;
+}
+
+void AlpacaUnit_buffer_zero(void){
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    //size_t prev_index = 0;
+    size_t prev_size = 0;
+
+    /*************************************************************************************
+     * Baseline evaluation
+     *************************************************************************************/
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+    result = AlpacaBuffer_init(&alpaca_buffer, ONE_KB);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, ONE_KB);
+
+    for(int i = 0; i<300; i++){
+        result = AlpacaBuffer_append(&alpaca_buffer, (uint8_t*)HELLOWORLD, HWSTRSZ);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    }
+
+    
+    prev_size = alpaca_buffer->size;
+
+    result = AlpacaBuffer_zero(&alpaca_buffer);
+    CU_ASSERT_PTR_NOT_NULL(alpaca_buffer);
+    CU_ASSERT_EQUAL(alpaca_buffer->index, 0);
+    CU_ASSERT_EQUAL(alpaca_buffer->size, prev_size);
+
+    for(int i = 0; i<ONE_KB; i++){
+        CU_ASSERT_EQUAL(alpaca_buffer->buffer[i], 0);
+    }
+
+    result = AlpacaBuffer_free(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(alpaca_buffer);
+
+
+    /*************************************************************************************
+     * Test ability to catch bad params
+     *************************************************************************************/
+    result = AlpacaBuffer_zero(&alpaca_buffer);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_MEMNOBUFFER);
 
     return;
 }
