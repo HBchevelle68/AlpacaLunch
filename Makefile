@@ -236,7 +236,7 @@ ifeq ($(MEMCHECK),$(filter $(MEMCHECK),1 Yes yes YES True true TRUE))
 		$(call PG, $@ Done)
 
 else ifeq ($(RUNUNIT),$(filter $(RUNUNIT),1 Yes yes YES True true TRUE))
-		$(call PY, Running unit tests in valgrind...)
+		$(call PY, Running unit tests...)
 		$(BIN)/alpacalunch-unittest
 		$(call PG, $@ Done)
 endif
