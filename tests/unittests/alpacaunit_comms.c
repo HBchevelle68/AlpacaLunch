@@ -3,6 +3,11 @@
 #include <time.h>
 #include <pthread.h>
 
+
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/ssl.h>
+
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 
@@ -13,17 +18,155 @@
 #include <interfaces/comms_interface.h>
 #include <comms/wolf.h>
 
+
+#define DEFAULTPORT 54321
+#define CERTFILE ".testcerts/cert.pem"
+#define KEYFILE  ".testcerts/private.pem"
+
+
 Alpaca_commsCtx_t *testServComms;
 Alpaca_commsCtx_t *testClientComms;
 
 
 static pthread_mutex_t g_lock;
+static ALPACA_STATUS flag;
 static uint8_t *g_buffer;
 
 
 
 
-void unit_server(void* args)__attribute__((unused));
+void unit_server(void* args){
+    int                sockfd;
+    int                connd;
+    struct sockaddr_in servAddr;
+    struct sockaddr_in clientAddr;
+    socklen_t          size = sizeof(clientAddr);
+    char               g_buff[256];
+    size_t             len;
+    int                shutdown = 0;
+    int                ret;
+    const char*        reply = "I hear ya fa shizzle!\n";
+    
+    /* declare wolfSSL objects */
+    WOLFSSL_CTX* ctx;
+    WOLFSSL*     ssl;
+
+    pthread_mutex_lock(&g_lock);
+
+
+    /* Create a socket that uses an internet IPv4 address,
+     * Sets the socket to be stream based (TCP),
+     * 0 means choose the default protocol. 
+     */
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        LOGERROR(stderr, "ERROR: failed to create the socket\n");
+        flag = ALPACA_FAILURE;
+    }
+
+
+
+    /* Create and initialize WOLFSSL_CTX */
+    if ((ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL) {
+        LOGERROR(stderr, "ERROR: failed to create WOLFSSL_CTX\n");
+        flag = ALPACA_FAILURE;
+    }
+
+    /* Load server certificates into WOLFSSL_CTX */
+    if (wolfSSL_CTX_use_certificate_file(ctx, CERTFILE, SSL_FILETYPE_PEM)
+        != SSL_SUCCESS) {
+        LOGERROR(stderr, "ERROR: failed to load %s, please check the file.\n",
+                CERTFILE);
+        flag = ALPACA_FAILURE;
+    }
+
+    /* Load server key into WOLFSSL_CTX */
+    if (wolfSSL_CTX_use_PrivateKey_file(ctx, KEYFILE, SSL_FILETYPE_PEM)
+        != SSL_SUCCESS) {
+        LOGERROR(stderr, "ERROR: failed to load %s, please check the file.\n",
+                KEYFILE);
+        flag = ALPACA_FAILURE;
+    }
+
+
+
+    /* Initialize the server address struct with zeros */
+    memset(&servAddr, 0, sizeof(servAddr));
+
+    /* Fill in the server address */
+    servAddr.sin_family      = AF_INET;             /* using IPv4      */
+    servAddr.sin_port        = htons(DEFAULTPORT); /* on DEFAULT_PORT */
+    servAddr.sin_addr.s_addr = INADDR_ANY;          /* from anywhere   */
+
+
+
+    /* Bind the server socket to our port */
+    if (bind(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) == -1) {
+        LOGERROR(stderr, "ERROR: failed to bind\n");
+        flag = ALPACA_FAILURE;
+    }
+
+    /* Listen for a new connection, allow 5 pending connections */
+    if (listen(sockfd, 5) == -1) {
+        LOGERROR(stderr, "ERROR: failed to listen\n");
+        flag = ALPACA_FAILURE;
+    }
+
+    while (!flag) {
+        LOGDEBUG("Waiting for a connection...\n");
+
+        /* Accept client connections */
+        if ((connd = accept(sockfd, (struct sockaddr*)&clientAddr, &size)) == -1) {
+            LOGERROR(stderr, "ERROR: failed to accept the connection\n\n");
+            flag = ALPACA_FAILURE;
+        }
+
+        /* Create a WOLFSSL object */
+        if ((ssl = wolfSSL_new(ctx)) == NULL) {
+            LOGERROR(stderr, "ERROR: failed to create WOLFSSL object\n");
+            flag = ALPACA_FAILURE;
+        }
+
+        /* Attach wolfSSL to the socket */
+        wolfSSL_set_fd(ssl, connd);
+
+        /* Establish TLS connection */
+        ret = wolfSSL_accept(ssl);
+        if (ret != SSL_SUCCESS) {
+            LOGERROR(stderr, "wolfSSL_accept error = %d\n",
+                wolfSSL_get_error(ssl, ret));
+            flag = ALPACA_FAILURE;
+        }
+
+
+        LOGDEBUG("Client connected successfully\n");
+
+
+
+        /* Read the client data into our g_buff array */
+        memset(g_buff, 0, sizeof(g_buff));
+        if (wolfSSL_read(ssl, g_buff, sizeof(g_buff)-1) == -1) {
+            LOGERROR(stderr, "ERROR: failed to read\n");
+            flag = ALPACA_FAILURE;
+        }
+        flag = ALPACA_SUCCESS;
+        pthread_mutex_unlock(&g_lock);
+        LOGDEBUG("Client: %s\n", g_buff);
+
+
+        /* Cleanup after this connection */
+        wolfSSL_free(ssl);      /* Free the wolfSSL object              */
+        close(connd);           /* Close the connection to the client   */
+    }
+
+
+    /* Cleanup and return */
+    wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
+    close(sockfd);          /* Close the socket listening for clients   */
+    return 0;               /* Return reporting a success               */
+
+
+
+}
 
 int AlpacaUnit_comms_initSuite(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
@@ -34,13 +177,6 @@ int AlpacaUnit_comms_initSuite(void){
      * the process level comms object
      */
     if((result = AlpacaComms_init(ALPACA_COMMSTYPE_TLS12)) != ALPACA_SUCCESS) {
-        goto exit;
-    }
-
-    /*
-     * Now init the static local server comms
-     */
-    if((result = AlpacaComms_initCtx(&testServComms, ALPACA_COMMSTYPE_TLS12)) != ALPACA_SUCCESS) {
         goto exit;
     }
 
@@ -165,8 +301,6 @@ void AlpacaUnit_comms_base(void){
     result = AlpacaComms_destroyCtx(&temp_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
-
-    
 
 
     return;

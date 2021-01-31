@@ -27,7 +27,28 @@ November 21, 2020
 ./configure \
 --prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs \
 --disable-oldtls \
---disable-filesystem \
+--disable-examples \
+--disable-crypttests \
+--disable-fips \
+--disable-aescbc \
+--disable-des3 \
+--disable-md5 \
+--disable-pkcs12 \
+--enable-static \
+--enable-harden \
+--enable-fastmath \
+--enable-keygen \
+--enable-certgen \
+--enable-tls13 \
+--enable-aesctr \
+--enable-ssh \
+CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" \
+LDFLAGS="-Wl,--gc-sections" 
+
+January 31, 2021
+./configure \
+--prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs \
+--disable-oldtls \
 --disable-examples \
 --disable-crypttests \
 --disable-fips \

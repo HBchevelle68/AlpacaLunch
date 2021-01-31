@@ -131,9 +131,6 @@ extern "C" {
 #undef  HAVE_HASHDRBG
 #define HAVE_HASHDRBG
 
-#undef  NO_FILESYSTEM
-#define NO_FILESYSTEM
-
 #undef  HAVE_TLS_EXTENSIONS
 #define HAVE_TLS_EXTENSIONS
 
