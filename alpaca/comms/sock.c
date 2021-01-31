@@ -7,7 +7,6 @@
 
 
 // Internal
-//#include <interfaces/memory_interface.h>
 #include <comms/sock.h>
 #include <comms/wolf.h>
 #include <core/logging.h>

@@ -182,18 +182,68 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_send (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaWolf_send(WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
+    if(NULL == sslCtx || NULL == buf || len == 0){
+        LOGERROR("AlpacaWolf_send given bad params!\n");
+        result = ALPACA_ERROR_BADPARAM;
+        *out = -1;
+        goto exit;
+    }
 
+    *out = wolfSSL_write(sslCtx, buf, len);
+    if(*out <= 0){
+        LOGERROR("Failure to send!\n");
+        result = ALPACA_ERROR_WOLFSSLWRITE;
+    }
+    /*
+     * If ever switched to non-blocking some extra work
+     * needs to be done here
+     */
 
-
+exit:
     LEAVING;
     return result;
 }
 
 
+/**
+ *  @brief Send data through set SSL connection   
+ *         
+ *  @param alpacasock Alpaca_sock_t pointer to custom socket
+ *  @param buf pointer to buffer to send
+ *  @param len length of data to send
+ *  @param out out variable of bytes successfully sent
+ * 
+ *  @return ALPACA_STATUS 
+ */
+ALPACA_STATUS AlpacaWolf_recv(WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+
+    if(NULL == sslCtx || NULL == buf || len == 0){
+        LOGERROR("AlpacaWolf_recv given bad params!\n");
+        result = ALPACA_ERROR_BADPARAM;
+        *out = -1;
+        goto exit;
+    }
+
+    *out = wolfSSL_read(sslCtx, buf, len);
+    if(*out <= 0){
+        LOGERROR("Failure to read!\n");
+        result = ALPACA_ERROR_WOLFSSLREAD;
+    }
+    /*
+     * If ever switched to non-blocking some extra work
+     * needs to be done here
+     */
+
+exit:
+    LEAVING;
+    return result;
+}
 
 
 /**

@@ -141,7 +141,7 @@ ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buf
 # ALPACA-UNITTESTS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAUNIT_UOBJS=$(addprefix $(UNITTESTSRC)/, alpacaunit_main-unit.o alpacaunit_memory-unit.o)
+ALPACAUNIT_UOBJS=$(addprefix $(UNITTESTSRC)/, alpacaunit_main-unit.o alpacaunit_memory-unit.o alpacaunit_comms-unit.o)
 
 #
 # Combining all modules into single varible
@@ -251,6 +251,7 @@ misc:
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	
 clean:
+	$(call PY, Full clean...)
 	rm -fr $(BIN)/* $(ALLROBJS) $(ALLDOBJS) $(ALLUOBJS) $(CONTROLLERTEST)/*.pyc $(CONTROLLERSRC)/*.pyc
 
 prescrub scrub:

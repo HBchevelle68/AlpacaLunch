@@ -6,8 +6,8 @@
 typedef uint32_t ALPACA_STATUS;
 
 
-#define ALPACA_SUCCESS  	  	(0)
-#define ALPACA_FAILURE  	  	(1)
+#define ALPACA_SUCCESS (0)
+#define ALPACA_FAILURE (1)
 
 /*
  * Comms Error Codes 
@@ -16,8 +16,12 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_WOLFNOINIT         (3)
 #define ALPACA_ERROR_WOLFSSLCREATE      (4)
 #define ALPACA_ERROR_WOLFSSLCONNECT     (5)
+#define ALPACA_ERROR_WOLFSSLWRITE       (6)
+#define ALPACA_ERROR_WOLFSSLREAD        (7)
+
 #define ALPACA_ERROR_COMMSINIT 	        (10)
 #define ALPACA_ERROR_COMMSCONNECT       (11)
+
 #define ALPACA_ERROR_SOCKCREATE	        (20)
 #define ALPACA_ERROR_SOCKSETPEER        (21)
 
@@ -55,7 +59,7 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_BADPARAM	        (104)
 #define ALPACA_ERROR_MALLOC 	        (105)
 #define ALPACA_ERROR_BADSTATE           (106)
-
+#define ALPACA_ERROR_UNSUPPORTED        (107)
 
 
 

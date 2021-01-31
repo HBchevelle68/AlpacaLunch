@@ -15,12 +15,18 @@
 #include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
 
+/*
+ * Comms context leading back to home
+ * See comms/comms.c
+ */
 extern Alpaca_commsCtx_t *coreComms;
 
 int main(int argc, char** argv){
     
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
+    char buffer[1024] = {0};
+    ssize_t out = 0;
 
 
     /** 
@@ -42,7 +48,16 @@ int main(int argc, char** argv){
     
 
     // FOR TEST ONLY! Doesn't belong here
-    AlpacaComms_connect(&coreComms, "127.0.0.1", 44444);
+    result = AlpacaComms_connect(&coreComms, "127.0.0.1", 44444);
+    
+    memset(buffer, 0, 1024);
+    strcpy(buffer,"WAZZZZZZUP!");
+    result = AlpacaComms_write(&coreComms, buffer, strlen(buffer), &out);
+    
+    result = AlpacaComms_read(&coreComms, buffer, 1024, &out);
+    LOGDEBUG("Buffer: %s\n", buffer);
+
+
 
     //DevTests();
    

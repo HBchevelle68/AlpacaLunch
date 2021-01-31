@@ -91,7 +91,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 	 */
 	if((*ctx) != NULL){
 		result = ALPACA_ERROR_BADPARAM;
-		LOGERROR("Pointer to Comms CTX appears invalid...points to %p...will not allocate\n", ctx);
+		LOGERROR("Pointer to Comms CTX appears valid...points to %p...will not allocate\n", ctx);
 		goto exit;
 	}
 	LOGINFO("Initializing Comms Ctx...\n");
@@ -136,7 +136,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 					goto exit;
 				}
 				(*ctx)->connect = AlpacaWolf_connect;
-				//(*ctx)->read    = AlpacaWolf_recv;
+				(*ctx)->read    = AlpacaWolf_recv;
 				(*ctx)->write   = AlpacaWolf_send;
 				(*ctx)->close   = AlpacaWolf_close;
 
@@ -145,17 +145,17 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 				break;
 		
 		case ALPACA_COMMSTYPE_TLS13:
-			result = ALPACA_FAILURE;
+			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("TLS 1.3 not supported yet");
 			break;
 
 		case ALPACA_COMMSTYPE_UDP:
-			result = ALPACA_FAILURE;
+			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("UDP not supported yet");
 			break;
 
 		case ALPACA_COMMSTYPE_SSH:
-			result = ALPACA_FAILURE;
+			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("SSH not supported yet");
 			break;
 
@@ -332,7 +332,7 @@ exit:
 ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
-	Alpaca_sock_t* ptr = (*ctx)->AlpacaSock;
+	
 
 	if(!(*ctx) || !(*ctx)->AlpacaSock){
 		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p, ctx->AlpacaSock:%p ", (*ctx), (*ctx)->AlpacaSock);
@@ -341,7 +341,7 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	}
 
 	// Close top layer comms
-	result = (*ctx)->close(ptr->ssl);
+	result = (*ctx)->close((*ctx)->AlpacaSock->ssl);
 	if(result != ALPACA_SUCCESS){
 		LOGERROR("Failure to close security comms layer");
 		goto exit;
@@ -360,10 +360,65 @@ exit:
 
 
 
+ALPACA_STATUS AlpacaComms_read(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+	ssize_t temp = 0;
+
+	if(!(*ctx) || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_read ctx:%p, buf:%p  len:%lu\n", (*ctx), buf, len);
+		result = ALPACA_ERROR_BADPARAM;
+		*out = 0;
+		goto exit;
+	}
+
+	/*
+	 * If non-blocking sockets end up being used
+	 * this will need to loop and have additional error checking
+	 * will also need polling
+	 */
+	result = (*ctx)->read((*ctx)->AlpacaSock->ssl, buf, len, &temp);
+	if(result != ALPACA_SUCCESS || temp <= 0){
+		LOGERROR("Error attempting read: %d\n", result);
+		*out = temp;
+		goto exit;
+	}
+	*out = temp;
+	LOGDEBUG("Recv'd %lu bytes\n", *out);
+
+exit:
+	LEAVING;
+	return result;	
+}
 
 
+ALPACA_STATUS AlpacaComms_write(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+	ssize_t temp = 0;
 
-/*
-ALPACA_STATUS AlpacaComms_read	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_write	  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
-*/
+	if(!(*ctx) || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, buf:%p  len:%lu\n", (*ctx), buf, len);
+		result = ALPACA_ERROR_BADPARAM;
+		*out = 0;
+		goto exit;
+	}
+
+	/*
+	 * If non-blocking sockets end up being used
+	 * this will need to loop and have additional error checking
+	 * will also need polling 
+	 */
+	result = (*ctx)->write((*ctx)->AlpacaSock->ssl, buf, len, &temp);
+	if(result != ALPACA_SUCCESS || temp <= 0){
+		LOGERROR("Error attempting send: %d\n", result);
+		*out = temp;
+		goto exit;
+	}
+	*out = temp;
+	LOGDEBUG("Sent %lu bytes\n", *out);
+
+exit:
+	LEAVING;
+	return result;	
+}

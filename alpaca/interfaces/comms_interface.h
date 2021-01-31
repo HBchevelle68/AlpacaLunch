@@ -79,6 +79,4 @@ ALPACA_STATUS AlpacaComms_read	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len,
 ALPACA_STATUS AlpacaComms_write	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t** ctx);
 
-
-
 #endif
