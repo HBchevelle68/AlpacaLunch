@@ -34,14 +34,16 @@ typedef enum AlpacaLunch_TLSVersion{
 } Alpaca_tlsVersion_t;
 
 /* Alpaca_commsCtx_t protocol values */ 
-#define ALPACA_COMMSTYPE_TLS12 0
-#define ALPACA_COMMSTYPE_TLS13 1
-#define ALPACA_COMMSTYPE_UDP   2
-#define ALPACA_COMMSTYPE_SSH   4
+#define ALPACA_COMMSPROTO_TLS12 0
+#define ALPACA_COMMSPROTO_TLS13 1
+#define ALPACA_COMMSPROTO_UDP   2
+#define ALPACA_COMMSPROTO_SSH   4
 
 /* Alpaca_commsCtx_t type values */
 #define ALPACA_COMMSTYPE_CLIENT 8
 #define ALPACA_COMMSTYPE_SERVER 16
+
+#define DISABLE_COMMS_TYPE 0x0007
 
 /* Alpaca_commsCtx_t Status values */ 
 #define ALPACA_COMMSSTATUS_NOTCONN 0

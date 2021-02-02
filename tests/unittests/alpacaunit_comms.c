@@ -42,14 +42,14 @@ void AlpacaUnit_comms_base(void){
     struct sockaddr_in *addrin_ptr = NULL;
     memset(&temp_addrin, 0, sizeof(struct sockaddr_in));
     
-    result = AlpacaComms_init(ALPACA_COMMSTYPE_TLS12);
+    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
 
     /*
      * Init TLS 1.2
      * Verify all layers of initialization is as expected
      */
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_TLS12);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL(temp_commsCTX);
 
@@ -79,25 +79,25 @@ void AlpacaUnit_comms_base(void){
      * Verify proper failures cases 
      */
     // Attempt to initialize obj already initialized
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_TLS12);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL(temp_commsCTX);
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_TLS12);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     result = AlpacaComms_destroyCtx(&temp_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
     // Attempt to initialize obj with unsupported comms type
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_TLS13);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS13);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_UDP);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_UDP);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_SSH);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_SSH);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
@@ -115,7 +115,7 @@ void AlpacaUnit_comms_base(void){
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_init(ALPACA_COMMSTYPE_TLS12);
+    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
 
     return;

@@ -54,7 +54,7 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
 
-    if(version > 4){
+    if(version > ALPACA_COMMSPROTO_SSH){
         LOGERROR("Version number not in range: %d\n", version);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
@@ -66,6 +66,8 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
          * Currently this is only support TLS 1.2, 
          */
         wolfSSL_Init();
+        wolfInitialized = 1;
+
         procWolfClientCtx = NULL;
         procWolfServerCtx = NULL;
         
@@ -101,12 +103,44 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
         }
         
         wolfSSL_CTX_set_verify(procWolfClientCtx, SSL_VERIFY_NONE, 0);
-
-        wolfInitialized = 1;
+        
         result = ALPACA_SUCCESS;
     }
 
 exit:
+    LEAVING;
+    return result;
+}
+
+/**
+ *  @brief
+ */
+ALPACA_STATUS AlpacaWolf_cleanUp(void){
+
+    ALPACA_STATUS result = ALPACA_ERROR_WOLFNOINIT;
+    ENTRY;
+
+    if(wolfInitialized){
+		/* 
+		 *	Free the wolfSSL context object
+		 *  Cleanup the wolfSSL environment 
+		 */
+		if(procWolfServerCtx){
+        	wolfSSL_CTX_free(procWolfServerCtx);
+    		procWolfServerCtx = NULL;
+		}
+
+		if(procWolfClientCtx){
+	        wolfSSL_CTX_free(procWolfClientCtx);    
+	    	procWolfClientCtx = NULL;
+		}
+
+    	wolfSSL_Cleanup();
+        wolfInitialized = 0;
+
+        result = ALPACA_SUCCESS;
+    }
+
     LEAVING;
     return result;
 }
@@ -129,9 +163,9 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
         goto exit;
     }
 
-    switch(0x00f0 & flags){
+    switch(DISABLE_COMMS_TYPE & flags){
 
-        case ALPACA_COMMSTYPE_TLS12:
+        case ALPACA_COMMSPROTO_TLS12:
             /**
              * Create ssl object
              */
@@ -140,20 +174,25 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
                 if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
                     result = ALPACA_ERROR_WOLFSSLCREATE;
-                    break;
                 }
+                result = ALPACA_SUCCESS;
             }
-            else {
+            else if (ALPACA_COMMSTYPE_SERVER & flags){
+
                 if ((alpacasock->ssl = wolfSSL_new(procWolfServerCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
                     result = ALPACA_ERROR_WOLFSSLCREATE;
-                    break;
                 }
+                result = ALPACA_SUCCESS;
             }
-            result = ALPACA_SUCCESS;
+            else {
+
+                LOGERROR("Error, invalid flags used %04x", flags);
+                result = ALPACA_ERROR_WOLFSSLCREATE;
+            }
             break;
 
-        case ALPACA_COMMSTYPE_TLS13:
+        case ALPACA_COMMSPROTO_TLS13:
 			result = ALPACA_FAILURE;
 			LOGERROR("TLS 1.3 not supported yet\n");
             break;
@@ -319,36 +358,3 @@ done:
     return result;   
 }
 
-/**
- *  @brief
- */
-ALPACA_STATUS AlpacaWolf_cleanUp(void){
-
-    ALPACA_STATUS result = ALPACA_ERROR_WOLFNOINIT;
-    ENTRY;
-
-    if(wolfInitialized){
-    
-		/* 
-		 *	Free the wolfSSL context object
-		 *  Cleanup the wolfSSL environment 
-		 */
-		if(procWolfServerCtx){
-        	wolfSSL_CTX_free(procWolfServerCtx);
-    		procWolfServerCtx = NULL;
-		}
-
-		if(procWolfClientCtx){
-	        wolfSSL_CTX_free(procWolfClientCtx);    
-	    	procWolfClientCtx = NULL;
-		}
-
-    	wolfSSL_Cleanup();
-        wolfInitialized = 0;
-
-        result = ALPACA_SUCCESS;
-    }
-
-    LEAVING;
-    return result;
-}

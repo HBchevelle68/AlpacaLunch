@@ -15,9 +15,10 @@
 #include <comms/wolf.h>
 #include <comms/sock.h>
 
-#define DEFAULTPORT  44444
-#define MAXRETRIES   5
-#define THREESECONDS (3*1000)
+
+#define DEFAULT_PORT  	   44444
+#define MAX_RETRIES   	   5
+#define THREE_SECONDS 	   (3*1000)
 
 // Process level variables 
 Alpaca_commsCtx_t *coreComms;
@@ -38,7 +39,7 @@ ALPACA_STATUS AlpacaComms_init(uint16_t flags){
 	 * Initilize the upper level comms layer
 	 */
 	LOGERROR("here: %d || %04x\n", flags,flags);
-	result = AlpacaWolf_init(0x0007 & flags);
+	result = AlpacaWolf_init(DISABLE_COMMS_TYPE & flags);
 	LOGERROR("Here\n");
 	if(result != ALPACA_SUCCESS){
 		LOGERROR("Error during TLS layer init Version:%d\n", flags);
@@ -125,9 +126,9 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	}
 
 
-	switch(0x0007 & flags) {
+	switch(DISABLE_COMMS_TYPE & flags) {
 
-		case ALPACA_COMMSTYPE_TLS12:
+		case ALPACA_COMMSPROTO_TLS12:
 				LOGINFO("Creating TLS 1.2 ssl obj\n");
 				/**
 				 * Create Client ssl object
@@ -147,17 +148,17 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 				(*ctx)->status  = ALPACA_COMMSSTATUS_NOTCONN;
 				break;
 		
-		case ALPACA_COMMSTYPE_TLS13:
+		case ALPACA_COMMSPROTO_TLS13:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("TLS 1.3 not supported yet\n");
 			break;
 
-		case ALPACA_COMMSTYPE_UDP:
+		case ALPACA_COMMSPROTO_UDP:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("UDP not supported yet\n");
 			break;
 
-		case ALPACA_COMMSTYPE_SSH:
+		case ALPACA_COMMSPROTO_SSH:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("SSH not supported yet\n");
 			break;
@@ -260,9 +261,9 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	/** 
 	 * Loop attempting to connect to supplied peer
 	 * If a failure is detected sleep for 3 seconds before
-	 * retrying. Retry up to MAXRETRIES
+	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAXRETRIES){
+	while(attempts < MAX_RETRIES){
 		ret = 0;
 
 		/* Wait for writeability */
@@ -283,7 +284,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 			{
 				LOGERROR("Failed to connect... errno: %d\n", errno	);
 				attempts++;
-				AlpacaUtilities_mSleep(THREESECONDS);
+				AlpacaUtilities_mSleep(THREE_SECONDS);
 				continue;
 			}
 			/* Connection established */
