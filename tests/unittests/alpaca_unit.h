@@ -8,6 +8,9 @@
 int AlpacaUnit_memory_initSuite(void);
 int AlpacaUnit_memory_cleanSuite(void);
 
+int AlpacaUnit_comms_initSuite(void);
+int AlpacaUnit_comms_cleanSuite(void);
+
 
 void AlpacaUnit_buffer_base(void);
 void AlpacaUnit_buffer_append(void);
@@ -16,6 +19,7 @@ void AlpacaUnit_buffer_ensureRoom(void);
 void AlpacaUnit_buffer_zero(void);
 
 void AlpacaUnit_comms_base(void);
+void AlpacaUnit_comms_connect(void);
 
 
 #endif

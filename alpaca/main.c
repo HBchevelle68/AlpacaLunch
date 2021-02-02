@@ -40,7 +40,8 @@ int main(int argc, char** argv){
     /** 
      * When debug is enabled this is an empty function
      */
-    result = AlpacaCore_init();
+    LOGERROR("here\n");
+    result = AlpacaCore_init( ALPACA_COMMSTYPE_TLS12 | ALPACA_COMMSTYPE_CLIENT);
     if(result != ALPACA_SUCCESS){
         LOGERROR("Global initialization error! [%u]\n", result);
         goto done;

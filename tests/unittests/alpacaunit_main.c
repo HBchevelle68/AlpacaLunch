@@ -40,13 +40,14 @@ int main(){
     }
 
     // Add comms tests to registry
-    pSuite1 = CU_add_suite("AlpacaLunch Comms Unit Tests", AlpacaUnit_memory_initSuite, AlpacaUnit_memory_cleanSuite);
+    pSuite1 = CU_add_suite("AlpacaLunch Comms Unit Tests", AlpacaUnit_comms_initSuite, AlpacaUnit_comms_cleanSuite);
     if (NULL == pSuite1) {
         CU_cleanup_registry();
         exit(CU_get_error());
     }
 
-    if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base))){
+    if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base)) ||
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }

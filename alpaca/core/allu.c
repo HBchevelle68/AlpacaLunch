@@ -6,7 +6,7 @@
 #include <core/sighandler.h>
 
 
-ALPACA_STATUS AlpacaCore_init(void){
+ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
@@ -22,8 +22,8 @@ ALPACA_STATUS AlpacaCore_init(void){
     // NEED ERROR HANDLING!
     AlpacaCore_installSigHandlers();
 
-
-    result = AlpacaComms_init(tls_1_2);
+    LOGERROR("here: %d\n", commsFlags);
+    result = AlpacaComms_init(commsFlags);
     if(result){
         LOGERROR("Error initializing Alpaca Comms\n");
         goto exit;

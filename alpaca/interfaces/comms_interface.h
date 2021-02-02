@@ -33,11 +33,15 @@ typedef enum AlpacaLunch_TLSVersion{
 	tls_1_3 = 1
 } Alpaca_tlsVersion_t;
 
-/* Alpaca_commsCtx_t type values */ 
+/* Alpaca_commsCtx_t protocol values */ 
 #define ALPACA_COMMSTYPE_TLS12 0
 #define ALPACA_COMMSTYPE_TLS13 1
 #define ALPACA_COMMSTYPE_UDP   2
-#define ALPACA_COMMSTYPE_SSH   3
+#define ALPACA_COMMSTYPE_SSH   4
+
+/* Alpaca_commsCtx_t type values */
+#define ALPACA_COMMSTYPE_CLIENT 8
+#define ALPACA_COMMSTYPE_SERVER 16
 
 /* Alpaca_commsCtx_t Status values */ 
 #define ALPACA_COMMSSTATUS_NOTCONN 0
@@ -54,7 +58,7 @@ typedef struct AlpacaLunch_CommsCtx {
 	Alpaca_sock_t* AlpacaSock;
 
 	ALPACA_STATUS (*connect)(Alpaca_sock_t* ctx);
-	//ALPACA_STATUS (*listen) (Alpaca_sock_t* ctx);	
+	ALPACA_STATUS (*accept) (Alpaca_sock_t* ctx);	
 	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (WOLFSSL* ctx);
@@ -65,16 +69,16 @@ typedef struct AlpacaLunch_CommsCtx {
 extern Alpaca_commsCtx_t *coreComms;
 
 // Process networking Init/Cleanup
-ALPACA_STATUS AlpacaComms_init	  (Alpaca_tlsVersion_t version);
+ALPACA_STATUS AlpacaComms_init	  (uint16_t flags);
 ALPACA_STATUS AlpacaComms_cleanUp (void);
 
 // Networking context creation/destruction
-ALPACA_STATUS AlpacaComms_initCtx	(Alpaca_commsCtx_t** ctx, uint8_t type);
+ALPACA_STATUS AlpacaComms_initCtx	(Alpaca_commsCtx_t** ctx, uint16_t flags);
 ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx);
 
 // Network I/O
 ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port);
-ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx)__attribute__((unused)) ;
+ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port);
 ALPACA_STATUS AlpacaComms_read	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_write	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t** ctx);

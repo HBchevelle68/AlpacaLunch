@@ -31,21 +31,23 @@ Alpaca_commsCtx_t *coreComms;
  *  @param  version - Selction of tls version 1.2/1.3 (comms_interface.h)
  *  @return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaComms_init(Alpaca_tlsVersion_t version){
+ALPACA_STATUS AlpacaComms_init(uint16_t flags){
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
 	/*
 	 * Initilize the upper level comms layer
 	 */
-	result = AlpacaWolf_init(version);
+	LOGERROR("here: %d || %04x\n", flags,flags);
+	result = AlpacaWolf_init(0x0007 & flags);
+	LOGERROR("Here\n");
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error during TLS layer init Version:%d\n", version);
+		LOGERROR("Error during TLS layer init Version:%d\n", flags);
 		goto exit;
 	}
 
-	result = AlpacaComms_initCtx(&coreComms, version);
+	result = AlpacaComms_initCtx(&coreComms, flags);
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error creating core comms context. Result:%d Version:%d\n", result, version);
+		LOGERROR("Error creating core comms context. Result:%d Flags:%d\n", result, flags);
 		goto exit;
 	}
 
@@ -80,7 +82,7 @@ ALPACA_STATUS AlpacaComms_cleanUp (void){
  * 	@param type Comms type
  *  @return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
+ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
@@ -118,24 +120,25 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 
 	result = AlpacaSock_create((*ctx)->AlpacaSock);
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error creating Alpaca Socket");
+		LOGERROR("Error creating Alpaca Socket\n");
 		goto exit;
 	}
 
 
-	switch(type) {
+	switch(0x0007 & flags) {
 
 		case ALPACA_COMMSTYPE_TLS12:
 				LOGINFO("Creating TLS 1.2 ssl obj\n");
 				/**
 				 * Create Client ssl object
 				 */
-				result = AlpacaWolf_createClientSSL((*ctx)->AlpacaSock, ALPACA_COMMSTYPE_TLS12);
-				if(((*ctx)->AlpacaSock) == NULL) {
-					LOGERROR("Error generating ssl object");
+				result = AlpacaWolf_createSSL((*ctx)->AlpacaSock, flags);
+				if(((*ctx)->AlpacaSock) == NULL || result != ALPACA_SUCCESS) {
+					LOGERROR("Error generating ssl object\n");
 					goto exit;
 				}
 				(*ctx)->connect = AlpacaWolf_connect;
+				(*ctx)->accept  = AlpacaWolf_accept;
 				(*ctx)->read    = AlpacaWolf_recv;
 				(*ctx)->write   = AlpacaWolf_send;
 				(*ctx)->close   = AlpacaWolf_close;
@@ -146,22 +149,22 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint8_t type) {
 		
 		case ALPACA_COMMSTYPE_TLS13:
 			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("TLS 1.3 not supported yet");
+			LOGERROR("TLS 1.3 not supported yet\n");
 			break;
 
 		case ALPACA_COMMSTYPE_UDP:
 			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("UDP not supported yet");
+			LOGERROR("UDP not supported yet\n");
 			break;
 
 		case ALPACA_COMMSTYPE_SSH:
 			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("SSH not supported yet");
+			LOGERROR("SSH not supported yet\n");
 			break;
 
 		default:
 			result = ALPACA_ERROR_UNKNOWN;
-			LOGERROR("Invalid comms type passed -> %d", type);
+			LOGERROR("Invalid comms type passed -> %d\n", flags);
 	}
 
 exit:
@@ -285,10 +288,9 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 			}
 			/* Connection established */
 			(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
+			LOGDEBUG("TCP connection established!\n");
 			break;
 		}
-		
-				
 	}
 
 	if(ret != 0){
@@ -307,7 +309,34 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
 
 exit:
+	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
+		/* 
+		 * TCP + TLS was not established 
+		 */
+		LOGERROR("TCP + TLS was not able to be established\n");
+		AlpacaComms_close(ctx);
+	}
+
+	LEAVING;
+	return result;
+}
+
+/**
+ *	@brief Start tcp listen at specified port
+ * 	       
+ * 
+ *  @warning No memory is free'd
+ * 
+ *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
+ *  @return ALPACA_STATUS  
+ */
+ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+
+
 	
+//exit:
 	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
 		/* 
 		 * TCP + TLS was not established 
@@ -346,6 +375,7 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 		LOGERROR("Failure to close security comms layer");
 		goto exit;
 	}
+	(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
 
 	// Close bottom layer 
 	result = AlpacaSock_close((*ctx)->AlpacaSock);
