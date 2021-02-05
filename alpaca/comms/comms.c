@@ -38,9 +38,7 @@ ALPACA_STATUS AlpacaComms_init(uint16_t flags){
 	/*
 	 * Initilize the upper level comms layer
 	 */
-	LOGERROR("here: %d || %04x\n", flags,flags);
 	result = AlpacaWolf_init(DISABLE_COMMS_TYPE & flags);
-	LOGERROR("Here\n");
 	if(result != ALPACA_SUCCESS){
 		LOGERROR("Error during TLS layer init Version:%d\n", flags);
 		goto exit;
@@ -233,7 +231,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	int32_t ret = 0;
-	uint8_t attempts = 0;
+	int32_t attempts = 0;
 	struct pollfd pfd;
 	/*
 	 * Eliminates the need for (*ctx) in every
@@ -246,6 +244,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
+	
 	
 	/**
 	 * Set the peer information
@@ -263,7 +262,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES){
+	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACA_COMMSSTATUS_NOTCONN)){
 		ret = 0;
 
 		/* Wait for writeability */
@@ -272,7 +271,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 
 		ret = poll(&pfd, 1, 10*1000);
 		if(ret == -1){
-			perror("poll");
+			LOGERROR("poll");
 			break;
 		}
 
@@ -280,9 +279,9 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 			/* Connect to the server */
 			LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
 			ret = connect((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, sizeof(struct sockaddr_in));
-			if (ret == -1)
-			{
-				LOGERROR("Failed to connect... errno: %d\n", errno	);
+			if (ret == -1) {
+
+				LOGERROR("Failed to connect... errno: %d\n", errno);
 				attempts++;
 				AlpacaUtilities_mSleep(THREE_SECONDS);
 				continue;
@@ -296,7 +295,6 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 
 	if(ret != 0){
 		result = ALPACA_ERROR_COMMSCONNECT;
-		LOGERROR("Could not establish TCP connection\n");
 		goto exit;
 	}
 
@@ -334,10 +332,83 @@ exit:
 ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
+	int32_t attempts = 0;
+	int32_t clientFd = 0;
+	struct sockaddr_in servAddr;
+	socklen_t saddr_size = sizeof(servAddr);
 
+
+	if(!(*ctx) || port < 1024){
+		result = ALPACA_ERROR_BADPARAM;
+		goto exit;
+	}
+
+	// Set up server address for bind
+    memset(&servAddr, 0, sizeof(servAddr));
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_port = htons(DEFAULT_PORT);
+    servAddr.sin_addr.s_addr = INADDR_ANY;
+
+
+	/* Bind the server socket to our port */
+    if (bind((*ctx)->AlpacaSock->fd, (struct sockaddr*)&servAddr, saddr_size) == -1) {
+        LOGERROR("Error failed to bind\n");
+		result = ALPACA_ERROR_TCPBIND;
+        goto exit;
+    }
+
+	/* Listen for a new connection, allow 5 pending connections */
+    if (listen((*ctx)->AlpacaSock->fd, 1) == -1) {
+        LOGERROR("Error failed to listen\n");
+		result = ALPACA_ERROR_TCPLISTEN;
+        goto exit;
+    }
+	LOGINFO("Listening on port [%d]\n", port);
+
+	/** 
+	 * Loop attempting to catch connect
+	 * If a failure is detected sleep for 3 seconds before
+	 * retrying. Retry up to MAX_RETRIES
+	 */
+	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACA_COMMSSTATUS_NOTCONN)){
+
+		LOGINFO("Attepmt #%d to catch TCP connection\n", attempts+1);
+		/* Accept client connections */
+        if ((clientFd = accept((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, &saddr_size)) == -1) {
+            LOGERROR("Failed to connect... errno: %d\n", errno);
+			attempts++;
+			AlpacaUtilities_mSleep(THREE_SECONDS);
+			continue;
+        }
+		/* Connection established */
+		(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
+		LOGDEBUG("TCP connection established!\n");	
+	}
+
+	if(!(*ctx)->status & ALPACA_COMMSSTATUS_CONN){
+		LOGERROR("Listen failed...\n");
+		result = ALPACA_ERROR_COMMSLISTEN;
+		goto exit;
+	}
+
+	/*
+	 * Close listener
+	 * Swap socket descriptors
+	 */
+	close((*ctx)->AlpacaSock->fd);
+	(*ctx)->AlpacaSock->fd = clientFd;
+
+	/* TLS handhake */
+	result = (*ctx)->accept((*ctx)->AlpacaSock);
+	if(result){
+		LOGERROR("TLS handshake failed!\n");
+		goto exit;
+	}
+	LOGINFO("TLS established\n");
+	(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
 
 	
-//exit:
+exit:
 	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
 		/* 
 		 * TCP + TLS was not established 

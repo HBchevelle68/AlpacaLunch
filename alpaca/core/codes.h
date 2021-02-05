@@ -21,9 +21,14 @@ typedef uint32_t ALPACA_STATUS;
 
 #define ALPACA_ERROR_COMMSINIT 	        (10)
 #define ALPACA_ERROR_COMMSCONNECT       (11)
+#define ALPACA_ERROR_COMMSLISTEN        (12)
+
+
 
 #define ALPACA_ERROR_SOCKCREATE	        (20)
 #define ALPACA_ERROR_SOCKSETPEER        (21)
+#define ALPACA_ERROR_TCPBIND            (22)
+#define ALPACA_ERROR_TCPLISTEN          (23)
 
 
 

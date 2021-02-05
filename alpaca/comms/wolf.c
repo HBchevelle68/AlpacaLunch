@@ -219,6 +219,28 @@ exit:
 ALPACA_STATUS AlpacaWolf_accept(Alpaca_sock_t* alpacasock){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
+
+    /* Verify pointers */
+    if(alpacasock && alpacasock->ssl){
+        /*
+         * Wrap bottom layer TCP socket in wolf
+         * then perform TLS handshake 
+         */
+        if(wolfSSL_set_fd(alpacasock->ssl, alpacasock->fd) != SSL_SUCCESS){
+            LOGERROR("wolfSSL_set_fd error\n");
+            result = ALPACA_ERROR_WOLFSSLCREATE;
+        }
+        
+        if (wolfSSL_accept(alpacasock->ssl) != SSL_SUCCESS) {
+            LOGERROR("ERROR failed to accept wolfSSL\n");
+            result = ALPACA_ERROR_WOLFSSLCONNECT;
+        }
+    }
+    else {
+        LOGERROR("Error invalid pointer(s) passed alpacasock:%p ssl:%p\n", alpacasock, alpacasock->ssl);
+        result = ALPACA_ERROR_BADPARAM;
+    }
+
     LEAVING;
     return result;
 }
@@ -246,7 +268,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
         }
         
         if (wolfSSL_connect(alpacasock->ssl) != SSL_SUCCESS) {
-            LOGERROR("ERROR failed to connect to wolfSSL\n");
+            LOGERROR("ERROR failed to connect in wolfSSL\n");
             result = ALPACA_ERROR_WOLFSSLCONNECT;
         }
     }
