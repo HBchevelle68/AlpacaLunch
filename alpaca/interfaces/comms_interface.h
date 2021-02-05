@@ -63,7 +63,7 @@ typedef struct AlpacaLunch_CommsCtx {
 	ALPACA_STATUS (*accept) (Alpaca_sock_t* ctx);	
 	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*close)  (WOLFSSL* ctx);
+	ALPACA_STATUS (*close)  (WOLFSSL** ctx);
 
 	uint8_t status;
 

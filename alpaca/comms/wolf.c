@@ -187,7 +187,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
             }
             else {
 
-                LOGERROR("Error, invalid flags used %04x", flags);
+                LOGERROR("Error, invalid flags used %04x\n", flags);
                 result = ALPACA_ERROR_WOLFSSLCREATE;
             }
             break;
@@ -362,14 +362,14 @@ exit:
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_close(WOLFSSL* sslCtx) {
+ALPACA_STATUS AlpacaWolf_close(WOLFSSL** sslCtx) {
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
-    LOGDEBUG("SSL OBJ: %p\n", sslCtx);
-    if(sslCtx) {
-        wolfSSL_free(sslCtx);
-        sslCtx = NULL;
+    LOGDEBUG("Freeing SSL OBJ at [%p]\n", (*sslCtx));
+    if((*sslCtx)) {
+        wolfSSL_free((*sslCtx));
+        (*sslCtx) = NULL;
         goto done;
     }
 

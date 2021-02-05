@@ -436,15 +436,15 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	
 
 	if(!(*ctx) || !(*ctx)->AlpacaSock){
-		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p, ctx->AlpacaSock:%p ", (*ctx), (*ctx)->AlpacaSock);
+		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p, ctx->AlpacaSock:%p\n", (*ctx), (*ctx)->AlpacaSock);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
 
 	// Close top layer comms
-	result = (*ctx)->close((*ctx)->AlpacaSock->ssl);
+	result = (*ctx)->close(&((*ctx)->AlpacaSock->ssl));
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Failure to close security comms layer");
+		LOGERROR("Failure to close security comms layer\n");
 		goto exit;
 	}
 	(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
@@ -452,7 +452,7 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	// Close bottom layer 
 	result = AlpacaSock_close((*ctx)->AlpacaSock);
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Failure to close security comms layer");
+		LOGERROR("Failure to close security comms layer\n");
 	}
 
 exit:
@@ -467,8 +467,8 @@ ALPACA_STATUS AlpacaComms_read(Alpaca_commsCtx_t** ctx, void* buf, size_t len, s
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
 
-	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_read ctx:%p, buf:%p  len:%lu\n", (*ctx), buf, len);
+	if(!(*ctx) || !(*ctx)->AlpacaSock->ssl || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, ssl:%p buf:%p  len:%lu\n", (*ctx), (*ctx)->AlpacaSock->ssl, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
@@ -499,8 +499,8 @@ ALPACA_STATUS AlpacaComms_write(Alpaca_commsCtx_t** ctx, void* buf, size_t len, 
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
 
-	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, buf:%p  len:%lu\n", (*ctx), buf, len);
+	if(!(*ctx) || !(*ctx)->AlpacaSock->ssl || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, ssl:%p buf:%p  len:%lu\n", (*ctx), (*ctx)->AlpacaSock->ssl, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;

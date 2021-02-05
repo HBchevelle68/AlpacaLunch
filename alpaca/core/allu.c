@@ -19,10 +19,12 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
 #endif 
 
     // Install signal handlers
-    // NEED ERROR HANDLING!
-    AlpacaCore_installSigHandlers();
+    result = AlpacaCore_installSigHandlers();
+    if(result){
+        LOGERROR("Error initializing Alpaca Signal Handlers\n");
+        goto exit;
+    }
 
-    LOGERROR("here: %d\n", commsFlags);
     result = AlpacaComms_init(commsFlags);
     if(result){
         LOGERROR("Error initializing Alpaca Comms\n");
