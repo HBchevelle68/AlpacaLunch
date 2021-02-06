@@ -38,18 +38,15 @@ ALPACA_STATUS AlpacaComms_init(uint16_t flags){
 	/*
 	 * Initilize the upper level comms layer
 	 */
-	result = AlpacaWolf_init(DISABLE_COMMS_TYPE & flags);
+	LOGINFO("Initializing global comms with flags: %X\n",flags);
+	
+
+	result = AlpacaWolf_init(GET_COMMS_PROTO(flags));
 	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error during TLS layer init Version:%d\n", flags);
+		LOGERROR("Error during TLS layer init Version:%d\n", GET_COMMS_PROTO(flags));
 		goto exit;
 	}
-
-	result = AlpacaComms_initCtx(&coreComms, flags);
-	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error creating core comms context. Result:%d Flags:%d\n", result, flags);
-		goto exit;
-	}
-
+	
 exit:
 	LEAVING;
 	return result;
@@ -78,24 +75,27 @@ ALPACA_STATUS AlpacaComms_cleanUp (void){
  *
  *  @param ctx Double Pointer to caller comms context object to 
  * 			   allocate and initialize
- * 	@param type Comms type
+ * 	@param type Comms type. Requires bit mask of ALPACA_COMMSTYPE and 
+ * 				ALPACA_COMMSPROTO
  *  @return ALPACA_STATUS
  */
 ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
+	
+	LOGINFO("Initializing Comms Ctx with params ctx[%p] flags[%X]\n", (*ctx), flags);
+
 	/*
 	 * Verify that the pointer given doesn't actually point to something
 	 * if it does, it may still be valid memory and allocation can cause 
 	 * a leak
 	 */
-	if((*ctx) != NULL){
+	if((*ctx) != NULL || !GET_COMMS_TYPE(flags) || !GET_COMMS_PROTO(flags)){
 		result = ALPACA_ERROR_BADPARAM;
-		LOGERROR("Pointer to Comms CTX appears valid...points to %p...will not allocate\n", ctx);
+		LOGERROR("Invalid params passed\n");
 		goto exit;
 	}
-	LOGINFO("Initializing Comms Ctx...\n");
 
 	/*
 	 * We have a safe pointer so we can allocate the base structure
@@ -124,7 +124,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	}
 
 
-	switch(DISABLE_COMMS_TYPE & flags) {
+	switch(GET_COMMS_PROTO(flags)) {
 
 		case ALPACA_COMMSPROTO_TLS12:
 				LOGINFO("Creating TLS 1.2 ssl obj\n");
@@ -172,6 +172,7 @@ exit:
 	 * and set to NULL 
 	 */
 	if((result != ALPACA_SUCCESS) && (*ctx)){
+		LOGERROR("Error [%u] occured during ctx init...cleaning\n", result);
 		AlpacaComms_destroyCtx(ctx);
 	}
 	
@@ -191,23 +192,16 @@ ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
 	
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
-
+	LOGDEBUG("Cleaning comms ctx at [%p]\n", (*ctx));
 	if((*ctx)) {
 		/*
 		* If our custom socket is allocated clean up
 		*/
-		if((*ctx)->AlpacaSock){
-
-			/* If we are connected, close both layers */
-			if((*ctx)->status & (ALPACA_COMMSSTATUS_CONN | ALPACA_COMMSSTATUS_TLSCONN)){
-				AlpacaComms_close(ctx);
-			}
-			
-			AlpacaSock_close((*ctx)->AlpacaSock);
+		if((*ctx)->AlpacaSock){			
+			AlpacaComms_close(ctx);
 			free((*ctx)->AlpacaSock);
 			(*ctx)->AlpacaSock = NULL;
 		}
-
 		free((*ctx));
 		*ctx = NULL;
 	}
@@ -233,11 +227,6 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	int32_t ret = 0;
 	int32_t attempts = 0;
 	struct pollfd pfd;
-	/*
-	 * Eliminates the need for (*ctx) in every
-	 * reference to the AlpacaSock
-	 */
-	//Alpaca_sock_t* as_ptr = (*ctx)->AlpacaSock;
 
 	if(!(*ctx) || !ipstr || !port ){
 		LOGERROR("Invalid parameters passed: ctx[%p], IP[%s], port[%d]\n",(*ctx), ipstr, port);
@@ -254,7 +243,9 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 
     /* convert IPv4 from string to network byte order */
     if(inet_pton(AF_INET, ipstr, &((*ctx)->AlpacaSock->peer.sin_addr)) != 1){
-		LOGERROR("");
+		LOGERROR("Error converting ip addr\n");
+		result = ALPACA_ERROR_UNKNOWN;
+		goto exit;
 	}
 
 	/** 
@@ -271,7 +262,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 
 		ret = poll(&pfd, 1, 10*1000);
 		if(ret == -1){
-			LOGERROR("poll");
+			LOGERROR("Error during poll() ret[%d]", ret);
 			break;
 		}
 
@@ -308,14 +299,13 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
 
 exit:
-	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
+	if((*ctx) && !((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
 		/* 
 		 * TCP + TLS was not established 
 		 */
 		LOGERROR("TCP + TLS was not able to be established\n");
 		AlpacaComms_close(ctx);
 	}
-
 	LEAVING;
 	return result;
 }
@@ -337,7 +327,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	struct sockaddr_in servAddr;
 	socklen_t saddr_size = sizeof(servAddr);
 
-
+	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]", (*ctx), port);
 	if(!(*ctx) || port < 1024){
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
@@ -346,13 +336,14 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	// Set up server address for bind
     memset(&servAddr, 0, sizeof(servAddr));
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(DEFAULT_PORT);
+    servAddr.sin_port = htons(port);
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
 
 	/* Bind the server socket to our port */
     if (bind((*ctx)->AlpacaSock->fd, (struct sockaddr*)&servAddr, saddr_size) == -1) {
         LOGERROR("Error failed to bind\n");
+		perror("whaaa\n");
 		result = ALPACA_ERROR_TCPBIND;
         goto exit;
     }
@@ -383,9 +374,21 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 		/* Connection established */
 		(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
 		LOGDEBUG("TCP connection established!\n");	
+		
+		/* Perform TLS handhake */
+		result = (*ctx)->accept((*ctx)->AlpacaSock, clientFd);
+		if(result){
+			LOGERROR("TLS handshake failed!\n");
+			close(clientFd);
+			(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
+			attempts++;
+			continue;
+		}
+		LOGINFO("TLS established\n");
+		(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
 	}
 
-	if(!(*ctx)->status & ALPACA_COMMSSTATUS_CONN){
+	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
 		LOGERROR("Listen failed...\n");
 		result = ALPACA_ERROR_COMMSLISTEN;
 		goto exit;
@@ -398,14 +401,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	close((*ctx)->AlpacaSock->fd);
 	(*ctx)->AlpacaSock->fd = clientFd;
 
-	/* TLS handhake */
-	result = (*ctx)->accept((*ctx)->AlpacaSock);
-	if(result){
-		LOGERROR("TLS handshake failed!\n");
-		goto exit;
-	}
-	LOGINFO("TLS established\n");
-	(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
+
 
 	
 exit:
@@ -441,12 +437,20 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 		goto exit;
 	}
 
-	// Close top layer comms
-	result = (*ctx)->close(&((*ctx)->AlpacaSock->ssl));
-	if(result != ALPACA_SUCCESS){
-		LOGERROR("Failure to close security comms layer\n");
-		goto exit;
+	/*
+	 * It is possible that an error could have 
+	 * occured prior to function pointers being set
+	 * verify pointers exist
+	 */
+	if((*ctx)->close && (*ctx)->AlpacaSock->ssl){
+		// Close top layer comms
+		result = (*ctx)->close(&((*ctx)->AlpacaSock->ssl));
+		if(result != ALPACA_SUCCESS){
+			LOGERROR("Failure to close security comms layer\n");
+			goto exit;
+		}
 	}
+
 	(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
 
 	// Close bottom layer 
@@ -493,7 +497,10 @@ exit:
 	return result;	
 }
 
-
+/**
+ * @brief 
+ * 
+ */
 ALPACA_STATUS AlpacaComms_write(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;

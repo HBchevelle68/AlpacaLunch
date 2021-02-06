@@ -11,7 +11,7 @@ context.verify_mode = wolfssl.CERT_NONE
 
 secure_socket = context.wrap_socket(bind_socket)
 
-secure_socket.connect(("", 44444))
+secure_socket.connect(("", 54321))
 
 secure_socket.write(b"SUPPPPPP!")
 

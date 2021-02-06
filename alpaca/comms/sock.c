@@ -91,7 +91,7 @@ ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
      * then verify its validity 
      */
     if(!alpacasock) {
-        LOGERROR("Invalid param\n");
+        LOGERROR("Invalid param [%p]\n", alpacasock);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     }

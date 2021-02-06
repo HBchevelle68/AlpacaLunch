@@ -40,10 +40,15 @@ int main(int argc, char** argv){
     /** 
      * When debug is enabled this is an empty function
      */
-    LOGERROR("here\n");
     result = AlpacaCore_init( ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
     if(result != ALPACA_SUCCESS){
         LOGERROR("Global initialization error! [%u]\n", result);
+        goto done;
+    }
+
+    result = AlpacaComms_initCtx(&coreComms, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    if(result != ALPACA_SUCCESS){
+        LOGERROR("Global comms ctx error! [%u]\n", result);
         goto done;
     }
     

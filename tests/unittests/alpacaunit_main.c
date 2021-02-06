@@ -22,7 +22,7 @@ int main(){
     if (CUE_SUCCESS != CU_initialize_registry()){
         exit(CU_get_error());
     }
-
+/*
     // Add mem tests to registry
     pSuite1 = CU_add_suite("AlpacaLunch Memory Unit Tests", AlpacaUnit_memory_initSuite, AlpacaUnit_memory_cleanSuite);
     if (NULL == pSuite1) {
@@ -38,7 +38,7 @@ int main(){
         CU_cleanup_registry();
         exit(CU_get_error());
     }
-
+*/
     // Add comms tests to registry
     pSuite1 = CU_add_suite("AlpacaLunch Comms Unit Tests", AlpacaUnit_comms_initSuite, AlpacaUnit_comms_cleanSuite);
     if (NULL == pSuite1) {

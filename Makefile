@@ -60,7 +60,7 @@ endif
 #
 # Valgrind
 #
-VALGRIND= valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
+VALGRIND= valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes
 
 #
 # Build variables

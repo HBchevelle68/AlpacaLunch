@@ -61,6 +61,7 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
     }
 
     if(!wolfInitialized){
+        LOGINFO("Initializing global wolfCTX's with version [%x]\n", version);
          /*
          * Init wolfSSL and create global wolfCTX obj
          * Currently this is only support TLS 1.2, 
@@ -93,7 +94,6 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
-
         wolfSSL_CTX_set_verify(procWolfServerCtx, SSL_VERIFY_NONE, 0);
         
         if ((procWolfClientCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].client_method())) == NULL){
@@ -114,10 +114,10 @@ exit:
 
 /**
  *  @brief
- */
+ */ 
 ALPACA_STATUS AlpacaWolf_cleanUp(void){
 
-    ALPACA_STATUS result = ALPACA_ERROR_WOLFNOINIT;
+    ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
     if(wolfInitialized){
@@ -137,8 +137,9 @@ ALPACA_STATUS AlpacaWolf_cleanUp(void){
 
     	wolfSSL_Cleanup();
         wolfInitialized = 0;
-
-        result = ALPACA_SUCCESS;
+    }
+    else {
+        LOGDEBUG("Wolf was either already cleaned or never initialized...nothing to do\n");
     }
 
     LEAVING;
@@ -157,13 +158,14 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
+    LOGDEBUG("Entering with params alpacasock[%p] alpacasock->ssl[%p] flags[%X]\n",alpacasock, alpacasock->ssl, flags);
     if(!alpacasock || (alpacasock->ssl)){
         result = ALPACA_ERROR_BADPARAM;
         LOGERROR(" Bad param(s) -> alpacasock:[%p] alpacasock->ssl:[%p]\n",alpacasock, alpacasock->ssl);
         goto exit;
     }
 
-    switch(DISABLE_COMMS_TYPE & flags){
+    switch(GET_COMMS_PROTO(flags)){
 
         case ALPACA_COMMSPROTO_TLS12:
             /**
@@ -203,6 +205,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
     }
     
 exit:
+    LOGDEBUG("Leaving with alpacasock[%p] alpacasock->ssl[%p] flags[%X]\n",alpacasock, alpacasock->ssl, flags);
     LEAVING;
     return result;
 }
@@ -216,17 +219,17 @@ exit:
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_accept(Alpaca_sock_t* alpacasock){
+ALPACA_STATUS AlpacaWolf_accept(Alpaca_sock_t* alpacasock, int16_t fd){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
     /* Verify pointers */
-    if(alpacasock && alpacasock->ssl){
+    if(alpacasock && alpacasock->ssl && fd > 2){
         /*
          * Wrap bottom layer TCP socket in wolf
          * then perform TLS handshake 
          */
-        if(wolfSSL_set_fd(alpacasock->ssl, alpacasock->fd) != SSL_SUCCESS){
+        if(wolfSSL_set_fd(alpacasock->ssl, fd) != SSL_SUCCESS){
             LOGERROR("wolfSSL_set_fd error\n");
             result = ALPACA_ERROR_WOLFSSLCREATE;
         }
@@ -237,7 +240,7 @@ ALPACA_STATUS AlpacaWolf_accept(Alpaca_sock_t* alpacasock){
         }
     }
     else {
-        LOGERROR("Error invalid pointer(s) passed alpacasock:%p ssl:%p\n", alpacasock, alpacasock->ssl);
+        LOGERROR("Error param(s) passed alpacasock[%p] ssl[%p] fd[%d]\n", alpacasock, alpacasock->ssl, fd);
         result = ALPACA_ERROR_BADPARAM;
     }
 

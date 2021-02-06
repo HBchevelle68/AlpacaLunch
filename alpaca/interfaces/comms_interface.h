@@ -34,16 +34,20 @@ typedef enum AlpacaLunch_TLSVersion{
 } Alpaca_tlsVersion_t;
 
 /* Alpaca_commsCtx_t protocol values */ 
-#define ALPACA_COMMSPROTO_TLS12 0
-#define ALPACA_COMMSPROTO_TLS13 1
-#define ALPACA_COMMSPROTO_UDP   2
-#define ALPACA_COMMSPROTO_SSH   4
+#define ALPACA_COMMSPROTO_TLS12 1
+#define ALPACA_COMMSPROTO_TLS13 2
+#define ALPACA_COMMSPROTO_UDP   4
+#define ALPACA_COMMSPROTO_SSH   8
 
 /* Alpaca_commsCtx_t type values */
-#define ALPACA_COMMSTYPE_CLIENT 8
-#define ALPACA_COMMSTYPE_SERVER 16
+#define ALPACA_COMMSTYPE_CLIENT 16
+#define ALPACA_COMMSTYPE_SERVER 32
 
-#define DISABLE_COMMS_TYPE 0x0007
+#define KEEP_COMMS_PROTO 0x000F
+#define KEEP_COMMS_TYPE  0x0030
+
+#define GET_COMMS_PROTO(flags) ((KEEP_COMMS_PROTO & flags))
+#define GET_COMMS_TYPE(flags) ((KEEP_COMMS_TYPE & flags))
 
 /* Alpaca_commsCtx_t Status values */ 
 #define ALPACA_COMMSSTATUS_NOTCONN 0
@@ -59,8 +63,8 @@ typedef struct AlpacaLunch_CommsCtx {
 
 	Alpaca_sock_t* AlpacaSock;
 
-	ALPACA_STATUS (*connect)(Alpaca_sock_t* ctx);
-	ALPACA_STATUS (*accept) (Alpaca_sock_t* ctx);	
+	ALPACA_STATUS (*connect)(Alpaca_sock_t* sockctx);
+	ALPACA_STATUS (*accept) (Alpaca_sock_t* sockctx, int16_t fd);	
 	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (WOLFSSL** ctx);
