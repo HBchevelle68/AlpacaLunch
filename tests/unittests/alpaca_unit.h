@@ -5,6 +5,11 @@
 #define FOUR_KB (1024*4)
 #define TEN_KB  (1024*10)
 
+static inline int random_int(int min, int max){
+   return min + rand() % (max+1 - min);
+}
+unsigned char *gen_rdm_bytestream (size_t num_bytes);
+
 int AlpacaUnit_memory_initSuite(void);
 int AlpacaUnit_memory_cleanSuite(void);
 
@@ -20,6 +25,7 @@ void AlpacaUnit_buffer_zero(void);
 
 void AlpacaUnit_comms_base(void);
 void AlpacaUnit_comms_connect(void);
+void AlpacaUnit_comms_send(void);
 
 
 #endif

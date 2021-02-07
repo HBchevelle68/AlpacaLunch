@@ -234,6 +234,11 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 	
+	if((*ctx)->status & (ALPACA_COMMSSTATUS_CONN|ALPACA_COMMSSTATUS_TLSCONN)){
+		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", (*ctx), (*ctx)->status);
+		result = ALPACA_ERROR_BADSTATE;
+		goto exit;
+	}
 	
 	/**
 	 * Set the peer information
@@ -327,7 +332,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	struct sockaddr_in servAddr;
 	socklen_t saddr_size = sizeof(servAddr);
 
-	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]", (*ctx), port);
+	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]\n", (*ctx), port);
 	if(!(*ctx) || port < 1024){
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;

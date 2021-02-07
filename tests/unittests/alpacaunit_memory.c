@@ -29,10 +29,6 @@ int AlpacaUnit_memory_cleanSuite(void){
     return 0;
 }
 
-static inline int random_int(int min, int max){
-   return min + rand() % (max+1 - min);
-}
-
 
 unsigned char *gen_rdm_bytestream (size_t num_bytes){
 
