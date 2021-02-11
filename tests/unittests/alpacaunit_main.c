@@ -47,8 +47,9 @@ int main(){
     }
 
     if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_send", AlpacaUnit_comms_send))){
+        //(NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
+        //(NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_send)) || 
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_listen))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }

@@ -26,6 +26,9 @@ void AlpacaUnit_buffer_zero(void);
 void AlpacaUnit_comms_base(void);
 void AlpacaUnit_comms_connect(void);
 void AlpacaUnit_comms_send(void);
+void AlpacaUnit_comms_listen(void);
+void AlpacaUnit_comms_recv(void);
+void AlpacaUnit_comms_close(void);
 
 
 #endif

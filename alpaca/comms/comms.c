@@ -471,13 +471,13 @@ exit:
 
 
 
-ALPACA_STATUS AlpacaComms_read(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
 
 	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, ssl:%p buf:%p  len:%lu\n", (*ctx), (*ctx)->AlpacaSock->ssl, buf, len);
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p, ssl:%p buf:%p  len:%lu\n", (*ctx), (*ctx)->AlpacaSock->ssl, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
@@ -506,14 +506,14 @@ exit:
  * @brief 
  * 
  */
-ALPACA_STATUS AlpacaComms_write(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
 
 	
 	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_write ctx:%p, buf:%p len:%lu\n", (*ctx), buf, len);
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p, buf:%p len:%lu\n", (*ctx), buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
