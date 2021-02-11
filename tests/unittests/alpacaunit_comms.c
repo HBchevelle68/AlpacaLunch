@@ -459,7 +459,6 @@ void AlpacaUnit_comms_send(void){
      * Connect and send full random buffer 
      * Verify contents and send values
      *************************************************************************************/
-
     ret = pthread_create(&server, NULL, server_thread, NULL);
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
@@ -487,7 +486,6 @@ void AlpacaUnit_comms_send(void){
     thrd_shutdown = 1;
     pthread_mutex_unlock(&write_lock);
     
-
     // Clean
     result = AlpacaComms_destroyCtx(&client_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
@@ -501,7 +499,6 @@ void AlpacaUnit_comms_send(void){
      * Buffer MUST be greater than the standard MTU size
      * Verify contents and send values
      *************************************************************************************/
-
     ret = pthread_create(&server, NULL, server_thread, NULL);
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
@@ -534,9 +531,80 @@ void AlpacaUnit_comms_send(void){
     }
     thrd_shutdown = 1;
     
+    // Clean
+    result = AlpacaComms_destroyCtx(&client_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(client_commsCTX);
+
+    pthread_join(server,NULL);
+    thrd_shutdown = 0;
+
+    /*************************************************************************************
+     * Connect then execute a series of sends that should fail gracefully
+     * Data should be preserved
+     * No data should be sent 
+     *************************************************************************************/
+    ret = pthread_create(&server, NULL, server_thread, NULL);
+    CU_ASSERT_FALSE_FATAL(ret);
+    AlpacaUtilities_mSleep(1000);
+
+    rand_stream = gen_rdm_bytestream(FOUR_KB);
+    // First without initialization occuring
+    // Bad ctx
+    LOGDEBUG("HERE1\n");
+    result = AlpacaComms_write(&client_commsCTX, rand_stream, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_EQUAL(out, 0);
+
+    // Now init
+    LOGDEBUG("HERE2\n");
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
+
+    // Bad len
+    LOGDEBUG("HERE3\n");
+    result = AlpacaComms_write(&client_commsCTX, rand_stream, 0, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_EQUAL(out, 0);
+    free(rand_stream);
+    rand_stream = NULL;
+
+    // Bad buff
+    LOGDEBUG("HERE4\n");
+    result = AlpacaComms_write(&client_commsCTX, rand_stream, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_EQUAL(out, 0);
+
+    // Bad buff but with out var pre-set
+    out = 123;
+    LOGDEBUG("HERE5\n");
+    result = AlpacaComms_write(&client_commsCTX, rand_stream, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_EQUAL(out, 0);
+
+    // Now connect
+    result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    pthread_mutex_lock(&write_lock);
+    rand_stream = gen_rdm_bytestream(FOUR_KB);
+    
+    // Final send
+    result = AlpacaComms_write(&client_commsCTX, rand_stream, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_EQUAL(out, FOUR_KB);
+    // Grab read lock to ensure buffer is in a readable state
+    pthread_mutex_lock(&read_lock);
+    CU_ASSERT_NSTRING_EQUAL(thrd_buffer, rand_stream, FOUR_KB);
+    
+    pthread_mutex_unlock(&write_lock);
+    pthread_mutex_unlock(&read_lock);
+    thrd_shutdown = 1;
+    free(rand_stream);
+    AlpacaUtilities_mSleep(100);
 
     // Clean
-    
     result = AlpacaComms_destroyCtx(&client_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(client_commsCTX);

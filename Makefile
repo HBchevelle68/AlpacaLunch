@@ -172,18 +172,20 @@ ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
 
 .PHONY: clean
 
-all: clean init-dirs 	  \
+all: clean init-dirs \
 	 alpacalunch-release  \
 	 alpacalunch-debug 	  \
 	 alpacalunch-unittest \
-	 scrub misc success   \
-	 rununittest
+	 rununittest 	 \
+	 scrub success   \
 
-release: init-dirs prescrub alpacalunch-release scrub success
+release:  init-dirs prescrub alpacalunch-release scrub success
 
-debug: init-dirs prescrub alpacalunch-debug scrub success
+debug: 	  init-dirs prescrub alpacalunch-debug scrub success
 
 unittest: init-dirs prescrub alpacalunch-unittest scrub success rununittest
+
+
 
 #
 # RELEASE, RELEASE STATIC(broken) builds
@@ -214,7 +216,7 @@ alpacalunch-unittest: $(ALLUOBJS)
 	$(call PG, Linking Unit Test Build)
 	$(CC) $(UNITCFLAGS) $(UNIT) $^ $(CRYPTSTATIC) $(UNITLFLAGS) $(LFLAGS) -o $(BIN)/$@
 	$(call PG, $@ Done)
-
+	
 %.o: %.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
 
@@ -231,12 +233,12 @@ runcomponenttest:
 	
 rununittest:
 ifeq ($(MEMCHECK),$(filter $(MEMCHECK),1 Yes yes YES True true TRUE))
-		$(call PY, Running unit tests in valgrind...)
+		$(call PT, Running unit tests in valgrind...)
 		$(VALGRIND) $(BIN)/alpacalunch-unittest
 		$(call PG, $@ Done)
 
 else ifeq ($(RUNUNIT),$(filter $(RUNUNIT),1 Yes yes YES True true TRUE))
-		$(call PY, Running unit tests...)
+		$(call PT, Running unit tests...)
 		$(BIN)/alpacalunch-unittest
 		$(call PG, $@ Done)
 endif
@@ -264,10 +266,19 @@ success:
 # Functions
 # Print Yellow
 define PY
-	@echo "\033[1;93m[*] $(1) \033[0m"
+	@echo "\033[38;5;227m[*] $(1) \033[0m"
+endef
+# Print Yellow
+define PT
+	@echo "\033[38;5;081m[>] $(1) \033[0m"
 endef
 # Print Green
 define PG
 	@echo "\033[38;5;084m[+] $(1) \033[0m"
+endef
+# For fast builds
+define SCRUB
+	$(call PY, Cleaning...)
+	rm -f $(1)
 endef
 
