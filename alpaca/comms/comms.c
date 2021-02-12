@@ -518,7 +518,6 @@ ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t** ctx, void* buf, size_t len, s
 		*out = 0;
 		goto exit;
 	}
-	LOGDEBUG("here2\n");
 
 	/*
 	 * If non-blocking sockets end up being used
