@@ -739,6 +739,72 @@ void AlpacaUnit_comms_listen(void){
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(server_commsCTX);
 
+    /*************************************************************************************
+     * Listen and recv multiple 
+     * Verify contents and recv values
+     *************************************************************************************/
+    LOGDEBUG("***** NUMBER 2 *****\n");
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+    ret = pthread_create(&client, NULL, client_thread, NULL);
+    CU_ASSERT_FALSE_FATAL(ret);
+   
+    
+    result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+   
+    for(int i = 0; i < ONE_KB; i++){
+
+        LOGDEBUG("***** Recv [%d] ***** \n", i+1);
+        memset(local_buffer, 0, sizeof(local_buffer));
+        pthread_mutex_lock(&write_lock);
+        result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+        CU_ASSERT_EQUAL(out, FOUR_KB);
+
+        // Grab read lock to ensure buffer is not changed
+        CU_ASSERT_NSTRING_EQUAL(thrd_cli_buffer, local_buffer, FOUR_KB);
+        pthread_mutex_unlock(&write_lock);
+
+        out = 0;
+        AlpacaUtilities_mSleep(10);
+        if(i%64 == 0){printf(".");} 
+    }
+    thrd_shutdown = 1;
+/*
+    for(int i = 0; i < ONE_KB; i++){
+        rand_stream = gen_rdm_bytestream(FOUR_KB);
+        pthread_mutex_lock(&write_lock);
+        LOGDEBUG("***** Send [%d] ***** \n", i+1);
+        result = AlpacaComms_send(&client_commsCTX, rand_stream, FOUR_KB, &out);
+        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+        CU_ASSERT_EQUAL(out, FOUR_KB);
+
+        // Grab read lock to ensure buffer is in a readable state
+        pthread_mutex_lock(&read_lock);
+        CU_ASSERT_NSTRING_EQUAL(thrd_serv_buffer, rand_stream, FOUR_KB);
+        
+        pthread_mutex_unlock(&write_lock);
+        pthread_mutex_unlock(&read_lock);
+        free(rand_stream);
+        AlpacaUtilities_mSleep(10);
+        if(i%64 == 0){printf(".");}
+    }
+    thrd_shutdown = 1;
+*/
+
+    pthread_join(client,NULL);
+    thrd_shutdown = 0;
+
+    // Clean
+    result = AlpacaComms_destroyCtx(&server_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
+
     result = AlpacaComms_cleanUp();
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
 }
