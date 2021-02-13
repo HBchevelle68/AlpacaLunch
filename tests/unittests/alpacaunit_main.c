@@ -48,10 +48,10 @@ int main(){
 
     if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base)) ||
         (NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_send))   || 
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_send", AlpacaUnit_comms_send))   || 
         (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_recv))   ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_listen)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_close))){
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_listen", AlpacaUnit_comms_listen)) ||
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_close", AlpacaUnit_comms_close))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }
