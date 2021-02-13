@@ -240,7 +240,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 	
-	/**
+	/*
 	 * Set the peer information
 	 */
 	(*ctx)->AlpacaSock->peer.sin_family = AF_INET;
