@@ -609,8 +609,6 @@ void* client_thread(void* args){
     Alpaca_commsCtx_t *client_commsCtx = NULL;
     ssize_t numsent = 0;
     
-    
-    
     AlpacaUtilities_mSleep(250);
 
     result = AlpacaComms_initCtx(&client_commsCtx, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
@@ -618,8 +616,6 @@ void* client_thread(void* args){
         LOGERROR("Error in client_thread during init...\n");
         goto exit;
     }
-
-    //setsockopt(client_commsCtx->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
     /*************************************************************************************
      * Set up client 
@@ -639,16 +635,19 @@ void* client_thread(void* args){
             AlpacaUtilities_mSleep(10);
         }
         free(thrd_cli_buffer);
+        thrd_cli_buffer = NULL;
     }
-    
-    
 
 exit:
+    if(thrd_cli_buffer){
+        free(thrd_cli_buffer);
+        thrd_cli_buffer = NULL;
+    }
     result = AlpacaComms_destroyCtx(&client_commsCtx);
     return NULL;
 }
 
-void AlpacaUnit_comms_listen(void){
+void AlpacaUnit_comms_recv(void){
 
     ALPACA_STATUS result = ALPACA_SUCCESS;
     Alpaca_commsCtx_t *server_commsCTX = NULL;
@@ -674,13 +673,10 @@ void AlpacaUnit_comms_listen(void){
     ret = pthread_create(&client, NULL, client_thread, NULL);
     CU_ASSERT_FALSE_FATAL(ret);
    
-    
     result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
    
-
-    
     memset(local_buffer, 0, sizeof(local_buffer));
     result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
@@ -701,9 +697,13 @@ void AlpacaUnit_comms_listen(void){
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(server_commsCTX);
 
+
+
+/*
     result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
     ret = pthread_create(&client, NULL, client_thread, NULL);
     CU_ASSERT_FALSE_FATAL(ret);
@@ -714,12 +714,13 @@ void AlpacaUnit_comms_listen(void){
 
     for(int i = 0; i < ONE_KB; i++){
         LOGDEBUG("***** RECV [%d] ***** \n", i+1);
-        memset(&thrd_serv_buffer, 0, sizeof(thrd_serv_buffer));
         result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
         CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
         CU_ASSERT_EQUAL(out, FOUR_KB);
         CU_ASSERT_NSTRING_EQUAL(thrd_cli_buffer, local_buffer, FOUR_KB);
+        memset(&local_buffer, 0, sizeof(local_buffer));
         ready = 1;
+        if(i%64 == 0){printf(".");}
     }
     thrd_shutdown = 1;
     ready = 1;
@@ -733,17 +734,85 @@ void AlpacaUnit_comms_listen(void){
     
     pthread_join(client,NULL);
     thrd_shutdown = 0;
+*/
 
+    /*************************************************************************************
+     * Setup valid context then procede to pass bad args finally passing proper values
+     * Verify contents and recv values
+     *************************************************************************************/
+
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+    ret = pthread_create(&client, NULL, client_thread, NULL);
+    CU_ASSERT_FALSE_FATAL(ret);
+   
+    LOGDEBUG("HERE\n");
+    result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+
+    
+    LOGDEBUG("HERE\n");
+    result = AlpacaComms_recv(&server_commsCTX, local_buffer, 0, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+
+    LOGDEBUG("HERE\n");
+    result = AlpacaComms_recv(&server_commsCTX, NULL, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+
+    LOGDEBUG("HERE\n");
+    result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    CU_ASSERT_NSTRING_EQUAL(thrd_cli_buffer, local_buffer, FOUR_KB);
+    memset(&local_buffer, 0, sizeof(local_buffer));
+    thrd_shutdown = 1;
+    ready = 1;
+
+    LOGDEBUG("HERE\n");
     // Clean
     result = AlpacaComms_destroyCtx(&server_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(server_commsCTX);
 
+    pthread_join(client,NULL);
+    thrd_shutdown = 0;
+
+    LOGDEBUG("HERE\n");
+    // Last failure check, pass null CTX
+    result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
+
+    
+    
+
+    result = AlpacaComms_cleanUp();
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+
+    return;
+}
+
+
+void AlpacaUnit_comms_listen(void){
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    Alpaca_commsCtx_t *server_commsCTX = NULL;
+    pthread_t client;
+    int ret = 0;
+    
+
+    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
+
     /*************************************************************************************
-     * Listen and recv multiple 
-     * Verify contents and recv values
+     * Baseline Listen. 
      *************************************************************************************/
-    LOGDEBUG("***** NUMBER 2 *****\n");
     result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
@@ -756,46 +825,62 @@ void AlpacaUnit_comms_listen(void){
     result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
-   
-    for(int i = 0; i < ONE_KB; i++){
+    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
 
-        LOGDEBUG("***** Recv [%d] ***** \n", i+1);
-        memset(local_buffer, 0, sizeof(local_buffer));
-        pthread_mutex_lock(&write_lock);
-        result = AlpacaComms_recv(&server_commsCTX, local_buffer, FOUR_KB, &out);
-        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-        CU_ASSERT_EQUAL(out, FOUR_KB);
+    // Clean
+    result = AlpacaComms_destroyCtx(&server_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
 
-        // Grab read lock to ensure buffer is not changed
-        CU_ASSERT_NSTRING_EQUAL(thrd_cli_buffer, local_buffer, FOUR_KB);
-        pthread_mutex_unlock(&write_lock);
-
-        out = 0;
-        AlpacaUtilities_mSleep(10);
-        if(i%64 == 0){printf(".");} 
-    }
     thrd_shutdown = 1;
-/*
-    for(int i = 0; i < ONE_KB; i++){
-        rand_stream = gen_rdm_bytestream(FOUR_KB);
-        pthread_mutex_lock(&write_lock);
-        LOGDEBUG("***** Send [%d] ***** \n", i+1);
-        result = AlpacaComms_send(&client_commsCTX, rand_stream, FOUR_KB, &out);
-        CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-        CU_ASSERT_EQUAL(out, FOUR_KB);
+    ready = 1;
 
-        // Grab read lock to ensure buffer is in a readable state
-        pthread_mutex_lock(&read_lock);
-        CU_ASSERT_NSTRING_EQUAL(thrd_serv_buffer, rand_stream, FOUR_KB);
-        
-        pthread_mutex_unlock(&write_lock);
-        pthread_mutex_unlock(&read_lock);
-        free(rand_stream);
-        AlpacaUtilities_mSleep(10);
-        if(i%64 == 0){printf(".");}
-    }
+    pthread_join(client,NULL);
+    thrd_shutdown = 0;
+
+
+    /*
+     * Test failure cases
+     */
+    result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
+
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+    // Bad port but valid CTX
+    result = AlpacaComms_listen(&server_commsCTX, 1023);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+
+    // Clean
+    result = AlpacaComms_destroyCtx(&server_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
+
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+    ret = pthread_create(&client, NULL, client_thread, NULL);
+    CU_ASSERT_FALSE_FATAL(ret);
+       
+    result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
+    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+
+    // Clean
+    result = AlpacaComms_destroyCtx(&server_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(server_commsCTX);
+
     thrd_shutdown = 1;
-*/
+    ready = 1;
 
     pthread_join(client,NULL);
     thrd_shutdown = 0;
@@ -807,26 +892,68 @@ void AlpacaUnit_comms_listen(void){
 
     result = AlpacaComms_cleanUp();
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+
+    return;
 }
 
+void AlpacaUnit_comms_close(void){
 
-void AlpacaUnit_comms_recv(void){
-/*
     ALPACA_STATUS result = ALPACA_SUCCESS;
+
     Alpaca_commsCtx_t *client_commsCTX = NULL;
+    struct sockaddr_in temp_addrin;
+
     pthread_t server;
     int ret = 0;
-    ssize_t out = 0;
-    unsigned char* rand_stream = NULL;
-    char local_buffer[1024] = {0};
-    memset(local_buffer, 0, sizeof(local_buffer));
+
+    memset(&temp_addrin, 0, sizeof(struct sockaddr_in));
 
     result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
+    ret = pthread_create(&server, NULL, server_thread, NULL);
+    CU_ASSERT_FALSE_FATAL(ret);
+    AlpacaUtilities_mSleep(1000);
+    
+    /*************************************************************************************
+     * Init TLS 1.2 CLIENT
+     * Initiate a VALID connection
+     * Verify results, then close
+     *************************************************************************************/
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
+
+
+    result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+
+    AlpacaUtilities_mSleep(1000);
+
+    result = AlpacaComms_close(&client_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
+    CU_ASSERT_EQUAL(ALPACA_COMMSSTATUS_NOTCONN, client_commsCTX->status);
+    CU_ASSERT_PTR_NULL(client_commsCTX->AlpacaSock->ssl);
+
+    thrd_shutdown = 1;
+    pthread_join(server,NULL);
+    thrd_shutdown = 0;
+
+    // Clean
+    result = AlpacaComms_destroyCtx(&client_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
+    CU_ASSERT_PTR_NULL(client_commsCTX);
+
+    result = AlpacaComms_close(&client_commsCTX);
+    CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
+    CU_ASSERT_PTR_NULL(client_commsCTX);
+
+
 
     result = AlpacaComms_cleanUp();
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-*/
+
     return;
 }

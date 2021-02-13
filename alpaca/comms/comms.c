@@ -334,6 +334,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 
 	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]\n", (*ctx), port);
 	if(!(*ctx) || port < 1024){
+		LOGERROR("Error bad params passed ctx[%p] port[%u]\n", (*ctx), port);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
@@ -348,7 +349,6 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	/* Bind the server socket to our port */
     if (bind((*ctx)->AlpacaSock->fd, (struct sockaddr*)&servAddr, saddr_size) == -1) {
         LOGERROR("Error failed to bind\n");
-		perror("whaaa\n");
 		result = ALPACA_ERROR_TCPBIND;
         goto exit;
     }
@@ -410,12 +410,14 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 
 	
 exit:
-	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
+	if(result != ALPACA_SUCCESS){
 		/* 
 		 * TCP + TLS was not established 
 		 */
 		LOGERROR("TCP + TLS was not able to be established\n");
-		AlpacaComms_close(ctx);
+		if(*ctx){
+			AlpacaComms_close(ctx);
+		}
 	}
 
 	LEAVING;
@@ -436,8 +438,8 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	
 
-	if(!(*ctx) || !(*ctx)->AlpacaSock){
-		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p, ctx->AlpacaSock:%p\n", (*ctx), (*ctx)->AlpacaSock);
+	if(!(*ctx)){
+		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p\n", (*ctx));
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
@@ -477,7 +479,7 @@ ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t** ctx, void* buf, size_t len, s
 	ssize_t temp = 0;
 
 	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p, ssl:%p buf:%p  len:%lu\n", (*ctx), (*ctx)->AlpacaSock->ssl, buf, len);
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p buf:%p  len:%lu\n", (*ctx), buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;

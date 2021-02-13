@@ -65,4 +65,4 @@ January 31, 2021
 --enable-aesctr \
 --enable-ssh \
 CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" \
-LDFLAGS="-Wl,--gc-sections" 
+LDFLAGS="-Wl,--gc-sections"

@@ -47,14 +47,14 @@ int main(){
     }
 
     if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base)) ||
-        //(NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
-        //(NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_send)) || 
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_listen))){
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_send))   || 
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_recv))   ||
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_listen)) ||
+        (NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_close))){
         CU_cleanup_registry();
         exit(CU_get_error());
     }
-
-
     
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
