@@ -75,7 +75,7 @@ ALPACA_STATUS AlpacaComms_cleanUp (void){
  *
  *  @param ctx Double Pointer to caller comms context object to 
  * 			   allocate and initialize
- * 	@param type Comms type. Requires bit mask of ALPACA_COMMSTYPE and 
+ * 	@param type Comms type. Requires bit mask of ALPACACOMMS_TYPE and 
  * 				ALPACA_COMMSPROTO
  *  @return ALPACA_STATUS
  */
@@ -126,7 +126,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 
 	switch(GET_COMMS_PROTO(flags)) {
 
-		case ALPACA_COMMSPROTO_TLS12:
+		case ALPACACOMMS_PROTO_TLS12:
 				LOGINFO("Creating TLS 1.2 ssl obj\n");
 				/**
 				 * Create Client ssl object
@@ -143,20 +143,20 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 				(*ctx)->close   = AlpacaWolf_close;
 
 				// Set status 
-				(*ctx)->status  = ALPACA_COMMSSTATUS_NOTCONN;
+				(*ctx)->status  = ALPACACOMMS_STATUS_NOTCONN;
 				break;
 		
-		case ALPACA_COMMSPROTO_TLS13:
+		case ALPACACOMMS_PROTO_TLS13:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("TLS 1.3 not supported yet\n");
 			break;
 
-		case ALPACA_COMMSPROTO_UDP:
+		case ALPACACOMMS_PROTO_UDP:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("UDP not supported yet\n");
 			break;
 
-		case ALPACA_COMMSPROTO_SSH:
+		case ALPACACOMMS_PROTO_SSH:
 			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("SSH not supported yet\n");
 			break;
@@ -234,7 +234,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 	
-	if((*ctx)->status & (ALPACA_COMMSSTATUS_CONN|ALPACA_COMMSSTATUS_TLSCONN)){
+	if((*ctx)->status & (ALPACACOMMS_STATUS_CONN|ALPACACOMMS_STATUS_TLSCONN)){
 		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", (*ctx), (*ctx)->status);
 		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
@@ -258,7 +258,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACA_COMMSSTATUS_NOTCONN)){
+	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACACOMMS_STATUS_NOTCONN)){
 		ret = 0;
 
 		/* Wait for writeability */
@@ -283,7 +283,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 				continue;
 			}
 			/* Connection established */
-			(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
+			(*ctx)->status = ALPACACOMMS_STATUS_CONN;
 			LOGDEBUG("TCP connection established!\n");
 			break;
 		}
@@ -301,10 +301,10 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 	LOGINFO("TLS established\n");
-	(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
+	(*ctx)->status = ALPACACOMMS_STATUS_TLSCONN;
 
 exit:
-	if((*ctx) && !((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
+	if((*ctx) && !((*ctx)->status & ALPACACOMMS_STATUS_TLSCONN)){
 		/* 
 		 * TCP + TLS was not established 
 		 */
@@ -366,7 +366,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACA_COMMSSTATUS_NOTCONN)){
+	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACACOMMS_STATUS_NOTCONN)){
 
 		LOGINFO("Attepmt #%d to catch TCP connection\n", attempts+1);
 		/* Accept client connections */
@@ -377,7 +377,7 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 			continue;
         }
 		/* Connection established */
-		(*ctx)->status = ALPACA_COMMSSTATUS_CONN;
+		(*ctx)->status = ALPACACOMMS_STATUS_CONN;
 		LOGDEBUG("TCP connection established!\n");	
 		
 		/* Perform TLS handhake */
@@ -385,15 +385,15 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
 		if(result){
 			LOGERROR("TLS handshake failed!\n");
 			close(clientFd);
-			(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
+			(*ctx)->status = ALPACACOMMS_STATUS_NOTCONN;
 			attempts++;
 			continue;
 		}
 		LOGINFO("TLS established\n");
-		(*ctx)->status = ALPACA_COMMSSTATUS_TLSCONN;
+		(*ctx)->status = ALPACACOMMS_STATUS_TLSCONN;
 	}
 
-	if(!((*ctx)->status & ALPACA_COMMSSTATUS_TLSCONN)){
+	if(!((*ctx)->status & ALPACACOMMS_STATUS_TLSCONN)){
 		LOGERROR("Listen failed...\n");
 		result = ALPACA_ERROR_COMMSLISTEN;
 		goto exit;
@@ -458,7 +458,7 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
 		}
 	}
 
-	(*ctx)->status = ALPACA_COMMSSTATUS_NOTCONN;
+	(*ctx)->status = ALPACACOMMS_STATUS_NOTCONN;
 
 	// Close bottom layer 
 	result = AlpacaSock_close((*ctx)->AlpacaSock);

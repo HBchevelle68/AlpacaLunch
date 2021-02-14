@@ -33,28 +33,36 @@ typedef enum AlpacaLunch_TLSVersion{
 	tls_1_3 = 1
 } Alpaca_tlsVersion_t;
 
-/* Alpaca_commsCtx_t protocol values */ 
-#define ALPACA_COMMSPROTO_TLS12 1
-#define ALPACA_COMMSPROTO_TLS13 2
-#define ALPACA_COMMSPROTO_UDP   4
-#define ALPACA_COMMSPROTO_SSH   8
-
-/* Alpaca_commsCtx_t type values */
-#define ALPACA_COMMSTYPE_CLIENT 16
-#define ALPACA_COMMSTYPE_SERVER 32
-
+/* 
+ * AlpacaComms protocol values
+ */ 
+#define ALPACACOMMS_PROTO_TLS12 1
+#define ALPACACOMMS_PROTO_TLS13 2
+#define ALPACACOMMS_PROTO_UDP   4
+#define ALPACACOMMS_PROTO_SSH   8
+/*
+ * AlpacaComms type values
+ */
+#define ALPACACOMMS_TYPE_CLIENT 16
+#define ALPACACOMMS_TYPE_SERVER 32
+/* 
+ * AlpacaComms Status values
+ */
+#define ALPACACOMMS_STATUS_NOTCONN 0
+#define ALPACACOMMS_STATUS_CONN    1
+#define ALPACACOMMS_STATUS_TLSCONN 2
+/*
+ * AlpacaComms limit values
+ */
+#define ALPACACOMMS_MAX_BUFF (1024*64)
+/*
+ * Bit flags and helpers
+ */
 #define KEEP_COMMS_PROTO 0x000F
 #define KEEP_COMMS_TYPE  0x0030
 
 #define GET_COMMS_PROTO(flags) ((KEEP_COMMS_PROTO & flags))
 #define GET_COMMS_TYPE(flags) ((KEEP_COMMS_TYPE & flags))
-
-/* Alpaca_commsCtx_t Status values */ 
-#define ALPACA_COMMSSTATUS_NOTCONN 0
-#define ALPACA_COMMSSTATUS_CONN    1
-#define ALPACA_COMMSSTATUS_TLSCONN 2
-
-
 
 /**
  * @struct AlpacaLunch_CommsCtx

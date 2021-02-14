@@ -54,7 +54,7 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
 
-    if(version > ALPACA_COMMSPROTO_SSH){
+    if(version > ALPACACOMMS_PROTO_SSH){
         LOGERROR("Version number not in range: %d\n", version);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
@@ -167,11 +167,11 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
 
     switch(GET_COMMS_PROTO(flags)){
 
-        case ALPACA_COMMSPROTO_TLS12:
+        case ALPACACOMMS_PROTO_TLS12:
             /**
              * Create ssl object
              */
-            if(ALPACA_COMMSTYPE_CLIENT & flags){
+            if(ALPACACOMMS_TYPE_CLIENT & flags){
 
                 if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
@@ -179,7 +179,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
                 }
                 result = ALPACA_SUCCESS;
             }
-            else if (ALPACA_COMMSTYPE_SERVER & flags){
+            else if (ALPACACOMMS_TYPE_SERVER & flags){
 
                 if ((alpacasock->ssl = wolfSSL_new(procWolfServerCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
@@ -194,7 +194,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
             }
             break;
 
-        case ALPACA_COMMSPROTO_TLS13:
+        case ALPACACOMMS_PROTO_TLS13:
 			result = ALPACA_FAILURE;
 			LOGERROR("TLS 1.3 not supported yet\n");
             break;

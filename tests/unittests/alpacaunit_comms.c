@@ -50,14 +50,14 @@ void AlpacaUnit_comms_base(void){
     struct sockaddr_in *addrin_ptr = NULL;
     memset(&temp_addrin, 0, sizeof(struct sockaddr_in));
     
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     /*************************************************************************************
      * Init TLS 1.2
      * Verify all layers of initialization is as expected
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(temp_commsCTX);
 
@@ -77,7 +77,7 @@ void AlpacaUnit_comms_base(void){
     CU_ASSERT_PTR_EQUAL(temp_commsCTX->write, AlpacaWolf_send);
     CU_ASSERT_PTR_EQUAL(temp_commsCTX->close, AlpacaWolf_close);
 
-    CU_ASSERT_EQUAL(temp_commsCTX->status, ALPACA_COMMSSTATUS_NOTCONN);
+    CU_ASSERT_EQUAL(temp_commsCTX->status, ALPACACOMMS_STATUS_NOTCONN);
     result = AlpacaComms_destroyCtx(&temp_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(temp_commsCTX);    
@@ -91,15 +91,15 @@ void AlpacaUnit_comms_base(void){
     /* 
      * Attempt to initialize ctx with missing required flags && invalid flags
      */
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_UDP);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_UDP);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
@@ -107,12 +107,12 @@ void AlpacaUnit_comms_base(void){
      * Attempt to initialize obj already initialized 
      *************************************************************************************/
     // Proper
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(temp_commsCTX);
 
     // Improper
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     // Clean
     result = AlpacaComms_destroyCtx(&temp_commsCTX);
@@ -122,19 +122,19 @@ void AlpacaUnit_comms_base(void){
     /************************************************************************************* 
      * Attempt to initialize obj with unsupported comms type 
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_TLS13 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_TLS13 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_UDP | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_UDP | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_SSH | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_SSH | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
-    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACA_COMMSPROTO_SSH | ALPACA_COMMSTYPE_CLIENT | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&temp_commsCTX, ALPACACOMMS_PROTO_SSH | ALPACACOMMS_TYPE_CLIENT | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_UNSUPPORTED);
     CU_ASSERT_PTR_NULL(temp_commsCTX);
 
@@ -168,7 +168,7 @@ void* server_thread(void* args){
     
     pthread_mutex_lock(&write_lock);
 
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     if(result){
         LOGERROR("Error in server_thread during init...\n");
         goto exit;
@@ -222,7 +222,7 @@ void AlpacaUnit_comms_connect(void){
 
     memset(&temp_addrin, 0, sizeof(struct sockaddr_in));
 
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     ret = pthread_create(&server, NULL, server_thread, NULL);
@@ -234,14 +234,14 @@ void AlpacaUnit_comms_connect(void){
      * Initiate a VALID connection
      * Verify results, then close
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
 
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     AlpacaUtilities_mSleep(1000);
 
@@ -284,7 +284,7 @@ void AlpacaUnit_comms_connect(void){
      * Invalid IP passed
      * Invalid port
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
     result = AlpacaComms_connect(&client_commsCTX, "", 0);
@@ -300,7 +300,7 @@ void AlpacaUnit_comms_connect(void){
      * valid IP passed
      * Invalid port
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", 0);
@@ -315,7 +315,7 @@ void AlpacaUnit_comms_connect(void){
     /*************************************************************************************
      * Valid params but attempt to connect to non-listening port
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", 12345);
@@ -329,7 +329,7 @@ void AlpacaUnit_comms_connect(void){
     /*************************************************************************************
      * Connect to listening service but with protocol mismatch
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", 22);
@@ -349,17 +349,17 @@ void AlpacaUnit_comms_connect(void){
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
 
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADSTATE);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     AlpacaUtilities_mSleep(500);
 
@@ -402,7 +402,7 @@ void AlpacaUnit_comms_send(void){
     char local_buffer[1024] = {0};
     memset(local_buffer, 0, sizeof(local_buffer));
 
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     /*************************************************************************************
@@ -413,13 +413,13 @@ void AlpacaUnit_comms_send(void){
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
 
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     pthread_mutex_lock(&write_lock);
     strcpy((char*)local_buffer,"WAZZZZZZUP!");
@@ -454,13 +454,13 @@ void AlpacaUnit_comms_send(void){
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
 
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     pthread_mutex_lock(&write_lock);
     rand_stream = gen_rdm_bytestream(ONE_KB);
@@ -494,13 +494,13 @@ void AlpacaUnit_comms_send(void){
     CU_ASSERT_FALSE_FATAL(ret);
     AlpacaUtilities_mSleep(1000);
 
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     for(int i = 0; i < ONE_KB; i++){
         rand_stream = gen_rdm_bytestream(FOUR_KB);
@@ -547,7 +547,7 @@ void AlpacaUnit_comms_send(void){
     CU_ASSERT_EQUAL(out, 0);
 
     // Now init
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
@@ -572,7 +572,7 @@ void AlpacaUnit_comms_send(void){
     // Now connect
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
     pthread_mutex_lock(&write_lock);
     rand_stream = gen_rdm_bytestream(FOUR_KB);
     
@@ -611,7 +611,7 @@ void* client_thread(void* args){
     
     AlpacaUtilities_mSleep(250);
 
-    result = AlpacaComms_initCtx(&client_commsCtx, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCtx, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     if(result){
         LOGERROR("Error in client_thread during init...\n");
         goto exit;
@@ -658,14 +658,14 @@ void AlpacaUnit_comms_recv(void){
     char local_buffer[FOUR_KB] = {0};
     memset(local_buffer, 0, sizeof(local_buffer));
 
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     /*************************************************************************************
      * Baseline Listen and recv. 
      * Verify contents and recv values
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -700,7 +700,7 @@ void AlpacaUnit_comms_recv(void){
 
 
 /*
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -710,7 +710,7 @@ void AlpacaUnit_comms_recv(void){
     
     result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     for(int i = 0; i < ONE_KB; i++){
         LOGDEBUG("***** RECV [%d] ***** \n", i+1);
@@ -741,7 +741,7 @@ void AlpacaUnit_comms_recv(void){
      * Verify contents and recv values
      *************************************************************************************/
 
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -807,13 +807,13 @@ void AlpacaUnit_comms_listen(void){
     int ret = 0;
     
 
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     /*************************************************************************************
      * Baseline Listen. 
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -825,7 +825,7 @@ void AlpacaUnit_comms_listen(void){
     result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
-    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     // Clean
     result = AlpacaComms_destroyCtx(&server_commsCTX);
@@ -846,7 +846,7 @@ void AlpacaUnit_comms_listen(void){
     CU_ASSERT_EQUAL(result, ALPACA_ERROR_BADPARAM);
     CU_ASSERT_PTR_NULL(server_commsCTX);
 
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -861,7 +861,7 @@ void AlpacaUnit_comms_listen(void){
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NULL(server_commsCTX);
 
-    result = AlpacaComms_initCtx(&server_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_SERVER);
+    result = AlpacaComms_initCtx(&server_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
     setsockopt(server_commsCTX->AlpacaSock->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
@@ -872,7 +872,7 @@ void AlpacaUnit_comms_listen(void){
     result = AlpacaComms_listen(&server_commsCTX, UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(server_commsCTX);
-    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(server_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     // Clean
     result = AlpacaComms_destroyCtx(&server_commsCTX);
@@ -908,7 +908,7 @@ void AlpacaUnit_comms_close(void){
 
     memset(&temp_addrin, 0, sizeof(struct sockaddr_in));
 
-    result = AlpacaComms_init(ALPACA_COMMSPROTO_TLS12);
+    result = AlpacaComms_init(ALPACACOMMS_PROTO_TLS12);
     CU_ASSERT_EQUAL_FATAL(result, ALPACA_SUCCESS);
 
     ret = pthread_create(&server, NULL, server_thread, NULL);
@@ -920,21 +920,21 @@ void AlpacaUnit_comms_close(void){
      * Initiate a VALID connection
      * Verify results, then close
      *************************************************************************************/
-    result = AlpacaComms_initCtx(&client_commsCTX, ALPACA_COMMSPROTO_TLS12 | ALPACA_COMMSTYPE_CLIENT);
+    result = AlpacaComms_initCtx(&client_commsCTX, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
 
 
     result = AlpacaComms_connect(&client_commsCTX, "127.0.0.1", UNITTEST_DEFAULT_PORT);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
-    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACA_COMMSSTATUS_TLSCONN);
+    CU_ASSERT_EQUAL(client_commsCTX->status, ALPACACOMMS_STATUS_TLSCONN);
 
     AlpacaUtilities_mSleep(1000);
 
     result = AlpacaComms_close(&client_commsCTX);
     CU_ASSERT_EQUAL(result, ALPACA_SUCCESS);
     CU_ASSERT_PTR_NOT_NULL_FATAL(client_commsCTX);
-    CU_ASSERT_EQUAL(ALPACA_COMMSSTATUS_NOTCONN, client_commsCTX->status);
+    CU_ASSERT_EQUAL(ALPACACOMMS_STATUS_NOTCONN, client_commsCTX->status);
     CU_ASSERT_PTR_NULL(client_commsCTX->AlpacaSock->ssl);
 
     thrd_shutdown = 1;
