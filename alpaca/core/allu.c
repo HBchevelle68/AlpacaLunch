@@ -3,7 +3,6 @@
 #include <interfaces/comms_interface.h>
 #include <core/allu.h>
 #include <core/logging.h>
-#include <core/sighandler.h>
 
 
 ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
@@ -17,13 +16,6 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
     // NEED ERROR HANDLING!
     getuid();
 #endif 
-
-    // Install signal handlers
-    result = AlpacaCore_installSigHandlers();
-    if(result){
-        LOGERROR("Error initializing Alpaca Signal Handlers\n");
-        goto exit;
-    }
 
     result = AlpacaComms_init(commsFlags);
     if(result){
