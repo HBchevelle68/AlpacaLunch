@@ -14,19 +14,21 @@
 #if DEBUGENABLE
 void AlpacaUtilities_daemonize(void){
 
-	pid_t pid;
+	int fd;
 
-    /* Fork off the parent process */
-    pid = fork();
-
-    /* An error occurred */
-    if (pid < 0){
-        exit(EXIT_FAILURE);
-    }
-
-    /* Success: Let the parent terminate */
-    if (pid > 0){
-        exit(EXIT_SUCCESS);
+    switch (fork())
+    {
+        case -1:
+            // Error during fork
+            exit(EXIT_FAILURE) 
+            break;
+        case 0:
+            // Child falls through
+            break
+        default:
+            // Parent exits
+            _exit(EXIT_SUCCESS)
+            break;
     }
 
     /* On success: The child process becomes session leader */
@@ -39,16 +41,19 @@ void AlpacaUtilities_daemonize(void){
     signal(SIGHUP, SIG_IGN);
 
     /* Fork off for the second time*/
-    pid = fork();
-
-    /* An error occurred */
-    if (pid < 0){
-        exit(EXIT_FAILURE);
-    }
-
-    /* Success: Let the parent terminate */
-    if (pid > 0){
-        exit(EXIT_SUCCESS);
+    switch (fork())
+    {
+        case -1:
+            // Error during fork
+            exit(EXIT_FAILURE) 
+            break;
+        case 0:
+            // Child falls through
+            break
+        default:
+            // Parent exits
+            _exit(EXIT_SUCCESS)
+            break;
     }
 
     /* Set new file permissions */
@@ -57,13 +62,27 @@ void AlpacaUtilities_daemonize(void){
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
     if(chdir("/")){
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     /* Close all open file descriptors */
     for (int tempFd = sysconf(_SC_OPEN_MAX); tempFd >= 0; tempFd--){
-        close (tempFd);
+        close(tempFd);
     }
+
+    // Reopen std file descs pointing to /dev/null
+    fd = open("/dev/null", O_RDWR);
+    if(fd != STDIN_FILENO){
+        exit(EXIT_FAILURE);
+    }
+    if(dup2(STDIN_FILENO, STDOUT_FILENO) != STDOUT_FILENO){
+        exit(EXIT_FAILURE);
+    }
+    if(dup2(STDOUT_FILENO, STDERR_FILENO) != STDERR_FILENO){
+        exit(EXIT_FAILURE);
+    }
+    
+
 }
 #else
 void AlpacaUtilities_daemonize(void){return;}

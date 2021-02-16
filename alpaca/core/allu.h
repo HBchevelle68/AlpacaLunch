@@ -5,7 +5,7 @@
 
 
 
-ALPACA_STATUS AlpacaCore_init(void);
+ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags);
 ALPACA_STATUS AlpacaCore_exit(void);
     
 

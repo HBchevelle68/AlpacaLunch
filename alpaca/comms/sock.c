@@ -3,13 +3,15 @@
 
 // Implements interface 
 #include <interfaces/comms_interface.h>
+#include <interfaces/memory_interface.h>
 
 
 // Internal
-//#include <interfaces/memory_interface.h>
 #include <comms/sock.h>
+#include <comms/wolf.h>
 #include <core/logging.h>
 #include <core/codes.h>
+
 
 
 #define DEFAULTPORT 12345
@@ -55,7 +57,7 @@ ALPACA_STATUS AlpacaSock_create(Alpaca_sock_t* ctx) {
      * Close on Exec (CLOEXEC) flag to prevent file descriptor
      * leaking into child processes 
      */
-    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
+    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0); 
     if(ctx->fd == -1) { 
         LOGERROR("Failure to create socket\n");
         result = ALPACA_ERROR_SOCKCREATE;
@@ -78,36 +80,37 @@ done:
     return result;
 }
 
-ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* ctx){
 
-    ALPACA_STATUS  result  = ALPACA_ERROR_UNKNOWN;
-    Alpaca_sock_t* sockPtr = (Alpaca_sock_t*)ctx;
+ALPACA_STATUS AlpacaSock_close(Alpaca_sock_t* alpacasock){
+
+    ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
     /*
      * Convert the opaque oparam to an Alpaca Socket
      * then verify its validity 
      */
-    if(ctx) {
-
-        if(sockPtr->ssl){
-            wolfSSL_free(sockPtr->ssl);
-        }
-
-        if(sockPtr->fd > 0){
-            close(sockPtr->fd);
-            sockPtr->fd = -1;
-        }
-        
-        sockPtr->type = 0;
-        memset(&sockPtr->peer, 0, sizeof(struct sockaddr_in));
-        result = ALPACA_SUCCESS;
-    }
-    else {
-        LOGERROR("Invalid param\n");
+    if(!alpacasock) {
+        LOGERROR("Invalid param [%p]\n", alpacasock);
         result = ALPACA_ERROR_BADPARAM;
+        goto exit;
     }
     
+    if(alpacasock->ssl){
+        LOGERROR("Underlying comms layer still valid. Close security layer first [%p]\n", alpacasock->ssl);
+        result = ALPACA_ERROR_BADSTATE;
+        goto exit;            
+    }
+
+    if(alpacasock->fd > 0){
+        close(alpacasock->fd);
+        alpacasock->fd = -1;
+    }
+    
+    alpacasock->type = 0;
+    memset(&alpacasock->peer, 0, sizeof(struct sockaddr_in));
+
+exit:
     LEAVING;
     return result;
 

@@ -3,56 +3,77 @@
 
 #include <stdint.h>
 #include <pthread.h>
-#include <stdatomic.h>
+//#include <stdatomic.h> // Needed?? 
 
 #include <core/codes.h>
 #include <threadpool/alpacaqueue.h>
 
+#define ALPACA_TPOOL_INACTIVE 0
+#define ALPACA_TPOOL_POOLINIT 1
+#define ALPACA_TPOOL_ATTRINIT 2
+#define ALPACA_TPOOL_LOCKINIT 4
+#define ALPACA_TPOOL_READY    8  
+
+
+/**
+ * @brief Alpaca thread structure
+ * 
+ * thrd - posix thread
+ * aptid - alapaca threadpool ID
+ * active - bool, is the thread active
+ */
+typedef struct AlpacaThread {
+
+  pthread_t thrd;
+  uint8_t   aptid;
+  uint8_t   active;
+
+} Alpaca_thrd_t;
 
 
 
-// Struct that holds the function and arguments to execute
-typedef struct AlpacaLunch_task{
-    void (*routine)(void *);
-    void *args;
-    char name[256];
-} ALtask_t;
-
-typedef struct AlpacaLunch_thread {
-  pthread_t thread;
-  char name[256]; 
-} ALthread_t;
-
-
-
-/*
-    The core pool
-
-    pthread_t *t_pool       - Thread array
-    AL_queue_t *queue           - Queue holding tasks
-    pthread_mutex_t q_lock  - Mutex to access queue of tasks
-    pthread_mutex_t q_cond  - Condition variable for Queue
-    uint16_t t_size         - Number of threads for pool
-    uint16_t q_size         - Number of tasks for pool
-*/
-typedef struct AlpacaLunch_threadpool {
+/**
+ * @brief Alpaca Threadpool structure
+ *        
+ * @note  Exepected to be used as an event based
+ *        threadpool 
+ * 
+ * 
+ * pool - allocated array of Alpaca_thrd_t's
+ *        These are our actual threads
+ * lock - mutex for pool access 
+ * lock_attr - attricutes of aformentioned lock
+ * max_threads - max alloed threads for this pool
+ * active_threads - number of actively executing threads
+ * status - bit flag of threadpool status 
+ * 
+ */
+typedef struct AlpacaThreadPool {
   
-  ALthread_t *t_pool;
-  AL_queue_t queue;
-  pthread_mutex_t tp_m_lock;
-  pthread_cond_t q_cond;  	 
-  uint16_t t_size;
-  uint8_t teardown;
-} ALtpool_t;
+  Alpaca_thrd_t*      pool;
+  pthread_mutex_t     lock;
+  pthread_mutexattr_t lock_attr;
+  uint8_t  max_threads;
+  uint8_t  active_threads;
+  uint8_t  status;
+
+} Alpaca_tPool_t;
 
 
-ALtpool_t* AlpacaThreadpool_init(uint32_t numThreads);
 
-int AlpacaThreadpool_addTask(ALtpool_t *tp, void (*routine)(void*), void *args, char* name);
+// thread structure 
 
-char* AlpacaThreadpool_listThreads(ALtpool_t *tp);
+// threadpool structure
 
-ALPACA_STATUS AlpacaThreadpool_exit(ALtpool_t *tp);
+// init threadpool
+ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds);
+
+// exit threadpool
+ALPACA_STATUS AlpacaThreadpool_teardownPool(void);
+
+
+// create thread
+// cancel thread
 
 
 

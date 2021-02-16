@@ -50,6 +50,9 @@ extern "C" {
 #undef  WC_RSA_BLINDING
 #define WC_RSA_BLINDING
 
+#undef  NO_AES_CBC
+#define NO_AES_CBC
+
 #undef  HAVE_AESGCM
 #define HAVE_AESGCM
 
@@ -97,6 +100,12 @@ extern "C" {
 
 #undef  NO_RC4
 #define NO_RC4
+
+#undef  NO_MD5
+#define NO_MD5
+
+#undef  NO_OLD_TLS
+#define NO_OLD_TLS
 
 #undef  NO_HC128
 #define NO_HC128
@@ -154,6 +163,9 @@ extern "C" {
 
 #undef  WOLFSSL_X86_64_BUILD
 #define WOLFSSL_X86_64_BUILD
+
+#undef  NO_PKCS12
+#define NO_PKCS12
 
 #undef  WC_NO_ASYNC_THREADING
 #define WC_NO_ASYNC_THREADING
