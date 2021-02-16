@@ -266,12 +266,8 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		pfd.events = POLLOUT;
 
 		ret = poll(&pfd, 1, 10*1000);
-		if(ret == -1){
-			LOGERROR("Error during poll() ret[%d]", ret);
-			break;
-		}
 
-		if(pfd.events & POLLOUT){
+		if(ret > 0 && pfd.events & POLLOUT){
 			/* Connect to the server */
 			LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
 			ret = connect((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, sizeof(struct sockaddr_in));
@@ -285,6 +281,10 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 			/* Connection established */
 			(*ctx)->status = ALPACACOMMS_STATUS_CONN;
 			LOGDEBUG("TCP connection established!\n");
+			break;
+		}
+		else if(ret == -1){
+			LOGERROR("Error during poll() ret[%d]", ret);
 			break;
 		}
 	}
