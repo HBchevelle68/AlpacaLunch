@@ -260,6 +260,7 @@ wolf:
 	make -C $(CRYPTSRC)
 	make install -C $(CRYPTSRC)
 	rm -rf $(CRYPTSRC)
+	$(call PG, WolfSSL sucessfully recompiled)
 	
 clean:
 	$(call PY, Full clean...)
