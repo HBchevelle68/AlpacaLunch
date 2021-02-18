@@ -1,6 +1,7 @@
 // Standard
 #include <stdio.h> 
 #include <time.h>
+#include <stdlib.h>
 
 // CUnit
 #include <CUnit/CUnit.h>
@@ -8,7 +9,6 @@
 
 // Internal
 #include <core/logging.h> 
-#include <core/crypto.h>
 
 // Internal Tests
 #include <unittests/alpaca_unit.h>

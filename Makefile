@@ -94,9 +94,9 @@ ALPACAMAIN_DOBJ=$(addprefix $(SRCBASE)/, main-debug.o)
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, crypto.o sighandler.o allu.o devtests.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, crypto-debug.o sighandler-debug.o allu-debug.o devtests-debug.o) 
-ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, crypto-unit.o sighandler-unit.o allu-unit.o devtests-unit.o)
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, allu.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, allu-debug.o) 
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, allu-unit.o)
 
 #
 # ALPACA-MULTITHREADSERVER object files
