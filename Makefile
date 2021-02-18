@@ -32,6 +32,7 @@ COMPONENTALL = $(COMPONENTBASE)/allTest.py
 CRYPTBASE= $(SRCBASE)/cryptlibs
 CRYPTINC= $(CRYPTBASE)/include
 CRYPTSTATIC= $(CRYPTBASE)/lib/libwolfssl.a
+CRYPTSRC= $(DIR)/ext/wolfSSL/wolfssl-4.7.0
 
 #
 # Header Directories
@@ -251,6 +252,14 @@ misc:
 	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
+
+wolf:
+	rm -rf $(CRYPTBASE)/*
+	unzip -o -q $(CRYPTSRC).zip -d $(DIR)/ext/wolfSSL
+	cd $(CRYPTSRC) && ./configure --prefix=$(CRYPTBASE) --disable-oldtls --disable-examples --disable-crypttests --disable-fips --disable-aescbc --disable-des3 --disable-md5 --disable-pkcs12 --enable-static --enable-harden --enable-fastmath --enable-keygen --enable-certgen --enable-tls13 --enable-aesctr --enable-ssh CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" LDFLAGS="-Wl,--gc-sections"
+	make -C $(CRYPTSRC)
+	make install -C $(CRYPTSRC)
+	rm -rf $(CRYPTSRC)
 	
 clean:
 	$(call PY, Full clean...)
