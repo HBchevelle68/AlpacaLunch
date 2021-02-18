@@ -256,7 +256,27 @@ misc:
 wolf:
 	rm -rf $(CRYPTBASE)/*
 	unzip -o -q $(CRYPTSRC).zip -d $(DIR)/ext/wolfSSL
-	cd $(CRYPTSRC) && ./configure --prefix=$(CRYPTBASE) --disable-oldtls --disable-examples --disable-crypttests --disable-fips --disable-aescbc --disable-des3 --disable-md5 --disable-pkcs12 --enable-static --enable-harden --enable-fastmath --enable-keygen --enable-certgen --enable-tls13 --enable-aesctr --enable-ssh CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" LDFLAGS="-Wl,--gc-sections"
+	cd $(CRYPTSRC) && ./configure \
+	--prefix=/home/ap/AlpacaLunch/alpaca/cryptlibs \
+	--disable-oldtls \
+	--disable-examples \
+	--disable-crypttests \
+	--disable-fips \
+	--disable-aescbc \
+	--disable-des3 \
+	--disable-md5 \
+	--disable-pkcs12 \
+	--enable-static \
+	--enable-harden \
+	--enable-fastmath \
+	--enable-keygen \
+	--enable-certgen \
+	--enable-tls13 \
+	--enable-aesctr \
+	--enable-ssh \
+	CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" \
+	LDFLAGS="-Wl,--gc-sections"
+# --prefix=$(CRYPTBASE) --disable-oldtls --disable-examples --disable-crypttests --disable-fips --disable-aescbc --disable-des3 --disable-md5 --disable-pkcs12 --enable-static --enable-harden --enable-fastmath --enable-keygen --enable-certgen --enable-tls13 --enable-aesctr --enable-ssh CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" LDFLAGS="-Wl,--gc-sections"
 	make -C $(CRYPTSRC)
 	make install -C $(CRYPTSRC)
 	rm -rf $(CRYPTSRC)
