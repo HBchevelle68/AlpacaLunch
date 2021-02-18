@@ -53,9 +53,6 @@ extern "C" {
 #undef  NO_AES_CBC
 #define NO_AES_CBC
 
-#undef  HAVE_AESGCM
-#define HAVE_AESGCM
-
 #undef  WOLFSSL_AES_COUNTER
 #define WOLFSSL_AES_COUNTER
 
@@ -176,8 +173,17 @@ extern "C" {
 #undef  NO_DES3
 #define NO_DES3
 
+#undef  GCM_TABLE_4BIT
+#define GCM_TABLE_4BIT
+
+#undef  HAVE_AESGCM
+#define HAVE_AESGCM
+
 #undef  HAVE___UINT128_T
 #define HAVE___UINT128_T 1
+
+#undef  HAVE_WC_INTROSPECTION
+#define HAVE_WC_INTROSPECTION
 
 
 #ifdef __cplusplus

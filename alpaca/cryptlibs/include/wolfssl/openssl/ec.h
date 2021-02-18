@@ -25,6 +25,7 @@
 #define WOLFSSL_EC_H_
 
 #include <wolfssl/openssl/bn.h>
+#include <wolfssl/wolfcrypt/asn.h>
 #include <wolfssl/wolfcrypt/ecc.h>
 
 #ifdef __cplusplus
@@ -66,6 +67,13 @@ enum {
     NID_brainpoolP320r1 = 929,
     NID_brainpoolP384r1 = 931,
     NID_brainpoolP512r1 = 933,
+#endif
+
+#ifdef HAVE_ED448
+    NID_ED448 = ED448k,
+#endif
+#ifdef HAVE_ED25519
+    NID_ED25519 = ED25519k,
 #endif
 
     OPENSSL_EC_NAMED_CURVE  = 0x001
@@ -301,6 +309,9 @@ char* wolfSSL_EC_POINT_point2hex(const WOLFSSL_EC_GROUP* group,
 #define EC_GROUP_get_order              wolfSSL_EC_GROUP_get_order
 #define EC_GROUP_order_bits             wolfSSL_EC_GROUP_order_bits
 #define EC_GROUP_method_of              wolfSSL_EC_GROUP_method_of
+#ifndef NO_WOLFSSL_STUB
+#define EC_GROUP_set_point_conversion_form(...)
+#endif
 
 #define EC_METHOD_get_field_type        wolfSSL_EC_METHOD_get_field_type
 
