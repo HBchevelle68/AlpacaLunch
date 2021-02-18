@@ -257,6 +257,7 @@ wolf:
 	rm -rf $(CRYPTBASE)/*
 	rm -rf $(CRYPTSRC)
 	unzip -o -q $(CRYPTSRC).zip -d $(DIR)/ext/wolfSSL
+
 	cd $(CRYPTSRC) && ./configure \
 		--prefix=$(CRYPTBASE) \
 		--disable-oldtls \
@@ -277,6 +278,7 @@ wolf:
 		--enable-ssh \
 		CFLAGS="-std=c11 -O2 -ffunction-sections -fdata-sections -fPIC -flto" \
 		LDFLAGS="-Wl,--gc-sections"
+
 	make -C $(CRYPTSRC)
 	make install -C $(CRYPTSRC)
 	rm -rf $(CRYPTSRC)
