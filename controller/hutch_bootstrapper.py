@@ -1,4 +1,4 @@
-from controller.hutch.hutch import Hutch
+from hutch.hutch import Hutch
 
 if __name__ == "__main__":
     Hutch()

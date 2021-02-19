@@ -23,8 +23,8 @@ int main(int argc, char** argv){
     
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
-    char buffer[1024] = {0};
-    ssize_t out = 0;
+    //char buffer[1024] = {0};
+    //ssize_t out = 0;
 
 
     /** 
@@ -52,14 +52,14 @@ int main(int argc, char** argv){
     
 
     // FOR TEST ONLY! Doesn't belong here
-    result = AlpacaComms_connect(&coreComms, "127.0.0.1" ,44444);
+    result = AlpacaComms_connect(&coreComms, "127.0.0.1" ,6969);
     
-    memset(buffer, 0, 1024);
-    strcpy(buffer,"WAZZZZZZUP!");
-    result = AlpacaComms_send(&coreComms, buffer, strlen(buffer), &out);
-    memset(buffer, 0, out);
-    result = AlpacaComms_recv(&coreComms, buffer, 1024, &out);
-    LOGDEBUG("Buffer: %s\n", buffer);
+    //memset(buffer, 0, 1024);
+    //strcpy(buffer,"Talk Buggy to me!");
+    //result = AlpacaComms_send(&coreComms, buffer, strlen(buffer), &out);
+    //memset(buffer, 0, out);
+    ///result = AlpacaComms_recv(&coreComms, buffer, 1024, &out);
+    //LOGDEBUG("Buffer: %s\n", buffer);
 
 
 

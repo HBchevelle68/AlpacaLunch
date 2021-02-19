@@ -7,8 +7,8 @@
 #include <core/codes.h>
 #include <core/logging.h>
 
-static const char TEMPCERTFILE[] = "/home/ap/AlpacaLunch/.testcerts/cert.pem";
-static const char TEMPKEYFILE[] = "/home/ap/AlpacaLunch/.testcerts/private.pem";
+static const char TEMPCERTFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-cert-dungpile.pem";
+static const char TEMPKEYFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-key-dungpile.pem";
 
 // For Atomics
 //__atribute__((unused)) static const uint8_t FLAGON  = 1;
@@ -271,7 +271,12 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
         }
         
         if (wolfSSL_connect(alpacasock->ssl) != SSL_SUCCESS) {
-            LOGERROR("ERROR failed to connect in wolfSSL\n");
+            int err = 0;
+            char buffer[80];
+            err = wolfSSL_get_error(alpacasock->ssl, 0);
+            wolfSSL_ERR_error_string(err, buffer);
+            LOGDEBUG("WolfSSL Error %d: %s\n", err, buffer);
+
             result = ALPACA_ERROR_WOLFSSLCONNECT;
         }
     }

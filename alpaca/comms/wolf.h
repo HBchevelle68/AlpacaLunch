@@ -18,5 +18,4 @@ ALPACA_STATUS AlpacaWolf_send   (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t
 ALPACA_STATUS AlpacaWolf_recv   (WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaWolf_close  (WOLFSSL** sslCtx);
 
-
 #endif

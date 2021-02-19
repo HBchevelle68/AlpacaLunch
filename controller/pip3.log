@@ -6,3 +6,4 @@ wolfssl
 wolfcrypt
 
 
+#Note: If for some reason wolfssl will not install via pip3, make sure you have libtool installed on your workstation

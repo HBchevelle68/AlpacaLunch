@@ -32,9 +32,9 @@ class Hutch:
         self.herder_tls_context = wolfssl.SSLContext(wolfssl.PROTOCOL_TLSv1_2, server_side=True)
 
         # TODO Should the server generate a cert if it doesn't have one or should it be an option
-        self.herder_tls_context.load_cert_chain("./hutch-cert-dungpile.crt", "./hutch-cert-dungpile.key")
         self.herder_tls_context.verify_mode = wolfssl.CERT_NONE
-
+        self.herder_tls_context.load_cert_chain("/home/chris/repos/AlpacaLunch/controller/hutch/hutch-cert-dungpile.pem", "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-key-dungpile.pem")
+        
         self.main()
 
     def main(self):
