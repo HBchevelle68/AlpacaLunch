@@ -1,8 +1,8 @@
 #include <sys/poll.h>
 
 #include <interfaces/comms_interface.h>
-#include <codes.h>
-#include <logging.h>
+#include <core/codes.h>
+#include <core/logging.h>
 
 #define MILLI_ONE_SEC (1000) // one second in milliseconds
 
@@ -12,7 +12,7 @@ extern Alpaca_commsCtx_t *coreComms;
 
 ALPACA_STATUS AlpacaCore_coreLoop(void){
 
-	ALPACA_STATUS result = ALPACA_SUCCESS;
+	// /ALPACA_STATUS result = ALPACA_SUCCESS;
 	int32_t ret = 0;
     ssize_t numRecvd = 0;
     struct pollfd pfd;
@@ -58,7 +58,8 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
                  * Here depenging on configuration 
                  * would connect or listen
                  */ 
-                AlpacaComms_initCtx(&coreComms, );
+                
+                //AlpacaComms_initCtx(&coreComms, );
                 
                
 

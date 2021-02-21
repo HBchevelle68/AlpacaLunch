@@ -12,10 +12,10 @@ BUILD = $(DIR)/build
 SRCBASE = $(DIR)/alpaca
 ALPACACORESRC   = $(SRCBASE)/core
 ALPACACOMMSSRC	= $(SRCBASE)/comms
-ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 ALPACATPOOLSRC  = $(SRCBASE)/threadpool
 ALPACAUTILSSRC	= $(SRCBASE)/utilities
 ALPACAMEMORYSRC = $(SRCBASE)/memory
+ALPACATASKSSRC  = $(SRCBASE)/tasks
 
 #
 # TEST DIRECTORIES
@@ -94,16 +94,9 @@ ALPACAMAIN_DOBJ=$(addprefix $(SRCBASE)/, main-debug.o)
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, allu.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, allu-debug.o) 
-ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, allu-unit.o)
-
-#
-# ALPACA-MULTITHREADSERVER object files
-# Build out seperate objs for release, test, debug 
-#
-ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
-ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o) 
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o)
 
 #
 # ALPACA-THREADPOOL object files
@@ -138,6 +131,14 @@ ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_bu
 ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buffer-unit.o) 
 
 #
+# ALPACA-MEMORY object files
+# Build out seperate objs for release, test, debug 
+#
+ALPACATASK_ROBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+ALPACATASK_DOBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+ALPACATASK_UOBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+
+#
 # ALPACA-UNITTESTS object files
 # Build out seperate objs for release, test, debug 
 #
@@ -148,25 +149,25 @@ ALPACAUNIT_UOBJS=$(addprefix $(UNITTESTSRC)/, alpacaunit_main-unit.o alpacaunit_
 #
 ALLROBJS = $(ALPACAMAIN_ROBJ)		 \
 		   $(ALPACACORE_ROBJS)       \
-		   $(ALPACAMTHREADSERV_ROBJS)\
 		   $(ALPACATPOOL_ROBJS) 	 \
 		   $(ALPACACOMMS_ROBJS) 	 \
 		   $(ALPACAUTILS_ROBJS) 	 \
+		   $(ALPACATASK_ROBJS) 	 	 \
 		   $(ALPACAMEM_ROBJS)
 
 ALLDOBJS = $(ALPACAMAIN_DOBJ)		 \
 		   $(ALPACACORE_DOBJS) 		 \
-		   $(ALPACAMTHREADSERV_DOBJS)\
 		   $(ALPACATPOOL_DOBJS)		 \
 		   $(ALPACACOMMS_DOBJS)		 \
 		   $(ALPACAUTILS_DOBJS)		 \
+		   $(ALPACATASK_DOBJS)		 \
 		   $(ALPACAMEM_DOBJS)		
 
 ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
-		   $(ALPACAMTHREADSERV_UOBJS)\
 		   $(ALPACATPOOL_UOBJS)		 \
 		   $(ALPACACOMMS_UOBJS)		 \
 		   $(ALPACAUTILS_UOBJS)		 \
+		   $(ALPACATASK_UOBJS)		 \
 		   $(ALPACAMEM_UOBJS) 		 \
 		   $(ALPACAUNIT_UOBJS)
 
