@@ -80,7 +80,23 @@ typedef struct AlpacaLunch_CommsCtx {
 	uint8_t status;
 
 } Alpaca_commsCtx_t;
+
 extern Alpaca_commsCtx_t *coreComms;
+
+
+typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header
+{
+	uint16_t alpacaID;
+	uint8_t  type;
+	uint8_t  flags;
+	uint16_t cmdNum;
+	uint16_t cmdID;
+	uint64_t bodySize;
+
+} Alpaca_protoHdr_t;
+
+#define PROTO_HDR_SIZE (sizeof(Alpaca_protoHdr_t));
+
 
 // Process networking Init/Cleanup
 ALPACA_STATUS AlpacaComms_init	  (uint16_t flags);

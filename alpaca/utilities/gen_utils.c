@@ -107,10 +107,8 @@ int AlpacaUtilities_mSleep(long msec){
     ts.tv_nsec = (msec % 1000) * 1000000;
 
     do {
-
         // SLEEP
         res = nanosleep(&ts, &ts);
-
     } while (res && errno == EINTR);
 
     return res;
