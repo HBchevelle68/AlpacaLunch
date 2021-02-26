@@ -97,7 +97,6 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header
 
 #define PROTO_HDR_SIZE (sizeof(Alpaca_protoHdr_t));
 
-
 // Process networking Init/Cleanup
 ALPACA_STATUS AlpacaComms_init	  (uint16_t flags);
 ALPACA_STATUS AlpacaComms_cleanUp (void);
