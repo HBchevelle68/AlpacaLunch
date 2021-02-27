@@ -13,7 +13,7 @@
 #include <core/logging.h>
 #include <core/codes.h>
 #include <comms/wolf.h>
-#include <comms/sock.h>
+//#include <comms/sock.h>
 
 
 #define DEFAULT_PORT  	   44444
@@ -107,35 +107,19 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 		goto exit;
 	}
 
-	/*
-	 * Now we can allocate the socket structure
-	 */
-	(*ctx)->AlpacaSock = calloc(sizeof(Alpaca_sock_t), sizeof(uint8_t));
-	if(!(*ctx)){
-		LOGERROR("Error during allocation of netCtx ctx\n");
-		result = ALPACA_ERROR_MALLOC;
-		goto exit;
-	}	
-
-	result = AlpacaSock_create((*ctx)->AlpacaSock);
-	if(result != ALPACA_SUCCESS){
-		LOGERROR("Error creating Alpaca Socket\n");
-		goto exit;
-	}
-
-
 	switch(GET_COMMS_PROTO(flags)) {
 
 		case ALPACACOMMS_PROTO_TLS12:
 				LOGINFO("Creating TLS 1.2 ssl obj\n");
 				/**
 				 * Create Client ssl object
-				 */
+				
 				result = AlpacaWolf_createSSL((*ctx)->AlpacaSock, flags);
 				if(((*ctx)->AlpacaSock) == NULL || result != ALPACA_SUCCESS) {
 					LOGERROR("Error generating ssl object\n");
 					goto exit;
 				}
+				 */
 				(*ctx)->connect = AlpacaWolf_connect;
 				(*ctx)->accept  = AlpacaWolf_accept;
 				(*ctx)->read    = AlpacaWolf_recv;
@@ -197,10 +181,8 @@ ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
 		/*
 		* If our custom socket is allocated clean up
 		*/
-		if((*ctx)->AlpacaSock){			
+		if((*ctx)->sock > 0){			
 			AlpacaComms_close(ctx);
-			free((*ctx)->AlpacaSock);
-			(*ctx)->AlpacaSock = NULL;
 		}
 		free((*ctx));
 		*ctx = NULL;
@@ -234,24 +216,20 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 	
-	if((*ctx)->status & (ALPACACOMMS_STATUS_CONN|ALPACACOMMS_STATUS_TLSCONN)){
+	if((*ctx)->status & (ALPACACOMMS_STATUS_CONN)){
 		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", (*ctx), (*ctx)->status);
 		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
 	}
 	
-	/*
-	 * Set the peer information
-	 */
-	(*ctx)->AlpacaSock->peer.sin_family = AF_INET;
-    (*ctx)->AlpacaSock->peer.sin_port   = htons(port);
 
-    /* convert IPv4 from string to network byte order */
+    /* convert IPv4 from string to network byte order 
     if(inet_pton(AF_INET, ipstr, &((*ctx)->AlpacaSock->peer.sin_addr)) != 1){
 		LOGERROR("Error converting ip addr\n");
 		result = ALPACA_ERROR_UNKNOWN;
 		goto exit;
 	}
+	*/
 
 	/** 
 	 * Loop attempting to connect to supplied peer

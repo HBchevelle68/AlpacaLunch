@@ -259,6 +259,50 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
+
+
+    /* convert IPv4 from string to network byte order 
+    if(inet_pton(AF_INET, ipstr, &((*ctx)->AlpacaSock->peer.sin_addr)) != 1){
+		LOGERROR("Error converting ip addr\n");
+		result = ALPACA_ERROR_UNKNOWN;
+		goto exit;
+	}
+	*/
+
+    LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
+    ret = connect((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, sizeof(struct sockaddr_in));
+
+    /* Wait for writeability */
+    pfd.fd = (*ctx)->AlpacaSock->fd;
+    pfd.events = POLLOUT;
+
+    ret = poll(&pfd, 1, 10*1000);
+
+    if(ret > 0 && pfd.events & POLLOUT){
+        /* Connect to the server */
+        
+        if (ret == -1) {
+
+            LOGERROR("Failed to connect... errno: %d\n", errno);
+            attempts++;
+            AlpacaUtilities_mSleep(THREE_SECONDS);
+            continue;
+        }
+        /* Connection established */
+        (*ctx)->status = ALPACACOMMS_STATUS_CONN;
+        LOGDEBUG("TCP connection established!\n");
+        break;
+    }
+    else if(ret == -1){
+        LOGERROR("Error during poll() ret[%d]", ret);
+        break;
+    }
+
+
+
+
+
+
     /* Verify pointers */
     if(alpacasock && alpacasock->ssl){
         /*

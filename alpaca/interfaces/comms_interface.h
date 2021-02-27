@@ -24,7 +24,6 @@
  * Internal headers
  */
 #include <core/codes.h>
-#include <comms/sock.h>
 
 
 
@@ -69,17 +68,20 @@ typedef enum AlpacaLunch_TLSVersion{
  */
 typedef struct AlpacaLunch_CommsCtx {
 
-	Alpaca_sock_t* AlpacaSock;
+	int sock;
+	void* protoCtx;
 
-	ALPACA_STATUS (*connect)(Alpaca_sock_t* sockctx);
-	ALPACA_STATUS (*accept) (Alpaca_sock_t* sockctx, int16_t fd);	
-	ALPACA_STATUS (*read)   (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*write)  (WOLFSSL* ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*close)  (WOLFSSL** ctx);
+	ALPACA_STATUS (*connect)(void** ctx);
+	ALPACA_STATUS (*accept) (void** ctx, uint16_t fd);	
+	ALPACA_STATUS (*read)   (void** ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*write)  (void** ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*close)  (void** ctx);
 
 	uint8_t status;
 
 } Alpaca_commsCtx_t;
+
+#define COMMS_CTX_SIZE (sizeof(Alpaca_commsCtx_t))
 
 extern Alpaca_commsCtx_t *coreComms;
 
@@ -95,7 +97,7 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header
 
 } Alpaca_protoHdr_t;
 
-#define PROTO_HDR_SIZE (sizeof(Alpaca_protoHdr_t));
+#define PROTO_HDR_SIZE (sizeof(Alpaca_protoHdr_t))
 
 // Process networking Init/Cleanup
 ALPACA_STATUS AlpacaComms_init	  (uint16_t flags);
