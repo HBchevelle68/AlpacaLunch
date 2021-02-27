@@ -66,20 +66,25 @@ typedef enum AlpacaLunch_TLSVersion{
 /**
  * @struct AlpacaLunch_CommsCtx
  */
-typedef struct AlpacaLunch_CommsCtx {
+
+typedef struct AlpacaLunch_CommsCtx Alpaca_commsCtx_t;
+
+struct AlpacaLunch_CommsCtx {
 
 	int sock;
 	void* protoCtx;
+	struct sockaddr_in peer;
 
-	ALPACA_STATUS (*connect)(void** ctx);
-	ALPACA_STATUS (*accept) (void** ctx, uint16_t fd);	
-	ALPACA_STATUS (*read)   (void** ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*write)  (void** ctx, void* buf, size_t len, ssize_t* out);
-	ALPACA_STATUS (*close)  (void** ctx);
+	ALPACA_STATUS (*connect)(Alpaca_commsCtx_t* ctx);
+	//ALPACA_STATUS (*listen)(Alpaca_commsCtx_t* ctx);
+	ALPACA_STATUS (*accept) (Alpaca_commsCtx_t* ctx, uint16_t fd);	
+	ALPACA_STATUS (*read)   (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*write)  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
+	ALPACA_STATUS (*close)  (Alpaca_commsCtx_t* ctx);
 
 	uint8_t status;
 
-} Alpaca_commsCtx_t;
+};
 
 #define COMMS_CTX_SIZE (sizeof(Alpaca_commsCtx_t))
 
@@ -108,10 +113,10 @@ ALPACA_STATUS AlpacaComms_initCtx	(Alpaca_commsCtx_t** ctx, uint16_t flags);
 ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx);
 
 // Network I/O
-ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port);
-ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port);
-ALPACA_STATUS AlpacaComms_recv	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_send	 (Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out);
+ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t port);
+ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t* ctx, uint16_t port);
+ALPACA_STATUS AlpacaComms_recv	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
+ALPACA_STATUS AlpacaComms_send	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t** ctx);
 
 #endif

@@ -110,24 +110,12 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	switch(GET_COMMS_PROTO(flags)) {
 
 		case ALPACACOMMS_PROTO_TLS12:
-				LOGINFO("Creating TLS 1.2 ssl obj\n");
-				/**
-				 * Create Client ssl object
-				
-				result = AlpacaWolf_createSSL((*ctx)->AlpacaSock, flags);
-				if(((*ctx)->AlpacaSock) == NULL || result != ALPACA_SUCCESS) {
-					LOGERROR("Error generating ssl object\n");
-					goto exit;
-				}
-				 */
+				LOGINFO("TLS_1.2 was selected\n");
 				(*ctx)->connect = AlpacaWolf_connect;
 				(*ctx)->accept  = AlpacaWolf_accept;
 				(*ctx)->read    = AlpacaWolf_recv;
 				(*ctx)->write   = AlpacaWolf_send;
 				(*ctx)->close   = AlpacaWolf_close;
-
-				// Set status 
-				(*ctx)->status  = ALPACACOMMS_STATUS_NOTCONN;
 				break;
 		
 		case ALPACACOMMS_PROTO_TLS13:
@@ -202,69 +190,44 @@ ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
  *  
  *  @return ALPACA_STATUS  
  */
-ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t port){
+ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t port){
 	
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	int32_t ret = 0;
 	int32_t attempts = 0;
-	struct pollfd pfd;
+	
 
-	if(!(*ctx) || !ipstr || !port ){
-		LOGERROR("Invalid parameters passed: ctx[%p], IP[%s], port[%d]\n",(*ctx), ipstr, port);
+	if(!ctx || !ipstr || !port ){
+		LOGERROR("Invalid parameters passed: ctx[%p], IP[%s], port[%d]\n", ctx, ipstr, port);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
 	
-	if((*ctx)->status & (ALPACACOMMS_STATUS_CONN)){
-		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", (*ctx), (*ctx)->status);
+	if(ctx->status & (ALPACACOMMS_STATUS_CONN)){
+		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", ctx, ctx->status);
 		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
 	}
 	
-
-    /* convert IPv4 from string to network byte order 
-    if(inet_pton(AF_INET, ipstr, &((*ctx)->AlpacaSock->peer.sin_addr)) != 1){
+	    // convert IPv4 from string to network byte order 
+    if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr != 1)){
 		LOGERROR("Error converting ip addr\n");
 		result = ALPACA_ERROR_UNKNOWN;
 		goto exit;
 	}
-	*/
 
 	/** 
 	 * Loop attempting to connect to supplied peer
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACACOMMS_STATUS_NOTCONN)){
-		ret = 0;
+	while(attempts < MAX_RETRIES && (ctx->status == ALPACACOMMS_STATUS_NOTCONN)){
+		
+		// Call underlying connect
 
-		/* Wait for writeability */
-		pfd.fd = (*ctx)->AlpacaSock->fd;
-		pfd.events = POLLOUT;
+		// error handling
 
-		ret = poll(&pfd, 1, 10*1000);
-
-		if(ret > 0 && pfd.events & POLLOUT){
-			/* Connect to the server */
-			LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
-			ret = connect((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, sizeof(struct sockaddr_in));
-			if (ret == -1) {
-
-				LOGERROR("Failed to connect... errno: %d\n", errno);
-				attempts++;
-				AlpacaUtilities_mSleep(THREE_SECONDS);
-				continue;
-			}
-			/* Connection established */
-			(*ctx)->status = ALPACACOMMS_STATUS_CONN;
-			LOGDEBUG("TCP connection established!\n");
-			break;
-		}
-		else if(ret == -1){
-			LOGERROR("Error during poll() ret[%d]", ret);
-			break;
-		}
 	}
 
 	if(ret != 0){
@@ -272,21 +235,14 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t** ctx, char* ipstr, uint16_t
 		goto exit;
 	}
 
-	/* TLS handhake */
-	result = (*ctx)->connect((*ctx)->AlpacaSock);
-	if(result){
-		LOGERROR("TLS handshake failed!\n");
-		goto exit;
-	}
-	LOGINFO("TLS established\n");
-	(*ctx)->status = ALPACACOMMS_STATUS_TLSCONN;
+	
 
 exit:
-	if((*ctx) && !((*ctx)->status & ALPACACOMMS_STATUS_TLSCONN)){
+	if(ctx && !(ctx->status & ALPACACOMMS_STATUS_CONN)){
 		/* 
 		 * TCP + TLS was not established 
 		 */
-		LOGERROR("TCP + TLS was not able to be established\n");
+		LOGERROR("Connection was not able to be established\n");
 		AlpacaComms_close(ctx);
 	}
 	LEAVING;
@@ -302,7 +258,7 @@ exit:
  *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
  *  @return ALPACA_STATUS  
  */
-ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t** ctx, uint16_t port){
+ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t* ctx, uint16_t port){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	int32_t attempts = 0;
@@ -411,7 +367,7 @@ exit:
  *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
  *  @return ALPACA_STATUS  
  */
-ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t** ctx){
+ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t* ctx){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	
@@ -451,7 +407,7 @@ exit:
 
 
 
-ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
@@ -486,7 +442,7 @@ exit:
  * @brief 
  * 
  */
-ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t** ctx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
