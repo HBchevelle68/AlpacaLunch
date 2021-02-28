@@ -71,8 +71,10 @@ typedef struct AlpacaLunch_CommsCtx Alpaca_commsCtx_t;
 
 struct AlpacaLunch_CommsCtx {
 
-	int sock;
+	int fd;
 	void* protoCtx;
+	uint8_t status;
+	uint16_t flags;
 	struct sockaddr_in peer;
 
 	ALPACA_STATUS (*connect)(Alpaca_commsCtx_t* ctx);
@@ -82,7 +84,6 @@ struct AlpacaLunch_CommsCtx {
 	ALPACA_STATUS (*write)  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (Alpaca_commsCtx_t* ctx);
 
-	uint8_t status;
 
 };
 

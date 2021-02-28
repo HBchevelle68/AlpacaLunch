@@ -116,6 +116,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 				(*ctx)->read    = AlpacaWolf_recv;
 				(*ctx)->write   = AlpacaWolf_send;
 				(*ctx)->close   = AlpacaWolf_close;
+				(*ctx)->flags   = flags; 
 				break;
 		
 		case ALPACACOMMS_PROTO_TLS13:
@@ -197,19 +198,21 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 	int32_t ret = 0;
 	int32_t attempts = 0;
 	
-
-	if(!ctx || !ipstr || !port ){
+	// Check params
+	if(!ctx || !ipstr || !port ) {
 		LOGERROR("Invalid parameters passed: ctx[%p], IP[%s], port[%d]\n", ctx, ipstr, port);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
 	
-	if(ctx->status & (ALPACACOMMS_STATUS_CONN)){
+	// Make sure we are not already in a connected state
+	if(ctx->status & (ALPACACOMMS_STATUS_CONN)) {
 		LOGERROR("Comms ctx at [%p] is already connected...state[%02X]...disconnect before connecting again\n", ctx, ctx->status);
 		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
 	}
 
+	// Verify function pointer
 	if (!ctx->connect) {
 		// Missing function pointer
 		LOGERROR("Error: Missing underlayer connect function pointer");
@@ -217,8 +220,8 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 		goto exit;
 	}
 	
-	// convert IPv4 from string to network byte order 
-    if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr != 1)){
+	// Convert IPv4 from string to network byte order 
+    if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr != 1)) {
 		LOGERROR("Error converting ip addr\n");
 		result = ALPACA_ERROR_UNKNOWN;
 		goto exit;
@@ -229,30 +232,34 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES && (ctx->status == ALPACACOMMS_STATUS_NOTCONN)){
-		
+	while(attempts < MAX_RETRIES && (ctx->status == ALPACACOMMS_STATUS_NOTCONN)) {
+
+		LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
 
 		// Call underlying connect
 		result = ctx->connect(ctx);
-		// error handling
 		if(ALPACA_SUCCESS != result){
+			/*
+			 * Error occured
+			 * Clean connection/socket
+			 * Sleep and retry if more attempts exist
+			 */
+			AlpacaComms_close(ctx);
+			ctx->status == ALPACACOMMS_STATUS_NOTCONN;
 			AlpacaUtilities_mSleep(THREE_SECONDS);
 			attempts++;
 			continue;
 		}
-		
-
-
+		// Success
+		LOGINFO("Connection fully established!")
 	}
-
 
 exit:
 	if(ctx && !(ctx->status & ALPACACOMMS_STATUS_CONN)){
-		/* 
-		 * TCP + TLS was not established 
-		 */
+
 		LOGERROR("Connection was not able to be established\n");
 		AlpacaComms_close(ctx);
+		memset(&ctx->peer, 0, sizeof(ctx->peer));
 	}
 	LEAVING;
 	return result;
@@ -376,13 +383,13 @@ exit:
  *  @param ctx Pointer to allocated Alpaca_commsCtx_t object 
  *  @return ALPACA_STATUS  
  */
-ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t* ctx){
+ALPACA_STATUS AlpacaComms_close(Alpaca_commsCtx_t* ctx) {
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	
 
-	if(!(*ctx)){
-		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p\n", (*ctx));
+	if(!ctx){
+		LOGERROR("Invalid params passed to AlpacaComms_close: ctx:%p\n", ctx);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
@@ -392,22 +399,19 @@ ALPACA_STATUS AlpacaComms_close (Alpaca_commsCtx_t* ctx){
 	 * occured prior to function pointers being set
 	 * verify pointers exist
 	 */
-	if((*ctx)->close && (*ctx)->AlpacaSock->ssl){
-		// Close top layer comms
-		result = (*ctx)->close(&((*ctx)->AlpacaSock->ssl));
+	if(ctx->close && ctx->protoCtx){
+		// Close underlying layer
+		result = ctx->close(ctx->protoCtx);
 		if(result != ALPACA_SUCCESS){
 			LOGERROR("Failure to close security comms layer\n");
 			goto exit;
 		}
 	}
 
-	(*ctx)->status = ALPACACOMMS_STATUS_NOTCONN;
-
-	// Close bottom layer 
-	result = AlpacaSock_close((*ctx)->AlpacaSock);
-	if(result != ALPACA_SUCCESS){
-		LOGERROR("Failure to close security comms layer\n");
-	}
+	// Close socket
+	close(ctx->fd);
+    ctx->fd = -1;
+	ctx->status = ALPACACOMMS_STATUS_NOTCONN;
 
 exit:
 	LEAVING;
