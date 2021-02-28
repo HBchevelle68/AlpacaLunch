@@ -25,15 +25,15 @@
 #ifdef TALKATIVELLAMA
 
 #define LOGINFO(fmt, ...) \
-    do { fprintf(stdout, "%s <INFO> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    do { fprintf(stdout, "[ INFO ] %s:%d:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGDEBUG(fmt, ...) \
-    do { fprintf(stdout, "%s <DEBUG> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    do { fprintf(stdout, "[ DEBUG ] %s:%d:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGERROR(fmt, ...) \
-    do { fprintf(stderr, "%s <ERROR> %s:%d:%s(): " fmt, __TIME__, __FNAME__, \
+    do { fprintf(stderr, "[ ERROR ] %s:%d:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
 
 /*
@@ -60,17 +60,17 @@ do { if (DEBUGENABLE){ \
 #define DEBUGWARNING()
 #endif
 
-#ifdef VERBOSELLAMA
+#ifdef VERBOSE
 #define ENTRY \
-    do { fprintf(stdout, "%s <ENTRY> Entering %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    do { fprintf(stdout, "<ENTRY> Entering %s:%s()\n", __FNAME__, __func__); } while(0)
 #else
 #define ENTRY
 #endif
 
 
-#ifdef VERBOSELLAMA
+#ifdef VERBOSE
 #define LEAVING \
-    do { fprintf(stdout, "%s <LEAVING> Leaving %s:%s()\n", __TIME__, __FNAME__, __func__); } while(0)
+    do { fprintf(stdout, "<LEAVING> Leaving %s:%s()\n", __FNAME__, __func__); } while(0)
 #else
 #define LEAVING
 #endif
