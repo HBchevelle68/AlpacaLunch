@@ -117,6 +117,10 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t* ctx, uint16_t port);
 ALPACA_STATUS AlpacaComms_recv	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_send	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
-ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t** ctx);
+ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t* ctx);
+
+// Network Utils
+int32_t AlpacaSock_setNonBlocking(int fd);
+
 
 #endif

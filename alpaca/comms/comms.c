@@ -209,8 +209,15 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
 	}
+
+	if (!ctx->connect) {
+		// Missing function pointer
+		LOGERROR("Error: Missing underlayer connect function pointer");
+		result = ALPACA_ERROR_BADSTATE;
+		goto exit;
+	}
 	
-	    // convert IPv4 from string to network byte order 
+	// convert IPv4 from string to network byte order 
     if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr != 1)){
 		LOGERROR("Error converting ip addr\n");
 		result = ALPACA_ERROR_UNKNOWN;
@@ -224,18 +231,20 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 	 */
 	while(attempts < MAX_RETRIES && (ctx->status == ALPACACOMMS_STATUS_NOTCONN)){
 		
+
 		// Call underlying connect
-
+		result = ctx->connect(ctx);
 		// error handling
+		if(ALPACA_SUCCESS != result){
+			AlpacaUtilities_mSleep(THREE_SECONDS);
+			attempts++;
+			continue;
+		}
+		
+
 
 	}
 
-	if(ret != 0){
-		result = ALPACA_ERROR_COMMSCONNECT;
-		goto exit;
-	}
-
-	
 
 exit:
 	if(ctx && !(ctx->status & ALPACACOMMS_STATUS_CONN)){
@@ -473,3 +482,18 @@ exit:
 	LEAVING;
 	return result;	
 }
+
+int32_t AlpacaComms_setNonBlocking(int fd) {
+    int flags;
+
+    /* If system have O_NONBLOCK, use the Posix way to do it */
+#if defined(O_NONBLOCK)
+    if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+        flags = 0;
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+    /* Otherwise, use the old way of doing it */
+    flags = 1;
+    return ioctl(fd, FIOBIO, &flags);
+#endif
+} 
