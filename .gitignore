@@ -179,3 +179,7 @@ dmypy.json
 
 # JetBrains IDE files
 .idea
+
+#Ignore Wolf Libs
+alpaca/cryptlibs/lib
+alpaca/cryptlibs/bin
