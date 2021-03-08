@@ -7,12 +7,11 @@
                 "${workspaceFolder}/alpaca/*",
                 "${workspaceFolder}/alpaca/**",
                 "${workspaceFolder}/alpaca/core/*",
-                "${workspaceFolder}/alpaca/multithreadserver/*",
                 "${workspaceFolder}/alpaca/threadpool/*",
                 "${workspaceFolder}/alpaca/cryptlibs/include/**"
             ],
             "defines": ["WOLFSSL_TLS13=1"],
-            "compilerPath": "/usr/local/bin/gcc",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
