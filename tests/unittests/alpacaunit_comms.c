@@ -70,7 +70,7 @@ void AlpacaUnit_comms_base(void){
     CU_ASSERT(!memcmp(&(addrin_ptr->sin_family), &temp_addrin.sin_family, sizeof(temp_addrin.sin_family)));
     CU_ASSERT(!memcmp(&(addrin_ptr->sin_port), &temp_addrin.sin_port, sizeof(temp_addrin.sin_port)));
     CU_ASSERT(!memcmp(&(addrin_ptr->sin_zero), &temp_addrin.sin_zero, sizeof(temp_addrin.sin_zero)));
-    CU_ASSERT_PTR_NOT_NULL(temp_commsCTX->AlpacaSock->ssl);
+    CU_ASSERT_PTR_NOT_NULL(temp_commsCTX->protoCtx);
     
     CU_ASSERT_PTR_EQUAL(temp_commsCTX->connect, AlpacaWolf_connect);
     CU_ASSERT_PTR_EQUAL(temp_commsCTX->read, AlpacaWolf_recv);

@@ -13,12 +13,8 @@
 #include <core/logging.h>
 #include <core/codes.h>
 #include <comms/wolf.h>
-//#include <comms/sock.h>
 
 
-#define DEFAULT_PORT  	   44444
-#define MAX_RETRIES   	   5
-#define THREE_SECONDS 	   (3*1000)
 
 // Process level variables 
 Alpaca_commsCtx_t *coreComms;
@@ -57,7 +53,7 @@ exit:
  *  	    
  *  @return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaComms_cleanUp (void){
+ALPACA_STATUS AlpacaComms_cleanUp (void) {
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
 
@@ -79,11 +75,11 @@ ALPACA_STATUS AlpacaComms_cleanUp (void){
  * 				ALPACA_COMMSPROTO
  *  @return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
-	
+ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t **ctx, uint16_t flags) {
+
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
-	
+
 	LOGINFO("Initializing Comms Ctx with params ctx[%p] flags[%X]\n", (*ctx), flags);
 
 	/*
@@ -91,7 +87,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	 * if it does, it may still be valid memory and allocation can cause 
 	 * a leak
 	 */
-	if((*ctx) != NULL || !GET_COMMS_TYPE(flags) || !GET_COMMS_PROTO(flags)){
+	if ((*ctx) != NULL || !GET_COMMS_TYPE(flags) || !GET_COMMS_PROTO(flags)) {
 		result = ALPACA_ERROR_BADPARAM;
 		LOGERROR("Invalid params passed\n");
 		goto exit;
@@ -101,42 +97,43 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t** ctx, uint16_t flags) {
 	 * We have a safe pointer so we can allocate the base structure
 	 */
 	(*ctx) = calloc(sizeof(Alpaca_commsCtx_t), sizeof(uint8_t));
-	if((*ctx) == NULL) {
+	if ((*ctx) == NULL) {
 		LOGERROR("Error during allocation of comms ctx\n");
 		result = ALPACA_ERROR_MALLOC;
 		goto exit;
 	}
 
-	switch(GET_COMMS_PROTO(flags)) {
+	switch (GET_COMMS_PROTO(flags)) {
 
-		case ALPACACOMMS_PROTO_TLS12:
-				LOGINFO("TLS_1.2 was selected\n");
-				(*ctx)->connect = AlpacaWolf_connect;
-				(*ctx)->accept  = AlpacaWolf_accept;
-				(*ctx)->read    = AlpacaWolf_recv;
-				(*ctx)->write   = AlpacaWolf_send;
-				(*ctx)->close   = AlpacaWolf_close;
-				(*ctx)->flags   = flags; 
-				break;
-		
-		case ALPACACOMMS_PROTO_TLS13:
-			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("TLS 1.3 not supported yet\n");
-			break;
+	case ALPACACOMMS_PROTO_TLS12:
+		LOGINFO("TLS_1.2 was selected\n");
+		(*ctx)->connect = AlpacaWolf_connect;
+		(*ctx)->listen = AlpacaWolf_listen;
+		(*ctx)->accept = AlpacaWolf_accept;
+		(*ctx)->read = AlpacaWolf_recv;
+		(*ctx)->write = AlpacaWolf_send;
+		(*ctx)->close = AlpacaWolf_close;
+		(*ctx)->flags = flags;
+		break;
 
-		case ALPACACOMMS_PROTO_UDP:
-			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("UDP not supported yet\n");
-			break;
+	case ALPACACOMMS_PROTO_TLS13:
+		result = ALPACA_ERROR_UNSUPPORTED;
+		LOGERROR("TLS 1.3 not supported yet\n");
+		break;
 
-		case ALPACACOMMS_PROTO_SSH:
-			result = ALPACA_ERROR_UNSUPPORTED;
-			LOGERROR("SSH not supported yet\n");
-			break;
+	case ALPACACOMMS_PROTO_UDP:
+		result = ALPACA_ERROR_UNSUPPORTED;
+		LOGERROR("UDP not supported yet\n");
+		break;
 
-		default:
-			result = ALPACA_ERROR_UNKNOWN;
-			LOGERROR("Invalid comms type passed -> %d\n", flags);
+	case ALPACACOMMS_PROTO_SSH:
+		result = ALPACA_ERROR_UNSUPPORTED;
+		LOGERROR("SSH not supported yet\n");
+		break;
+
+	default:
+		result = ALPACA_ERROR_UNKNOWN;
+		LOGERROR("Invalid comms type passed -> %d\n", flags);
 	}
 
 exit:
@@ -144,15 +141,14 @@ exit:
 	 * If any failure occurs clean memory allocated
 	 * and set to NULL 
 	 */
-	if((result != ALPACA_SUCCESS) && (*ctx)){
+	if ((ALPACA_SUCCESS != result) && (*ctx)) {
 		LOGERROR("Error [%u] occured during ctx init...cleaning\n", result);
 		AlpacaComms_destroyCtx(ctx);
 	}
-	
+
 	LEAVING;
 	return result;
 }
-
 
 /**
  *	@brief Tear down of an Alpaca Comms context object to
@@ -168,10 +164,11 @@ ALPACA_STATUS AlpacaComms_destroyCtx(Alpaca_commsCtx_t** ctx){
 	LOGDEBUG("Cleaning comms ctx at [%p]\n", (*ctx));
 	if((*ctx)) {
 		/*
-		* If our custom socket is allocated clean up
+		* If our custom socket is valid
+		* clean up
 		*/
-		if((*ctx)->sock > 0){			
-			AlpacaComms_close(ctx);
+		if((*ctx)->fd > 0){			
+			AlpacaComms_close(*ctx);
 		}
 		free((*ctx));
 		*ctx = NULL;
@@ -195,7 +192,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 	
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
-	int32_t ret = 0;
+	//int32_t ret = 0;
 	int32_t attempts = 0;
 	
 	// Check params
@@ -220,19 +217,23 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 		goto exit;
 	}
 	
+	memset(&ctx->peer, 0, sizeof(ctx->peer));
 	// Convert IPv4 from string to network byte order 
-    if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr != 1)) {
+    if(inet_pton(AF_INET, ipstr, &ctx->peer.sin_addr) != 1) {
 		LOGERROR("Error converting ip addr\n");
 		result = ALPACA_ERROR_UNKNOWN;
 		goto exit;
 	}
+	// Set up peer address
+    ctx->peer.sin_family = AF_INET;
+    ctx->peer.sin_port = htons(port);
 
 	/** 
 	 * Loop attempting to connect to supplied peer
 	 * If a failure is detected sleep for 3 seconds before
 	 * retrying. Retry up to MAX_RETRIES
 	 */
-	while(attempts < MAX_RETRIES && (ctx->status == ALPACACOMMS_STATUS_NOTCONN)) {
+	while(attempts < MAX_RETRIES && ctx->status == ALPACACOMMS_STATUS_NOTCONN) {
 
 		LOGINFO("Attepmt #%d to establish TCP connection to %s:%d\n", attempts+1, ipstr, port);
 
@@ -245,13 +246,13 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 			 * Sleep and retry if more attempts exist
 			 */
 			AlpacaComms_close(ctx);
-			ctx->status == ALPACACOMMS_STATUS_NOTCONN;
-			AlpacaUtilities_mSleep(THREE_SECONDS);
+			ctx->status = ALPACACOMMS_STATUS_NOTCONN;
+			AlpacaUtilities_mSleep(THREE_SECONDS_MILLI);
 			attempts++;
 			continue;
 		}
 		// Success
-		LOGINFO("Connection fully established!")
+		LOGINFO("Connection fully established!");
 	}
 
 exit:
@@ -277,95 +278,56 @@ exit:
 ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t* ctx, uint16_t port){
 	ENTRY;
 	ALPACA_STATUS result = ALPACA_SUCCESS;
-	int32_t attempts = 0;
-	int32_t clientFd = 0;
-	struct sockaddr_in servAddr;
-	socklen_t saddr_size = sizeof(servAddr);
-
-	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]\n", (*ctx), port);
-	if(!(*ctx) || port < 1024){
-		LOGERROR("Error bad params passed ctx[%p] port[%u]\n", (*ctx), port);
+	
+	LOGDEBUG("Attempting to setup listener with params ctx[%p] port[%u]\n", ctx, port);
+	if(!ctx || port < 1024) {
+		LOGERROR("Error bad params passed ctx[%p] port[%u]\n", ctx, port);
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
 	}
 
-	// Set up server address for bind
-    memset(&servAddr, 0, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(port);
-    servAddr.sin_addr.s_addr = INADDR_ANY;
-
-
-	/* Bind the server socket to our port */
-    if (bind((*ctx)->AlpacaSock->fd, (struct sockaddr*)&servAddr, saddr_size) == -1) {
-        LOGERROR("Error failed to bind\n");
-		result = ALPACA_ERROR_TCPBIND;
-        goto exit;
-    }
-
-	/* Listen for a new connection, allow 5 pending connections */
-    if (listen((*ctx)->AlpacaSock->fd, 1) == -1) {
-        LOGERROR("Error failed to listen\n");
-		result = ALPACA_ERROR_TCPLISTEN;
-        goto exit;
-    }
-	LOGINFO("Listening on port [%d]\n", port);
-
-	/** 
-	 * Loop attempting to catch connect
-	 * If a failure is detected sleep for 3 seconds before
-	 * retrying. Retry up to MAX_RETRIES
+	/*
+	 * Make sure that this ctx has been 
+	 * set up correctly
 	 */
-	while(attempts < MAX_RETRIES && ((*ctx)->status == ALPACACOMMS_STATUS_NOTCONN)){
-
-		LOGINFO("Attepmt #%d to catch TCP connection\n", attempts+1);
-		/* Accept client connections */
-        if ((clientFd = accept((*ctx)->AlpacaSock->fd, (struct sockaddr*)&(*ctx)->AlpacaSock->peer, &saddr_size)) == -1) {
-            LOGERROR("Failed to connect... errno: %d\n", errno);
-			attempts++;
-			AlpacaUtilities_mSleep(THREE_SECONDS);
-			continue;
-        }
-		/* Connection established */
-		(*ctx)->status = ALPACACOMMS_STATUS_CONN;
-		LOGDEBUG("TCP connection established!\n");	
-		
-		/* Perform TLS handhake */
-		result = (*ctx)->accept((*ctx)->AlpacaSock, clientFd);
-		if(result){
-			LOGERROR("TLS handshake failed!\n");
-			close(clientFd);
-			(*ctx)->status = ALPACACOMMS_STATUS_NOTCONN;
-			attempts++;
-			continue;
-		}
-		LOGINFO("TLS established\n");
-		(*ctx)->status = ALPACACOMMS_STATUS_TLSCONN;
-	}
-
-	if(!((*ctx)->status & ALPACACOMMS_STATUS_TLSCONN)){
-		LOGERROR("Listen failed...\n");
-		result = ALPACA_ERROR_COMMSLISTEN;
+	if(!ctx->listen || !ctx->accept) {
+		LOGERROR("Error Comms CTX bad state! listen [%p] accept [%p]\n",ctx->listen, ctx->accept);
+		result = ALPACA_ERROR_BADSTATE;
 		goto exit;
 	}
 
 	/*
-	 * Close listener
-	 * Swap socket descriptors
+	 * The underlying listen call can be virtually
+	 * any protocol. Any specific listen behavior
+	 * is executed in this call
 	 */
-	close((*ctx)->AlpacaSock->fd);
-	(*ctx)->AlpacaSock->fd = clientFd;
+	result = ctx->listen(ctx, port);
+	if(ALPACA_SUCCESS != result) {
+		// Underlying listen call failed
+		goto exit;
+	}
 
+	/*
+	 * The underlying accept call can be virtually
+	 * any protocol. Any specific accept behavior
+	 * is executed in this call
+	 * 
+	 * Connectionless protocols will not truly have 
+	 * an accept and instead will likely have a 
+	 * filler stub instead
+	 */
+	result = ctx->accept(ctx);
+	if(ALPACA_SUCCESS != result) {
+		// Underlying accept call failed
+		goto exit;
+	}	
 
-
+	// If we hit here we are successfull
 	
 exit:
-	if(result != ALPACA_SUCCESS){
-		/* 
-		 * TCP + TLS was not established 
-		 */
-		LOGERROR("TCP + TLS was not able to be established\n");
-		if(*ctx){
+	if(ALPACA_SUCCESS != result ){
+		if(ctx){
+			LOGINFO("Cleaning listener...");
 			AlpacaComms_close(ctx);
 		}
 	}
@@ -399,18 +361,19 @@ ALPACA_STATUS AlpacaComms_close(Alpaca_commsCtx_t* ctx) {
 	 * occured prior to function pointers being set
 	 * verify pointers exist
 	 */
-	if(ctx->close && ctx->protoCtx){
-		// Close underlying layer
-		result = ctx->close(ctx->protoCtx);
+	if(ctx->close && NULL != ctx->protoCtx){
+		// Close underlying layer	
+		result = ctx->close(ctx);
 		if(result != ALPACA_SUCCESS){
 			LOGERROR("Failure to close security comms layer\n");
 			goto exit;
 		}
 	}
-
-	// Close socket
-	close(ctx->fd);
-    ctx->fd = -1;
+	if(0 < ctx->fd){
+		// Close socket
+		close(ctx->fd);
+		ctx->fd = -1;
+	}
 	ctx->status = ALPACACOMMS_STATUS_NOTCONN;
 
 exit:
@@ -425,8 +388,8 @@ ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ssize_t temp = 0;
 
-	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p buf:%p  len:%lu\n", (*ctx), buf, len);
+	if(!ctx || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p buf:%p  len:%lu\n", ctx, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
@@ -437,7 +400,7 @@ ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	 * this will need to loop and have additional error checking
 	 * will also need polling
 	 */
-	result = (*ctx)->read((*ctx)->AlpacaSock->ssl, buf, len, &temp);
+	result = ctx->read(ctx, buf, len, &temp);
 	if(result != ALPACA_SUCCESS || temp <= 0){
 		LOGERROR("Error attempting read: %d\n", result);
 		*out = temp;
@@ -461,8 +424,8 @@ ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	ssize_t temp = 0;
 
 	
-	if(!(*ctx) || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p, buf:%p len:%lu\n", (*ctx), buf, len);
+	if(!ctx || !buf || len == 0){
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p, buf:%p len:%lu\n", ctx, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
@@ -473,7 +436,7 @@ ALPACA_STATUS AlpacaComms_send(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	 * this will need to loop and have additional error checking
 	 * will also need polling 
 	 */
-	result = (*ctx)->write((*ctx)->AlpacaSock->ssl, buf, len, &temp);
+	result = ctx->write(ctx, buf, len, &temp);
 	if(result != ALPACA_SUCCESS || temp <= 0){
 		LOGERROR("Error attempting send: %d\n", result);
 		*out = temp;

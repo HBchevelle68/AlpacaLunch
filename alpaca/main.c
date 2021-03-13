@@ -101,7 +101,7 @@ int main(int argc, char** argv){
     memset(buffer, 0, 1024);
     strcpy(buffer,"WAZZZZZZUP!");
     result = AlpacaComms_send(coreComms, buffer, strlen(buffer), &out);
-    memset(buffer, 0, out);
+    memset(buffer, 0, 1024);
     result = AlpacaComms_recv(coreComms, buffer, 1024, &out);
     LOGDEBUG("Buffer: %s\n", buffer);
 

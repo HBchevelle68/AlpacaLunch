@@ -18,6 +18,8 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_WOLFSSLCONNECT     (5)
 #define ALPACA_ERROR_WOLFSSLWRITE       (6)
 #define ALPACA_ERROR_WOLFSSLREAD        (7)
+#define ALPACA_ERROR_WOLFSSLACCEPT      (8)
+
 
 #define ALPACA_ERROR_COMMSINIT 	        (10)
 #define ALPACA_ERROR_COMMSCONNECT       (11)
@@ -65,7 +67,6 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_MALLOC 	        (105)
 #define ALPACA_ERROR_BADSTATE           (106)
 #define ALPACA_ERROR_UNSUPPORTED        (107)
-
 
 
 

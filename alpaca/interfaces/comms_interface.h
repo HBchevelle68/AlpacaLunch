@@ -25,6 +25,9 @@
  */
 #include <core/codes.h>
 
+#define DEFAULT_PORT 54321
+#define MAX_RETRIES  5
+#define THREE_SECONDS_MILLI (3*1000)
 
 
 typedef enum AlpacaLunch_TLSVersion{
@@ -78,8 +81,8 @@ struct AlpacaLunch_CommsCtx {
 	struct sockaddr_in peer;
 
 	ALPACA_STATUS (*connect)(Alpaca_commsCtx_t* ctx);
-	//ALPACA_STATUS (*listen)(Alpaca_commsCtx_t* ctx);
-	ALPACA_STATUS (*accept) (Alpaca_commsCtx_t* ctx, uint16_t fd);	
+	ALPACA_STATUS (*listen)(Alpaca_commsCtx_t* ctx, uint16_t port);
+	ALPACA_STATUS (*accept) (Alpaca_commsCtx_t* ctx);
 	ALPACA_STATUS (*read)   (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (Alpaca_commsCtx_t* ctx);

@@ -111,9 +111,9 @@ ALPACATPOOL_UOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-unit.o alpacaqueue-
 # ALPACA-COMMS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o wolf.o) 
-ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wolf-debug.o)
-ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o sock-unit.o wolf-unit.o)
+ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o wolf.o) 
+ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o wolf-debug.o)
+ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o wolf-unit.o)
 
 #
 # ALPACA-UTILS object files
@@ -261,14 +261,6 @@ wolf:
 
 	cd $(CRYPTSRC) && ./configure \
 		--prefix=$(CRYPTBASE) \
-		--disable-oldtls \
-		--disable-examples \
-		--disable-crypttests \
-		--disable-fips \
-		--disable-aescbc \
-		--disable-des3 \
-		--disable-md5 \
-		--disable-pkcs12 \
 		--enable-static \
 		--enable-harden \
 		--enable-fastmath \

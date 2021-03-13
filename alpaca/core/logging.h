@@ -25,15 +25,15 @@
 #ifdef TALKATIVELLAMA
 
 #define LOGINFO(fmt, ...) \
-    do { fprintf(stdout, "[ INFO ] %s:%d:%s(): " fmt, __FNAME__, \
+    do { fprintf(stdout, "[  INFO  ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGDEBUG(fmt, ...) \
-    do { fprintf(stdout, "[ DEBUG ] %s:%d:%s(): " fmt, __FNAME__, \
+    do { fprintf(stdout, "[  \033[0;33mDEBUG\033[0m ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGERROR(fmt, ...) \
-    do { fprintf(stderr, "[ ERROR ] %s:%d:%s(): " fmt, __FNAME__, \
+    do { fprintf(stderr, "[  \033[0;31mERROR\033[0m ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
 
 /*

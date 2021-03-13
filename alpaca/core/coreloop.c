@@ -24,7 +24,7 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
      * controller. we also are concerned about
      * loss of connection  
      */
-    pfd.fd = coreComms->AlpacaSock->fd;
+    pfd.fd = coreComms->fd;
     pfd.events = POLLIN;
     while(1) {
         pfd.revents = 0;
@@ -43,7 +43,7 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
                  * from there introspection into the header will provide 
                  * remaining length to readoff
                  */
-                coreComms->read(coreComms->AlpacaSock->ssl, &data, ALPACACOMMS_MAX_BUFF, &numRecvd);
+                coreComms->read(coreComms->protoCtx, &data, ALPACACOMMS_MAX_BUFF, &numRecvd);
 
                 // Maybe a ...._processPayload() call??
             }

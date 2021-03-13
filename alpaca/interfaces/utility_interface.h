@@ -7,12 +7,18 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+/// Return min of two numbers
+#ifndef MIN
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
+#endif
+
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 
 off_t AlpacaFileUtils_fSize(const char *filename);
 void  AlpacaUtilities_daemonize(void);
 int   AlpacaUtilities_mSleep(long msec);
-
-
 
 #endif
