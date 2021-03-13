@@ -2,6 +2,7 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
 
+
 // Internal
 #include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
@@ -33,7 +34,7 @@ typedef struct WolfSSL_TLS_Version {
 
 static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] = 
 {
-	{
+    {
 		wolfTLSv1_2_server_method, 
 		wolfTLSv1_2_client_method
 	},
@@ -47,13 +48,35 @@ static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] =
 ALPACA_STATUS AlpacaWolf_init(uint16_t version){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
+    WOLFLOGGING;
     ENTRY;
 
-    if(version > ALPACACOMMS_PROTO_SSH){
+    if(version > ALPACACOMMS_PROTO_SSH || version == 0){
         LOGERROR("Version number not in range: %d\n", version);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     }
+
+    /**
+     * In order to keep this working  
+     * shift bit down by 1. Since I use(d)
+     * This as the index into the ALPACA_TLSVersion_t
+     * 
+     * The defines are
+     * TLS1.2 == 0001
+     * TLS1.3 == 0010
+     * 
+     * however indexes are: 
+     * [0] == TLS1.2
+     * [1] == TLS1.3
+     * 
+     * Bit shift >>1 will now yield:
+     * TLS1.2 == 0000
+     * TLS1.3 == 0001 
+     * 
+     * Bit shift is purely local
+     */
+    version = version>>1;
 
     if(!wolfInitialized){
         LOGINFO("Initializing global wolfCTX's with version [%x]\n", version);
@@ -212,7 +235,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
     }
     
 exit:
-    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] flags[%X]\n",ctx, ctx->protoCtx, flags);
+    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] flags[0x%08x]\n",ctx, ctx->protoCtx, flags);
     LEAVING;
     return result;
 }

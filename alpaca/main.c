@@ -82,13 +82,14 @@ int main(int argc, char** argv){
     /** 
      * When debug is enabled this is an empty function
      */
-    result = AlpacaCore_init( ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
+    result = AlpacaCore_init(ALPACACOMMS_PROTO_TLS12);
     if(result != ALPACA_SUCCESS){
         LOGERROR("Global initialization error! [%u]\n", result);
         goto done;
     }
 
-    result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
+    //result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
+    result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
     if(result != ALPACA_SUCCESS){
         LOGERROR("Global comms ctx error! [%u]\n", result);
         goto done;
@@ -96,7 +97,8 @@ int main(int argc, char** argv){
     
 
     // FOR TEST ONLY! Doesn't belong here
-    result = AlpacaComms_connect(coreComms, "127.0.0.1" ,44444);
+    //result = AlpacaComms_connect(coreComms, "127.0.0.1" ,44444);
+    result = AlpacaComms_listen(coreComms, 54321);
     
     memset(buffer, 0, 1024);
     strcpy(buffer,"WAZZZZZZUP!");

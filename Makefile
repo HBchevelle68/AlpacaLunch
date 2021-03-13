@@ -49,13 +49,29 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 
 
 #
-# Options
+# Build Time Options
 #
+# Building wolfSSL 
+WOLFDEBUG=0 
+
+# Building Unit Tests
 MEMCHECK=0
 RUNUNIT=0
 TALKBUGGYTOME=0
+
+# Building Debug
+WOLFLOG=0
+
+ifeq ($(WOLFLOG),$(filter $(WOLFLOG),1 Yes yes YES True true TRUE))
+	DBGWOLF= -DTALKATIVE_WOLF
+endif
 ifeq ($(TALKBUGGYTOME),$(filter $(TALKBUGGYTOME),1 Yes yes YES True true TRUE))
-	UNITDBG= -DTALKATIVELLAMA
+	UNITDBG= -DTALKATIVE_ALPACA
+endif
+ifeq ($(WOLFDEBUG),$(filter $(WOLFDEBUG),1 Yes yes YES True true TRUE))
+	WOLFOPT= --enable-debug
+else
+	WOLFOPT= --disable-debug
 endif
 
 #
@@ -71,8 +87,8 @@ CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -ffast-math -flto 
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread -Wl,--gc-sections
 
 # Debug Compilation and Lining
-DBG= -g2 -Og -DTALKATIVELLAMA
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC)
+DBG= -g2 -Og -DTALKATIVE_ALPACA $(DBGWOLF)
+DBGCFLAGS= -Werror -Wall -DTALKATIVE_ALPACA $(DBGWOLF) -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 
 # Unit Test Compilation and Lining
 UNIT= -g -O2
@@ -258,9 +274,18 @@ wolf:
 	rm -rf $(CRYPTBASE)/*
 	rm -rf $(CRYPTSRC)
 	unzip -o -q $(CRYPTSRC).zip -d $(DIR)/ext/wolfSSL
-
+	$(call PY, $(WOLFOPT) is set)
 	cd $(CRYPTSRC) && ./configure \
 		--prefix=$(CRYPTBASE) \
+		--disable-oldtls \
+		--disable-examples \
+		--disable-crypttests \
+		--disable-fips \
+		--disable-aescbc \
+		--disable-des3 \
+		--disable-md5 \
+		--disable-pkcs12 \
+		$(WOLFOPT) \
 		--enable-static \
 		--enable-harden \
 		--enable-fastmath \

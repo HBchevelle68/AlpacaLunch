@@ -1,6 +1,6 @@
 /*
  * AlpacaLunch Memory Interface 
-#ifdef TALKATIVELLAMA
+#ifdef TALKATIVE_ALPACA
  */
 #ifndef MEMORY_INTERFACE_H
 #define MEMORY_INTERFACE_H

@@ -34,7 +34,7 @@ ALPACA_STATUS AlpacaComms_init(uint16_t flags){
 	/*
 	 * Initilize the upper level comms layer
 	 */
-	LOGINFO("Initializing global comms with flags: %X\n",flags);
+	LOGINFO("Initializing global comms with flags: 0x%08X\n",flags);
 	
 
 	result = AlpacaWolf_init(GET_COMMS_PROTO(flags));
@@ -80,7 +80,7 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t **ctx, uint16_t flags) {
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	ENTRY;
 
-	LOGINFO("Initializing Comms Ctx with params ctx[%p] flags[%X]\n", (*ctx), flags);
+	LOGINFO("Initializing Comms Ctx with params ctx[%p] flags[0x%08x]\n", (*ctx), flags);
 
 	/*
 	 * Verify that the pointer given doesn't actually point to something
@@ -252,7 +252,7 @@ ALPACA_STATUS AlpacaComms_connect(Alpaca_commsCtx_t* ctx, char* ipstr, uint16_t 
 			continue;
 		}
 		// Success
-		LOGINFO("Connection fully established!");
+		LOGINFO("Connection fully established!\n");
 	}
 
 exit:

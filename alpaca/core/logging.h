@@ -5,15 +5,6 @@
 #include <string.h>
 
 /*
- * Suppress vscode's inability to detect volatility
- */ 
-#if !defined(TALKATIVELLAMA) || !defined(VERBOSELLAMA)
-#define DEBUGENABLE 0
-#else
-#define DEBUGENABLE 1
-#endif 
-
-/*
  * Grab source file
  */ 
 #define __FNAME__ (strrchr(__FILE__, '/') + 1)
@@ -22,7 +13,7 @@
 /*
  * Logging  
  */
-#ifdef TALKATIVELLAMA
+#ifdef TALKATIVE_ALPACA
 
 #define LOGINFO(fmt, ...) \
     do { fprintf(stdout, "[  INFO  ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
@@ -36,15 +27,20 @@
     do { fprintf(stderr, "[  \033[0;31mERROR\033[0m ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
 
+#ifdef TALKATIVE_WOLF
+
+#define WOLFLOGGING wolfSSL_Debugging_ON();
+#else
+#define WOLFLOGGING wolfSSL_Debugging_OFF();
+#endif
+
 /*
  * Warn that debug build is running
  */ 
 #define DEBUGWARNING() \
-do { if (DEBUGENABLE){ \
-        printf("****************************************\n"); \
-        printf("*************** DEBUG ON ***************\n"); \
-        printf("****************************************\n"); \
-      }                                                       \
+do {printf("****************************************\n"); \
+    printf("*************** DEBUG ON ***************\n"); \
+    printf("****************************************\n"); \
 } while(0)
 
 
@@ -58,23 +54,21 @@ do { if (DEBUGENABLE){ \
 #define LOGDEBUG(fmt, ...)
 #define LOGERROR(fmt, ...)
 #define DEBUGWARNING()
+#define WOLFLOGGING
 #endif
 
 #ifdef VERBOSE
+
 #define ENTRY \
     do { fprintf(stdout, "<ENTRY> Entering %s:%s()\n", __FNAME__, __func__); } while(0)
-#else
-#define ENTRY
-#endif
 
-
-#ifdef VERBOSE
 #define LEAVING \
     do { fprintf(stdout, "<LEAVING> Leaving %s:%s()\n", __FNAME__, __func__); } while(0)
+
 #else
+#define ENTRY
 #define LEAVING
 #endif
-
 
 
 #endif
