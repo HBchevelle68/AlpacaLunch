@@ -90,7 +90,7 @@ struct AlpacaLunch_CommsCtx {
 
 };
 
-#define COMMS_CTX_SIZE (sizeof(Alpaca_commsCtx_t))
+#define COMMS_CTX_SIZE (sizeof(struct AlpacaLunch_CommsCtx))
 
 extern Alpaca_commsCtx_t *coreComms;
 

@@ -344,7 +344,7 @@ ALPACA_STATUS AlpacaWolf_accept(Alpaca_commsCtx_t* ctx){
 		/* 
          * TCP Connection established 
          */
-		ctx->status = ALPACACOMMS_STATUS_CONN;
+		ctx->status |= ALPACACOMMS_STATUS_CONN;
 		LOGDEBUG("TCP connection established!\n");	
 		
         /*
@@ -366,12 +366,15 @@ ALPACA_STATUS AlpacaWolf_accept(Alpaca_commsCtx_t* ctx){
         if(SSL_SUCCESS != wolfSSL_set_fd((WOLFSSL*)ctx->protoCtx, clientFd)){
             LOGERROR("wolfSSL_set_fd error\n");
             close_sleep(&clientFd, ctx);
+            ctx->status = ALPACACOMMS_STATUS_NOTCONN;
             attempts++;
+            continue;
         }
         
         if (SSL_SUCCESS != wolfSSL_accept((WOLFSSL*)ctx->protoCtx)) {
             LOGERROR("Error failed to accept in wolfSSL\n");
             close_sleep(&clientFd, ctx);
+            ctx->status = ALPACACOMMS_STATUS_NOTCONN;
             attempts++;
         }
     }
@@ -392,7 +395,7 @@ exit:
     else {
 
         LOGINFO("TLS established\n");
-        ctx->status = ALPACACOMMS_STATUS_TLSCONN;
+        ctx->status |= ALPACACOMMS_STATUS_TLSCONN;
         /*
         * SUCCESS Close listener
         * Swap socket descriptors
@@ -411,7 +414,9 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     int32_t ret = 0;
+    ctx->status = ALPACACOMMS_STATUS_NOTCONN;
     ENTRY;
+
 
     /*
      * Create socket and verify
@@ -439,7 +444,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
     
     
     // TCP Connection established 
-    ctx->status = ALPACACOMMS_STATUS_CONN;
+    ctx->status |= ALPACACOMMS_STATUS_CONN;
     LOGDEBUG("TCP connection established!\n");
 
     // Create Client ssl object    
@@ -449,7 +454,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
         goto exit;
     }
 
-    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] \n",ctx, ctx->protoCtx);
+    LOGDEBUG("Leaving with ctx[%p] ctx->protoCtx[%p] \n",ctx, ctx->protoCtx);
     
     /*
      * Wrap bottom layer TCP socket in wolf
@@ -470,7 +475,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
 exit:
     LEAVING;
     if(result == ALPACA_SUCCESS){
-        ctx->status = ALPACACOMMS_STATUS_TLSCONN;
+        ctx->status |= ALPACACOMMS_STATUS_TLSCONN;
     }
     /*
      * At this point TCP connection is possibly valid

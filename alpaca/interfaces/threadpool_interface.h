@@ -30,6 +30,8 @@ typedef struct AlpacaThread {
 
 } Alpaca_thrd_t;
 
+#define ALPACA_THRD_SIZE (sizeof(Alpaca_thrd_t))
+
 
 
 /**
@@ -60,11 +62,6 @@ typedef struct AlpacaThreadPool {
 } Alpaca_tPool_t;
 
 
-
-// thread structure 
-
-// threadpool structure
-
 // init threadpool
 ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds);
 
@@ -74,6 +71,7 @@ ALPACA_STATUS AlpacaThreadpool_teardownPool(void);
 
 // create thread
 // cancel thread
+// reap thread stacks
 
 
 

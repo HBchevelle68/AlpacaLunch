@@ -104,36 +104,35 @@ ALPACA_STATUS AlpacaComms_initCtx(Alpaca_commsCtx_t **ctx, uint16_t flags) {
 	}
 
 	switch (GET_COMMS_PROTO(flags)) {
+		case ALPACACOMMS_PROTO_TLS12:
+			LOGINFO("TLS_1.2 was selected\n");
+			(*ctx)->connect = AlpacaWolf_connect;
+			(*ctx)->listen = AlpacaWolf_listen;
+			(*ctx)->accept = AlpacaWolf_accept;
+			(*ctx)->read = AlpacaWolf_recv;
+			(*ctx)->write = AlpacaWolf_send;
+			(*ctx)->close = AlpacaWolf_close;
+			(*ctx)->flags = flags;
+			break;
 
-	case ALPACACOMMS_PROTO_TLS12:
-		LOGINFO("TLS_1.2 was selected\n");
-		(*ctx)->connect = AlpacaWolf_connect;
-		(*ctx)->listen = AlpacaWolf_listen;
-		(*ctx)->accept = AlpacaWolf_accept;
-		(*ctx)->read = AlpacaWolf_recv;
-		(*ctx)->write = AlpacaWolf_send;
-		(*ctx)->close = AlpacaWolf_close;
-		(*ctx)->flags = flags;
-		break;
+		case ALPACACOMMS_PROTO_TLS13:
+			result = ALPACA_ERROR_UNSUPPORTED;
+			LOGERROR("TLS 1.3 not supported yet\n");
+			break;
 
-	case ALPACACOMMS_PROTO_TLS13:
-		result = ALPACA_ERROR_UNSUPPORTED;
-		LOGERROR("TLS 1.3 not supported yet\n");
-		break;
+		case ALPACACOMMS_PROTO_UDP:
+			result = ALPACA_ERROR_UNSUPPORTED;
+			LOGERROR("UDP not supported yet\n");
+			break;
 
-	case ALPACACOMMS_PROTO_UDP:
-		result = ALPACA_ERROR_UNSUPPORTED;
-		LOGERROR("UDP not supported yet\n");
-		break;
+		case ALPACACOMMS_PROTO_SSH:
+			result = ALPACA_ERROR_UNSUPPORTED;
+			LOGERROR("SSH not supported yet\n");
+			break;
 
-	case ALPACACOMMS_PROTO_SSH:
-		result = ALPACA_ERROR_UNSUPPORTED;
-		LOGERROR("SSH not supported yet\n");
-		break;
-
-	default:
-		result = ALPACA_ERROR_UNKNOWN;
-		LOGERROR("Invalid comms type passed -> %d\n", flags);
+		default:
+			result = ALPACA_ERROR_UNKNOWN;
+			LOGERROR("Invalid comms type passed -> %d\n", flags);
 	}
 
 exit:
