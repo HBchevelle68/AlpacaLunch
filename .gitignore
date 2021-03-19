@@ -182,5 +182,4 @@ dmypy.json
 .idea
 
 #Ignore Wolf Libs
-alpaca/cryptlibs/lib
-alpaca/cryptlibs/bin
+alpaca/cryptlibs/
