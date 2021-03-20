@@ -81,21 +81,22 @@ VALGRIND= valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=ye
 
 #
 # Build variables
-# Release Compilation and Lining
+# RELEASE Compilation and Lining
 CC= gcc -std=c11
 CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -ffast-math -flto -s -O3 -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread -Wl,--gc-sections
 
-# Debug Compilation and Lining
+# DEBUG Compilation and Lining
 DBG= -g2 -Og -DTALKATIVE_ALPACA $(DBGWOLF)
 DBGCFLAGS= -Werror -Wall -DTALKATIVE_ALPACA $(DBGWOLF) -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 
-# Unit Test Compilation and Lining
+# UNIT Test Compilation and Lining
 UNIT= -g -O2
 UNITCFLAGS= -Werror -Wall $(UNITDBG) -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(UNITINCLUDE)
 UNITLFLAGS= -lcunit -L$(UNITTESTBASE)
 
 # Static Compilation and Lining
+# Not Working
 STATIC= -static
 STATICBUILD-CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) 
 

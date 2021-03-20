@@ -7,7 +7,9 @@
 #define MILLI_ONE_SEC (1000) // one second in milliseconds
 
 
-/* Process level comms connected to controller */
+/* 
+ * Process level comms connected to controller 
+ */
 extern Alpaca_commsCtx_t *coreComms;
 
 ALPACA_STATUS AlpacaCore_coreLoop(void){
