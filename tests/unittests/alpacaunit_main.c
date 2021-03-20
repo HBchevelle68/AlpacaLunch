@@ -13,47 +13,53 @@
 // Internal Tests
 #include <unittests/alpaca_unit.h>
 
+#define ADD_SUITE(name, init, clean)\
+    do{\
+        AlpacaUnit_CU_pSuite = CU_add_suite(name, init, clean);\
+        if (NULL == AlpacaUnit_CU_pSuite) {\
+            CU_cleanup_registry();\
+            exit(CU_get_error());\
+        }\
+        }while(0)
+
+#define ADD_TEST(suite, name, test)\
+    do{\
+        if ((NULL == CU_add_test(suite,name,test))){\
+            CU_cleanup_registry();\
+            exit(CU_get_error());\
+        }\
+        }while(0)
 
 int main(){
 
-    CU_pSuite pSuite1 = NULL;
+    CU_pSuite AlpacaUnit_CU_pSuite = NULL;
 
     // Initialize CUnit test registry
     if (CUE_SUCCESS != CU_initialize_registry()){
         exit(CU_get_error());
     }
-/*
-    // Add mem tests to registry
-    pSuite1 = CU_add_suite("AlpacaLunch Memory Unit Tests", AlpacaUnit_memory_initSuite, AlpacaUnit_memory_cleanSuite);
-    if (NULL == pSuite1) {
-        CU_cleanup_registry();
-        exit(CU_get_error());
-    }
-
-    if ((NULL == CU_add_test(pSuite1,"AlpacaBuffer_init/AlpacaBuffer_free", AlpacaUnit_buffer_base)) || 
-        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_append", AlpacaUnit_buffer_append)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_resize", AlpacaUnit_buffer_resize)) ||
-        (NULL == CU_add_test(pSuite1,"Alpac
-        aBuffer_ensureRoom", AlpacaUnit_buffer_ensureRoom)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaBuffer_zero", AlpacaUnit_buffer_zero))){
-        CU_cleanup_registry();
-        exit(CU_get_error());
-    }
-*/
-    // Add comms tests to registry
-    pSuite1 = CU_add_suite("AlpacaLunch Comms Unit Tests", AlpacaUnit_comms_initSuite, AlpacaUnit_comms_cleanSuite);
-    if (NULL == pSuite1) {
-        CU_cleanup_registry();
-        exit(CU_get_error());
-    }
-
-    if ((NULL == CU_add_test(pSuite1,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_connect", AlpacaUnit_comms_connect)) ||
-        (NULL == CU_add_test(pSuite1,"AlpacaComms_close", AlpacaUnit_comms_close))){
-        CU_cleanup_registry();
-        exit(CU_get_error());
-    }
     
+    ADD_SUITE("AlpacaLunch Memory Unit Tests", 
+              AlpacaUnit_memory_initSuite,
+              AlpacaUnit_memory_cleanSuite);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaBuffer_init/AlpacaBuffer_free", AlpacaUnit_buffer_base);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaBuffer_append", AlpacaUnit_buffer_append);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaBuffer_resize", AlpacaUnit_buffer_resize);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaBuffer_ensureRoom",AlpacaUnit_buffer_ensureRoom);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaBuffer_zero", AlpacaUnit_buffer_zero);
+
+
+    ADD_SUITE("AlpacaLunch Comms Unit Tests",
+              AlpacaUnit_comms_initSuite,
+              AlpacaUnit_comms_cleanSuite);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_initCtx/destroyCtx", AlpacaUnit_comms_base);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_connect", AlpacaUnit_comms_connect);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_send", AlpacaUnit_comms_send);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_recv", AlpacaUnit_comms_recv);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_listen", AlpacaUnit_comms_listen);
+    ADD_TEST(AlpacaUnit_CU_pSuite,"AlpacaComms_close", AlpacaUnit_comms_close);
+
+
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
 
@@ -64,8 +70,8 @@ int main(){
 }
 
         
-        //(NULL == CU_add_test(pSuite1,"AlpacaComms_send", AlpacaUnit_comms_send))   || 
-        //(NULL == CU_add_test(pSuite1,"AlpacaComms_recv", AlpacaUnit_comms_recv))   ||
+        //
+        //
         //(NULL == CU_add_test(pSuite1,"AlpacaComms_listen", AlpacaUnit_comms_listen)) ||
 
         //||

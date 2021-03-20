@@ -277,6 +277,7 @@ ALPACA_STATUS AlpacaWolf_listen(Alpaca_commsCtx_t* ctx, uint16_t port){
         result = ALPACA_ERROR_SOCKCREATE;
         goto exit;
     }
+    setsockopt(ctx->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
 	/* Bind the server socket to our port */
     ret = bind(ctx->fd, (struct sockaddr*)&servAddr, saddr_size);
