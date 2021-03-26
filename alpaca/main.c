@@ -5,10 +5,9 @@
 
 // Internal
 #include <core/logging.h> 
+#include <core/coreloop.h>
 
 // Interfaces 
-#include <interfaces/threadpool_interface.h>
-#include <interfaces/memory_interface.h>
 #include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
 
@@ -26,15 +25,26 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
 
     DEBUGWARNING();
 
-    // Check for root if in release
-#ifndef DEBUGENABLE
-    // NEED ERROR HANDLING!
-    getuid();
-#endif 
 
+    /*
+     * Initialize process wide comms
+     */
     result = AlpacaComms_init(commsFlags);
     if(result){
         LOGERROR("Error initializing Alpaca Comms\n");
+        goto exit;
+    }
+    
+    /*
+     * Initialize comms context for connect/listen
+     * This context is for our connection to the controller
+     * 
+     * TODO - flags should be pulled from a configuration
+     *        hardcoded for now
+     */
+    result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
+    if(result != ALPACA_SUCCESS){
+        LOGERROR("Global comms ctx error! [%u]\n", result);
         goto exit;
     }
 
@@ -67,9 +77,6 @@ int main(int argc, char** argv){
     
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
-    char buffer[1024] = {0};
-    ssize_t out = 0;
-
 
     /** 
      * Immediately daemonize ourself according to *nix spec
@@ -83,36 +90,35 @@ int main(int argc, char** argv){
      * When debug is enabled this is an empty function
      */
     result = AlpacaCore_init(ALPACACOMMS_PROTO_TLS12);
-    if(result != ALPACA_SUCCESS){
+    if(ALPACA_SUCCESS != result){
         LOGERROR("Global initialization error! [%u]\n", result);
         goto done;
     }
 
-    //result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_CLIENT);
-    result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_PROTO_TLS12 | ALPACACOMMS_TYPE_SERVER);
-    if(result != ALPACA_SUCCESS){
-        LOGERROR("Global comms ctx error! [%u]\n", result);
+    // Need to perform initial comms
+
+
+    result = AlpacaComms_initialCallback(coreComms);
+    if(ALPACA_SUCCESS != result){
+        LOGERROR("Initial Comms exited with result [%u]\n", result);
         goto done;
     }
-    
 
-    // FOR TEST ONLY! Doesn't belong here
-    //result = AlpacaComms_connect(coreComms, "127.0.0.1" ,44444);
-    result = AlpacaComms_listen(coreComms, 54321);
-    
-    memset(buffer, 0, 1024);
-    strcpy(buffer,"WAZZZZZZUP!");
-    result = AlpacaComms_send(coreComms, buffer, strlen(buffer), &out);
-    memset(buffer, 0, 1024);
-    result = AlpacaComms_recv(coreComms, buffer, 1024, &out);
-    LOGDEBUG("Buffer: %s\n", buffer);
+    /*
+     * Launch coreloop
+     * 
+     * This likely will need to be more complex 
+     * as time goes on. For now its simple
+     */
+    result = AlpacaCore_coreLoop();
+    if(ALPACA_SUCCESS != result){
+        LOGERROR("Coreloop exited with result [%u]\n", result);
+        goto done;
+    }
 
-
-
-    //DevTests();
    
 done:
     AlpacaCore_exit();
-    LOGINFO("Exiting with exit code:%u\n", result);
+    LOGINFO("Exiting with exit code: %u\n", result);
     return 0; 
 }

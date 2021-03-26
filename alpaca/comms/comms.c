@@ -388,24 +388,21 @@ ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	ssize_t temp = 0;
 
 	if(!ctx || !buf || len == 0){
-		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p buf:%p  len:%lu\n", ctx, buf, len);
+		LOGERROR("Invalid params passed to AlpacaComms_send ctx:%p buf:%p len:%lu\n", ctx, buf, len);
 		result = ALPACA_ERROR_BADPARAM;
 		*out = 0;
 		goto exit;
 	}
-
 	/*
 	 * If non-blocking sockets end up being used
 	 * this will need to loop and have additional error checking
 	 * will also need polling
 	 */
 	result = ctx->read(ctx, buf, len, &temp);
-	if(result != ALPACA_SUCCESS || temp <= 0){
-		LOGERROR("Error attempting read: %d\n", result);
-		*out = temp;
+	*out = temp;
+	if(result != ALPACA_SUCCESS || temp < 0){
 		goto exit;
 	}
-	*out = temp;
 	LOGDEBUG("Recv'd %lu bytes\n", *out);
 
 exit:
@@ -448,6 +445,53 @@ exit:
 	LEAVING;
 	return result;	
 }
+
+
+
+ALPACA_STATUS AlpacaComms_initialCallback(Alpaca_commsCtx_t* ctx){
+	ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+
+	/* TODO
+	 * In here we should be pulling 
+	 * configuration options to include 
+	 * callback ip, delays, keys, etc
+	 * 
+	 */
+	if(!ctx){
+		LOGERROR("Bad parameters passed ctx[%p]", ctx);
+		result = ALPACA_ERROR_BADPARAM;
+		goto exit;
+	}
+
+	/* TODO
+	 * Should be pulling from config
+	 */ 
+	result = AlpacaComms_connect(ctx, "127.0.0.1", DEFAULT_PORT);
+	if(ALPACA_SUCCESS != result){
+		// Debug print in prior call
+		goto exit;
+	}
+
+	LOGINFO("Initial connection established!\n");
+
+	/* TODO 
+	 * Here there should be some form of verification
+	 * key exchange, etc
+	 */
+
+
+exit:
+	LEAVING;
+	return result;	
+}
+
+
+
+
+
+
+
 
 int32_t AlpacaComms_setNonBlocking(int fd) {
     int flags;

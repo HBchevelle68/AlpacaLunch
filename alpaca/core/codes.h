@@ -19,12 +19,13 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_WOLFSSLWRITE       (6)
 #define ALPACA_ERROR_WOLFSSLREAD        (7)
 #define ALPACA_ERROR_WOLFSSLACCEPT      (8)
+#define ALPACA_ERROR_WOLFSSLFDSET       (9)
 
 
 #define ALPACA_ERROR_COMMSINIT 	        (10)
 #define ALPACA_ERROR_COMMSCONNECT       (11)
 #define ALPACA_ERROR_COMMSLISTEN        (12)
-
+#define ALPACA_ERROR_COMMSCLOSED        (13)
 
 
 #define ALPACA_ERROR_SOCKCREATE	        (20)

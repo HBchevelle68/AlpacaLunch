@@ -62,13 +62,9 @@ typedef enum AlpacaLunch_TLSVersion{
  */
 #define KEEP_COMMS_PROTO 0x000F
 #define KEEP_COMMS_TYPE  0x0030
+#define GET_COMMS_PROTO(flags) (KEEP_COMMS_PROTO & flags)
+#define GET_COMMS_TYPE(flags) (KEEP_COMMS_TYPE & flags)
 
-#define GET_COMMS_PROTO(flags) ((KEEP_COMMS_PROTO & flags))
-#define GET_COMMS_TYPE(flags) ((KEEP_COMMS_TYPE & flags))
-
-/**
- * @struct AlpacaLunch_CommsCtx
- */
 
 typedef struct AlpacaLunch_CommsCtx Alpaca_commsCtx_t;
 
@@ -81,13 +77,11 @@ struct AlpacaLunch_CommsCtx {
 	struct sockaddr_in peer;
 
 	ALPACA_STATUS (*connect)(Alpaca_commsCtx_t* ctx);
-	ALPACA_STATUS (*listen)(Alpaca_commsCtx_t* ctx, uint16_t port);
+	ALPACA_STATUS (*listen) (Alpaca_commsCtx_t* ctx, uint16_t port);
 	ALPACA_STATUS (*accept) (Alpaca_commsCtx_t* ctx);
 	ALPACA_STATUS (*read)   (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*write)  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (Alpaca_commsCtx_t* ctx);
-
-
 };
 
 #define COMMS_CTX_SIZE (sizeof(struct AlpacaLunch_CommsCtx))
@@ -95,18 +89,64 @@ struct AlpacaLunch_CommsCtx {
 extern Alpaca_commsCtx_t *coreComms;
 
 
-typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header
-{
-	uint16_t alpacaID;
-	uint8_t  type;
+typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
+	uint32_t alpacaID;
 	uint8_t  flags;
+	uint8_t  reserved; 
 	uint16_t cmdNum;
 	uint16_t cmdID;
-	uint64_t bodySize;
-
+	uint32_t bodySize;
 } Alpaca_protoHdr_t;
 
-#define PROTO_HDR_SIZE (sizeof(Alpaca_protoHdr_t))
+#define COMMS_HDR_SIZE (sizeof(struct AlpacaLunch_Protocol_Header))
+#define COMMS_HDR_FLAG_TSK 1
+#define COMMS_HDR_FLAG_RSP 2
+#define COMMS_HDR_FLAG_FWD 4
+#define COMMS_HDR_FLAG_OOB 8
+
+#ifdef TALKATIVE_ALPACA
+
+#define	DEBUG_COMMS_CTX(comms_ptr) \
+	do {\
+		char str[INET_ADDRSTRLEN];\
+		if(comms_ptr) {\
+			inet_ntop(AF_INET, &(comms_ptr->peer.sin_addr.s_addr), str, INET_ADDRSTRLEN);\
+			printf("*** DEBUG Comms Ctx ***\n");\
+			printf("Alpaca_protoHdr_t { \n");\
+			printf("  ->fd = %d (%#x)\n",comms_ptr->fd,comms_ptr->fd);\
+			printf("  ->protoCtx = %p\n",comms_ptr->protoCtx);\
+			printf("  ->status = %u (%#x)\n",comms_ptr->status,comms_ptr->status);\
+			printf("  ->flags = %u (%#x)\n",comms_ptr->flags,comms_ptr->flags);\
+			printf("  ->peer {\n");\
+			printf("    .sin_family = %u (%#x)\n",comms_ptr->peer.sin_family,comms_ptr->peer.sin_family);\
+			printf("    .sin_port = %u (%#x)\n",ntohs(comms_ptr->peer.sin_port),ntohs(comms_ptr->peer.sin_port));\
+			printf("    .sin_addr.s_addr = %s (%#x)\n",str,comms_ptr->peer.sin_addr.s_addr);\
+			printf("  } \n");\
+			printf("} \n");\
+		}\
+	} while(0)
+
+#define	DEBUG_COMMS_HDR(hdr_ptr) \
+	do {\
+		if(hdr_ptr) {\
+			printf("*** DEBUG Comms Header ***\n");\
+			printf("Alpaca_protoHdr_t { \n");\
+			printf("  ->alpacaID = %lu (%#x)\n",hdr_ptr->alpacaID,hdr_ptr->alpacaID);\
+			printf("  ->flags = %u (%#x)\n",hdr_ptr->flags,hdr_ptr->flags);\
+			printf("  ->resserved = %u (%#x)\n",hdr_ptr->resserved,hdr_ptr->resserved);\
+			printf("  ->cmdNum = %u (%#x)\n",hdr_ptr->cmdNum,hdr_ptr->cmdNum);\
+			printf("  ->cmdID = %u (%#x)\n",hdr_ptr->cmdID,hdr_ptr->cmdID);\
+			printf("  ->bodySize = %lu (%#x)\n",hdr_ptr->bodySize,hdr_ptr->bodySize);\
+			printf("} \n");\
+		}\
+	} while(0)
+
+#else
+#define	DEBUG_COMMS_CTX(comms_ptr)
+#define DEBUG_COMMS_HDR(hdr_ptr)
+#endif
+
+
 
 // Process networking Init/Cleanup
 ALPACA_STATUS AlpacaComms_init	  (uint16_t flags);
@@ -122,6 +162,11 @@ ALPACA_STATUS AlpacaComms_listen (Alpaca_commsCtx_t* ctx, uint16_t port);
 ALPACA_STATUS AlpacaComms_recv	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_send	 (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 ALPACA_STATUS AlpacaComms_close  (Alpaca_commsCtx_t* ctx);
+
+
+// Initial Behavior
+ALPACA_STATUS AlpacaComms_initialCallback(Alpaca_commsCtx_t* ctx);
+ALPACA_STATUS AlpacaComms_initialListen(Alpaca_commsCtx_t* ctx);
 
 // Network Utils
 int32_t AlpacaSock_setNonBlocking(int fd);

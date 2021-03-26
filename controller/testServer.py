@@ -4,7 +4,7 @@ import time
 
 bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 bind_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-bind_socket.bind(("127.0.0.1", 44444))
+bind_socket.bind(("127.0.0.1", 54321))
 bind_socket.listen(5)
 
 context = wolfssl.SSLContext(wolfssl.PROTOCOL_TLSv1_2, server_side=True)
@@ -21,8 +21,9 @@ while True:
 
         # wrap socket
         secure_socket = context.wrap_socket(new_socket)
-        print("\n", secure_socket.read(), "\n")
         secure_socket.write(b"I hear you fa shizzle!")
+        time.sleep(5)
+        #print("\n", secure_socket.read(), "\n")
 
     except Exception as e:
         print()
