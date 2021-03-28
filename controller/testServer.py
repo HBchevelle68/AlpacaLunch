@@ -51,8 +51,11 @@ while True:
 
         # wrap socket
         secure_socket = context.wrap_socket(new_socket)
-        secure_socket.write(payload)
-        time.sleep(5)
+        for i in range(0,5,1):
+            print("sending payload...")
+            secure_socket.write(payload)
+            #print("sleeping...")
+            #time.sleep(6)
         #print("\n", secure_socket.read(), "\n")
 
     except Exception as e:

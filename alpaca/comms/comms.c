@@ -3,11 +3,8 @@
  */
 #include <sys/poll.h>
 
-// Implements interface 
-#include <interfaces/comms_interface.h>
-
-
 // Internal
+#include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
 #include <interfaces/memory_interface.h>
 #include <core/logging.h>
@@ -16,7 +13,7 @@
 
 
 
-// Process level variables 
+// External Process level variables 
 Alpaca_commsCtx_t *coreComms;
 
 

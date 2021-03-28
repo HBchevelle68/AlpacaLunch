@@ -83,9 +83,9 @@ struct AlpacaLunch_CommsCtx {
 	ALPACA_STATUS (*write)  (Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out);
 	ALPACA_STATUS (*close)  (Alpaca_commsCtx_t* ctx);
 };
-
 #define COMMS_CTX_SIZE (sizeof(struct AlpacaLunch_CommsCtx))
 
+// Core comms, links to controller
 extern Alpaca_commsCtx_t *coreComms;
 
 
@@ -143,7 +143,7 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
 			printf("Alpaca_protoHdr_t { \n");\
 			printf("  ->alpacaID = %lu (%#x)\n",hdr_ptr->alpacaID,hdr_ptr->alpacaID);\
 			printf("  ->flags = %u (%#x)\n",hdr_ptr->flags,hdr_ptr->flags);\
-			printf("  ->resserved = %u (%#x)\n",hdr_ptr->resserved,hdr_ptr->resserved);\
+			printf("  ->reserved = %u (%#x)\n",hdr_ptr->resserved,hdr_ptr->resserved);\
 			printf("  ->cmdNum = %u (%#x)\n",hdr_ptr->cmdNum,hdr_ptr->cmdNum);\
 			printf("  ->cmdID = %u (%#x)\n",hdr_ptr->cmdID,hdr_ptr->cmdID);\
 			printf("  ->bodySize = %lu (%#x)\n",hdr_ptr->bodySize,hdr_ptr->bodySize);\

@@ -4,14 +4,9 @@
 #include <core/codes.h>
 #include <core/logging.h>
 
-#define MILLI_ONE_SEC (1000) // one second in milliseconds
+#define MILLI_FIVE_SEC (1000*5) // Five seconds in milliseconds
 
-
-/* 
- * Process level comms connected to controller 
- */
-extern Alpaca_commsCtx_t *coreComms;
-
+static int debug_counter;  
 
 ALPACA_STATUS handle_payload(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
@@ -52,17 +47,20 @@ ALPACA_STATUS handle_payload(void){
         result = AlpacaComms_recv(coreComms, &body, header.bodySize, &numRecvd);
         if(0 < numRecvd){
             LOGDEBUG("Received: {%s}\n", body);
+            LOGINFO("Counter: %d\n", ++debug_counter);
 
         }
         else if(0 > numRecvd) {
             /*
             * Error occured
             */
+           LOGERROR("Failure occured during body recv\n");
         }
         else {
             /*
             * Socket closed
             */
+           LOGERROR("Peer closed during body recv\n");
         }
 
     }
@@ -120,7 +118,7 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
          */
         
         LOGDEBUG("Polling on controller fd...\n");
-        ret = poll(&pfd, 1, MILLI_ONE_SEC*5);
+        ret = poll(&pfd, 1, MILLI_FIVE_SEC*5);
         if(ret > 0) 
         {
             /* Data available for read */
@@ -151,8 +149,8 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
                 }
             }
             else if(POLLHUP == pfd.revents ||
-                    POLLHUP == pfd.revents || 
-                    POLLNVAL == pfd.events) 
+                    POLLERR == pfd.revents || 
+                    POLLNVAL == pfd.revents) 
             {
                 /*
                  * FIN or RST recieved

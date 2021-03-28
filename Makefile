@@ -112,9 +112,9 @@ ALPACAMAIN_DOBJ=$(addprefix $(SRCBASE)/, main-debug.o)
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o) 
-ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o)
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o config.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o config-debug.o) 
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o config-unit.o)
 
 #
 # ALPACA-THREADPOOL object files
