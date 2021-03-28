@@ -403,7 +403,7 @@ ALPACA_STATUS AlpacaComms_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ss
 	if(result != ALPACA_SUCCESS || temp < 0){
 		goto exit;
 	}
-	LOGDEBUG("Recv'd %lu bytes\n", *out);
+	LOGDEBUG("Recv'd %ld bytes\n", *out);
 
 exit:
 	LEAVING;

@@ -13,19 +13,72 @@
 extern Alpaca_commsCtx_t *coreComms;
 
 
-ALPACA_STATUS handle_payload(uint8_t* data){
+ALPACA_STATUS handle_payload(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ssize_t numRecvd = 0;
+    //size_t numWant = 0;
+    Alpaca_protoHdr_t header =  {0};
+    uint8_t body[COMMS_MAX_BODY];
+
+    memset(body, 0, sizeof(body));
     ENTRY;
 
-    result = AlpacaComms_recv(coreComms, &data, COMMS_HDR_SIZE, &numRecvd);
+    result = AlpacaComms_recv(coreComms, &header, COMMS_HDR_SIZE, &numRecvd);
     if(0 < numRecvd){
         /* TODO Process header
          * progress state machine
          */
+
+        /* Convert all members (that require it)
+         * from network to host byte order.
+         * This macro is in release 
+         */
+        NTOH_COMMS_HDR(header);
+
+        // DEBUG ONLY
+        DEBUG_COMMS_HDR(header);
+
+        if(header.bodySize > COMMS_MAX_BODY){
+            LOGERROR("header.bodySize exceeds max size! [%u]", header.bodySize);
+            result = ALPACA_ERROR_HDRBODYSIZE;
+            goto exit;
+        }
+
+        /*
+         * Header has been processed, now we 
+         * know the size we are expecting and
+         * can read of remaining from network stack
+         */
+        result = AlpacaComms_recv(coreComms, &body, header.bodySize, &numRecvd);
+        if(0 < numRecvd){
+            LOGDEBUG("Received: {%s}\n", body);
+
+        }
+        else if(0 > numRecvd) {
+            /*
+            * Error occured
+            */
+        }
+        else {
+            /*
+            * Socket closed
+            */
+        }
+
+    }
+    else if(0 > numRecvd) {
+        /*
+         * Error occured
+         */
+    }
+    else {
+        /*
+         * Socket closed
+         */
     }
 
-//exit:
+
+exit:
     LEAVING;
     return result;
 }
@@ -44,7 +97,7 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
 	int32_t ret = 0;
     
     struct pollfd pfd;
-    uint8_t data[ALPACACOMMS_MAX_BUFF] = {0};
+    
     ENTRY;
 
     /* 
@@ -55,42 +108,52 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
     //DEBUG_COMMS_CTX(coreComms);
 
     pfd.fd = coreComms->fd;
-    pfd.events = POLLIN | POLLPRI;
-    LOGDEBUG("Polling on controller fd...\n");
-    while(1) {
+    pfd.events = POLLIN;
+
+
+    while(1) 
+    {
         pfd.revents = 0;
         /* TODO
          * Amount to memset will likely need change after payload
          * processing is decided upon
          */
-        memset(data, 0, sizeof(data));
-
+        
+        LOGDEBUG("Polling on controller fd...\n");
         ret = poll(&pfd, 1, MILLI_ONE_SEC*5);
-        if(ret > 0) {
+        if(ret > 0) 
+        {
             /* Data available for read */
-            if(POLLIN == pfd.revents) {
+            if(POLLIN == pfd.revents) 
+            {
                 /* ** TO DO ********************************************************
                  * Since the header size is deterministic should read off header
                  * from there introspection into the header will provide 
                  * remaining length to readoff
                  */
-                result = handle_payload(data);
-                if(ALPACA_ERROR_COMMSCLOSED == result) {
+                result = handle_payload();
+                if(ALPACA_ERROR_COMMSCLOSED == result) 
+                {
                     // TODO
 
                     // HANDLE RECONNECTION
                     break;
                 }
-                else if (ALPACA_SUCCESS != result) {
+                else if (ALPACA_SUCCESS != result) 
+                {
                     // TODO 
                     // HANDLE ERROR
                     break;
                 }
-                else {
+                else 
+                {
                     continue;
                 }
             }
-            else if (POLLHUP == pfd.revents) {
+            else if(POLLHUP == pfd.revents ||
+                    POLLHUP == pfd.revents || 
+                    POLLNVAL == pfd.events) 
+            {
                 /*
                  * FIN or RST recieved
                  * This should never be expected 
@@ -102,13 +165,20 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
                 goto exit;
             }
         }
-        else if(0 > ret) {
-            /* An error occured */ 
-            LOGERROR("Error in coreloop pool errno[%d]\n", errno);
-        }
         else if(0 == ret)
+        {
+            LOGDEBUG("Coreloop poll timeout\n");
+        }
+        else 
+        {
+            /* 
+             * 0 > ret
+             * An error occured 
+             */ 
+            LOGERROR("Error in coreloop pool errno[%d]\n", errno);
+            break;
+        }
 
-        LOGDEBUG("Coreloop poll timeout\n");
         /*
          * Either a timeout occured (ret == 0) or data was 
          * read off the socket. Either way, time to 

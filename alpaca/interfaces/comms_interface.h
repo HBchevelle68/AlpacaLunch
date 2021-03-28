@@ -99,13 +99,23 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
 } Alpaca_protoHdr_t;
 
 #define COMMS_HDR_SIZE (sizeof(struct AlpacaLunch_Protocol_Header))
+#define COMMS_MAX_BODY ((1024*64) - COMMS_HDR_SIZE)
 #define COMMS_HDR_FLAG_TSK 1
 #define COMMS_HDR_FLAG_RSP 2
 #define COMMS_HDR_FLAG_FWD 4
 #define COMMS_HDR_FLAG_OOB 8
 
-#ifdef TALKATIVE_ALPACA
 
+#define	NTOH_COMMS_HDR(hdr) \
+	do {\
+		hdr.alpacaID = ntohl(hdr.alpacaID);\
+		hdr.cmdNum = ntohs(hdr.cmdNum);\
+		hdr.cmdID = ntohs(hdr.cmdID);\
+		hdr.bodySize = ntohl(hdr.bodySize);\
+	} while(0)
+
+
+#ifdef TALKATIVE_ALPACA
 #define	DEBUG_COMMS_CTX(comms_ptr) \
 	do {\
 		char str[INET_ADDRSTRLEN];\
@@ -126,7 +136,7 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
 		}\
 	} while(0)
 
-#define	DEBUG_COMMS_HDR(hdr_ptr) \
+#define	DEBUG_COMMS_HDR_PTR(hdr_ptr) \
 	do {\
 		if(hdr_ptr) {\
 			printf("*** DEBUG Comms Header ***\n");\
@@ -141,9 +151,23 @@ typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
 		}\
 	} while(0)
 
+#define	DEBUG_COMMS_HDR(hdr) \
+	do {\
+		printf("*** DEBUG Comms Header ***\n");\
+		printf("Alpaca_protoHdr_t { \n");\
+		printf("  .alpacaID = %u (%#x)\n",hdr.alpacaID,hdr.alpacaID);\
+		printf("  .flags = %u (%#x)\n",hdr.flags,hdr.flags);\
+		printf("  .resserved = %u (%#x)\n",hdr.reserved,hdr.reserved);\
+		printf("  .cmdNum = %u (%#x)\n",hdr.cmdNum,hdr.cmdNum);\
+		printf("  .cmdID = %u (%#x)\n",hdr.cmdID,hdr.cmdID);\
+		printf("  .bodySize = %u (%#x)\n",hdr.bodySize,hdr.bodySize);\
+		printf("} \n");\
+	} while(0)
+
 #else
 #define	DEBUG_COMMS_CTX(comms_ptr)
 #define DEBUG_COMMS_HDR(hdr_ptr)
+#define DEBUG_COMMS_HDR_PTR(hdr_ptr)
 #endif
 
 
