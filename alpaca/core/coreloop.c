@@ -40,14 +40,18 @@ ALPACA_STATUS handle_payload(void){
         }
 
         /*
-         * Header has been processed, now we 
+         * Header has been read, now we 
          * know the size we are expecting and
          * can read of remaining from network stack
          */
         result = AlpacaComms_recv(coreComms, &body, header.bodySize, &numRecvd);
         if(0 < numRecvd){
             LOGDEBUG("Received: {%s}\n", body);
-            LOGINFO("Counter: %d\n", ++debug_counter);
+            LOGDEBUG("Counter: %d\n", ++debug_counter);
+
+
+            // TODO 
+            // Process whole payload
 
         }
         else if(0 > numRecvd) {
