@@ -1,10 +1,12 @@
-
-
 #include <core/config.h>
+#include <core/logging.h>
+//#include "config.h"
+//#include "logging.h"
 
-Alpaca_config_t alpaca_config = {
-    .MAGIC_HEADER="GHI123JKGHI123JK",
-    .MAGIC_FOOTER="LMN456NOLMN456NO"
+
+volatile Alpaca_config_t alpaca_config = {
+    .MAGIC_HEADER="WwXxYyZz",
+    .MAGIC_FOOTER="wWxXyYzZ"
 };
 
 
@@ -12,6 +14,10 @@ Alpaca_config_t alpaca_config = {
 
 ALPACA_STATUS AlpacaConfig_init(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
+
+    //LOGDEBUG("HEADER: %s", alpaca_config.MAGIC_HEADER);
+
+    alpaca_config.initial_behavior = 1;
 
     return result;
 }

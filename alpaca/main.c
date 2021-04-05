@@ -10,12 +10,14 @@
 // Interfaces 
 #include <interfaces/comms_interface.h>
 #include <interfaces/utility_interface.h>
-
+#include <core/config.h>
 /*
  * Comms context leading back to home
  * See comms/comms.c
  */
 extern Alpaca_commsCtx_t *coreComms;
+//extern Alpaca_config_t alpaca_config;
+
 
 
 
@@ -25,7 +27,11 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
 
     DEBUGWARNING();
 
+    alpaca_config.initial_behavior = 1;
+    
+    printf("here\n");
 
+    AlpacaConfig_init();
     /*
      * Initialize process wide comms
      */
@@ -84,7 +90,7 @@ int main(int argc, char** argv){
      * 
      * When debug is enabled this is an empty function
      */
-    AlpacaUtilities_daemonize();
+    //AlpacaUtilities_daemonize();
 
     /** 
      * When debug is enabled this is an empty function

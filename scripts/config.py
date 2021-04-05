@@ -1,46 +1,113 @@
 import argparse
 import sys
 import os
+import socket
+
+class Config:
+    HDR_MAGIC = b'WwXxYyZz'
+    FTR_MAGIC = b'wWxXyYzZ'
+    USABLE_CONF_SIZE = 19
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 def __validate_ipv4_address(address):
     try:
         socket.inet_pton(socket.AF_INET, address)
-    except AttributeError:  # no inet_pton here, sorry
+    except AttributeError:  
         try:
             socket.inet_aton(address)
         except socket.error:
             return False
         return address.count('.') == 3
-    except socket.error:  # not a valid address
+    except socket.error:
         return False
 
     return True
 
-def __validate_files(infile, outfile):
+
+def __validate_port(port):
+
+    if port > 65535 or port < 4096:
+        raise ValueError(Config.FAIL+f'Port {port} is not between required (4096,65535)'+Config.ENDC)
+    
+
+
+def __validate_file(infile):
     if not os.path.exists(infile):
         raise FileNotFoundError(f'{infile} was not found')
     
     elif not os.path.isfile(infile):
         raise ValueError(f'{infile} not a regular file')
+    
 
-    if not os.path.exists(outfile):
-        raise FileNotFoundError(f'{outfile} was not found')
+def __find_magic(infile):
 
-    elif not os.path.isfile(outfile):
-        raise ValueError(f'{outfile} not a regular file')
+    with open(infile, 'rb') as vanilla_bin:
 
-def __find_magic(infile_bytes):
-    pass
+        v_bytes = vanilla_bin.read()
+
+        hdr = v_bytes.find(Config.HDR_MAGIC)
+        if hdr == -1:
+            print(Config.FAIL+"[-] Couldn't find magic header..."+Config.ENDC)
+            return hdr
+
+        print(Config.OKGREEN+f'[+] Found {Config.HDR_MAGIC} at {hdr}'+Config.ENDC)
+        # Need to move forward by 8 bytes
+        # 'WwXxYyZz' <-----Current
+        #  ^
+        # 'WwXxYyZz ' <-----Where we need it
+        #          ^
+        hdr = hdr+8
+        
+        ftr = v_bytes.find(Config.FTR_MAGIC)
+        if ftr == -1:
+            print(Config.FAIL+f"[-] Couldn't find magic footer..."+Config.ENDC)
+            return ftr
+
+        print(Config.OKGREEN+f'[+] Found {Config.FTR_MAGIC} at {ftr}'+Config.ENDC)
+        
+        found_conf_byte_size = ftr - hdr
+        print(Config.OKBLUE+f'[*] Config size {found_conf_byte_size}'+Config.ENDC)
+
+        if found_conf_byte_size != Config.USABLE_CONF_SIZE:
+            print(Config.WARNING+
+                 f'Scaned binary has config size of {found_conf_byte_size} '+
+                 f'expected {Config.USABLE_CONF_SIZE}'+Config.ENDC)
+            return -1
+
+        return hdr
+
     
 
 def _validate_args(args):
+    print(Config.OKCYAN+f'Validating args...')
+    __validate_file(args.infile)
+    __validate_port(args.port)
+    __validate_ipv4_address(args.addr)
+        
+
+    # More need to happen here
+
+
+    return True
     
-    __validate_files(args.infile, args.outfile)
 
 
 def configure(args):
-    print(f'{args}')
     if not _validate_args(args):
+        print(Config.FAIL+f'[-] Validation failed...'+Config.ENDC)
+        return
+
+
+    if __find_magic(args.infile) == -1:
         return
 
 if __name__ == "__main__":

@@ -237,7 +237,7 @@ alpacalunch-unittest: $(ALLUOBJS)
 	$(call PG, $@ Done)
 	
 %.o: %.c $(DEPS)
-	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %-debug.o: %.c $(DEPS)
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@

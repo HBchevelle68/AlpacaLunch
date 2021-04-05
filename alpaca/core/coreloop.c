@@ -6,7 +6,7 @@
 
 #define MILLI_FIVE_SEC (1000*5) // Five seconds in milliseconds
 
-static int debug_counter;  
+//static int debug_counter;  
 
 ALPACA_STATUS handle_payload(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
@@ -47,7 +47,7 @@ ALPACA_STATUS handle_payload(void){
         result = AlpacaComms_recv(coreComms, &body, header.bodySize, &numRecvd);
         if(0 < numRecvd){
             LOGDEBUG("Received: {%s}\n", body);
-            LOGDEBUG("Counter: %d\n", ++debug_counter);
+            //LOGDEBUG("Counter: %d\n", ++debug_counter);
 
 
             // TODO 
