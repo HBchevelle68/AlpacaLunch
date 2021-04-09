@@ -414,29 +414,6 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
     ctx->status = ALPACACOMMS_STATUS_NOTCONN;
     ENTRY;
 
-<<<<<<< HEAD
-    /* Verify pointers */
-    if(alpacasock && alpacasock->ssl){
-        /*
-         * Wrap bottom layer TCP socket in wolf
-         * then perform TLS handshake 
-         */
-        if(wolfSSL_set_fd(alpacasock->ssl, alpacasock->fd) != SSL_SUCCESS){
-            LOGERROR("wolfSSL_set_fd error\n");
-            result = ALPACA_ERROR_WOLFSSLCREATE;
-        }
-        
-        if (wolfSSL_connect(alpacasock->ssl) != SSL_SUCCESS) {
-            int err = 0;
-            char buffer[80];
-            err = wolfSSL_get_error(alpacasock->ssl, 0);
-            wolfSSL_ERR_error_string(err, buffer);
-            LOGDEBUG("WolfSSL Error %d: %s\n", err, buffer);
-
-            result = ALPACA_ERROR_WOLFSSLCONNECT;
-        }
-=======
-
     /*
      * Create socket and verify
      * Socket created is set to non-blocking as well as setting the
@@ -448,7 +425,6 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
         LOGERROR("Failure to create socket\n");
         result = ALPACA_ERROR_SOCKCREATE;
         goto exit;
->>>>>>> master
     }
     
     
