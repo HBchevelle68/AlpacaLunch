@@ -27,9 +27,7 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
 
     DEBUGWARNING();
 
-    alpaca_config.initial_behavior = 1;
-    
-    printf("here\n");
+    AlpacaUtilities_daemonize();
 
     AlpacaConfig_init();
     /*

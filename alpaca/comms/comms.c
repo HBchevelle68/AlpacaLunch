@@ -9,6 +9,7 @@
 #include <interfaces/memory_interface.h>
 #include <core/logging.h>
 #include <core/codes.h>
+#include <core/config.h>
 #include <comms/wolf.h>
 
 
@@ -464,7 +465,7 @@ ALPACA_STATUS AlpacaComms_initialCallback(Alpaca_commsCtx_t* ctx){
 	/* TODO
 	 * Should be pulling from config
 	 */ 
-	result = AlpacaComms_connect(ctx, "127.0.0.1", DEFAULT_PORT);
+	result = AlpacaComms_connect(ctx, (char*)alpaca_config.addr, alpaca_config.port);
 	if(ALPACA_SUCCESS != result){
 		// Debug print in prior call
 		goto exit;

@@ -25,7 +25,6 @@
  */
 #include <core/codes.h>
 
-#define DEFAULT_PORT 54321
 #define MAX_RETRIES  5
 #define THREE_SECONDS_MILLI (3*1000)
 
