@@ -27,7 +27,6 @@ class Config:
     USABLE_CONF_SIZE = struct.calcsize(CONFIG_FMT)
 
 
-
 def __validate_ipv4_address(address):
     try:
         socket.inet_pton(socket.AF_INET, address)
@@ -52,7 +51,6 @@ def __validate_port(port):
     print(Config.OKGREEN+f'[*] Port: {port}'+ Config.ENDC)
     
 
-
 def __validate_file(infile):
     if not os.path.exists(infile):
         raise FileNotFoundError(Config.FAIL+f'{os.path.abspath(infile)} was not found'+Config.ENDC)
@@ -74,7 +72,6 @@ def __validate_behavior(cb,lstn):
     else:
         print(Config.FAIL+f'[-] Neither callback or listen behavior selected...'+Config.ENDC)
 
-    
 
 def _find_magic(infile):
 
@@ -93,8 +90,6 @@ def _find_magic(infile):
         #  ^
         # 'WwXxYyZz ' <-----Where we need it
         #          ^
-        
-        
         ftr = v_bytes.find(Config.FTR_MAGIC)
         if ftr == -1:
             print(Config.FAIL+f"[-] Couldn't find FOOTER_MAGIC..."+Config.ENDC)
@@ -111,7 +106,7 @@ def _find_magic(infile):
                  f'expected {Config.USABLE_CONF_SIZE}'+Config.ENDC)
             return -1,-1
 
-        return hdr, ftr
+        return hdr,ftr
 
     
 
@@ -122,13 +117,8 @@ def _validate_args(args):
     __validate_port(args.port)
 
     # More need to happen here
-
-
     return __validate_ipv4_address(args.addr)
     
-
-
-
 
 def configure(args):
     if not _validate_args(args):
