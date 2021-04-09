@@ -18,7 +18,7 @@ void* AlpacaMemory_zero(void* buf, size_t bufsize, size_t len){
 	return buf;
 }
 
-#ifdef TALKATIVELLAMA
+#ifdef TALKATIVE_ALPACA
 #include <stdio.h>
 void AlpacaMemory_dumpHex(const void* data, size_t size) {
     char ascii[17];

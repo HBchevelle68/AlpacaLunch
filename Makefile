@@ -12,10 +12,10 @@ BUILD = $(DIR)/build
 SRCBASE = $(DIR)/alpaca
 ALPACACORESRC   = $(SRCBASE)/core
 ALPACACOMMSSRC	= $(SRCBASE)/comms
-ALPACATHREADSRC = $(SRCBASE)/multithreadserver
 ALPACATPOOLSRC  = $(SRCBASE)/threadpool
 ALPACAUTILSSRC	= $(SRCBASE)/utilities
 ALPACAMEMORYSRC = $(SRCBASE)/memory
+ALPACATASKSSRC  = $(SRCBASE)/tasks
 
 #
 # TEST DIRECTORIES
@@ -49,13 +49,29 @@ CONTROLLERTEST=$(CONTROLLER)/tests
 
 
 #
-# Options
+# Build Time Options
 #
+# Building wolfSSL 
+WOLFDEBUG=0 
+
+# Building Unit Tests
 MEMCHECK=0
 RUNUNIT=0
 TALKBUGGYTOME=0
+
+# Building Debug
+WOLFLOG=0
+
+ifeq ($(WOLFLOG),$(filter $(WOLFLOG),1 Yes yes YES True true TRUE))
+	DBGWOLF= -DTALKATIVE_WOLF
+endif
 ifeq ($(TALKBUGGYTOME),$(filter $(TALKBUGGYTOME),1 Yes yes YES True true TRUE))
-	UNITDBG= -DTALKATIVELLAMA
+	UNITDBG= -DTALKATIVE_ALPACA
+endif
+ifeq ($(WOLFDEBUG),$(filter $(WOLFDEBUG),1 Yes yes YES True true TRUE))
+	WOLFOPT= --enable-debug
+else
+	WOLFOPT= --disable-debug
 endif
 
 #
@@ -65,21 +81,22 @@ VALGRIND= valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=ye
 
 #
 # Build variables
-# Release Compilation and Lining
+# RELEASE Compilation and Lining
 CC= gcc -std=c11
 CFLAGS= -Werror -Wall -fvisibility=hidden -fno-builtin-memset -ffast-math -flto -s -O3 -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 LFLAGS= -L$(CRYPTBASE)/lib -lm -pthread -Wl,--gc-sections
 
-# Debug Compilation and Lining
-DBG= -g2 -Og -DTALKATIVELLAMA
-DBGCFLAGS= -Werror -Wall -DTALKATIVELLAMA  -I$(ALPACAINCLUDE) -I$(CRYPTINC)
+# DEBUG Compilation and Lining
+DBG= -g2 -Og -DTALKATIVE_ALPACA $(DBGWOLF)
+DBGCFLAGS= -Werror -Wall -DTALKATIVE_ALPACA $(DBGWOLF) -I$(ALPACAINCLUDE) -I$(CRYPTINC)
 
-# Unit Test Compilation and Lining
+# UNIT Test Compilation and Lining
 UNIT= -g -O2
 UNITCFLAGS= -Werror -Wall $(UNITDBG) -I$(ALPACAINCLUDE) -I$(CRYPTINC) -I$(UNITINCLUDE)
 UNITLFLAGS= -lcunit -L$(UNITTESTBASE)
 
 # Static Compilation and Lining
+# Not Working
 STATIC= -static
 STATICBUILD-CFLAGS= -Werror -Wall -fvisibility=hidden -flto -s -O2 -fPIC -I$(ALPACAINCLUDE) -I$(CRYPTINC) 
 
@@ -95,16 +112,9 @@ ALPACAMAIN_DOBJ=$(addprefix $(SRCBASE)/, main-debug.o)
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, allu.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, allu-debug.o) 
-ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, allu-unit.o)
-
-#
-# ALPACA-MULTITHREADSERVER object files
-# Build out seperate objs for release, test, debug 
-#
-ALPACAMTHREADSERV_ROBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver.o)
-ALPACAMTHREADSERV_DOBJS=$(addprefix $(ALPACATHREADSRC)/, multithreadserver-debug.o) 
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o) 
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o)
 
 #
 # ALPACA-THREADPOOL object files
@@ -118,9 +128,9 @@ ALPACATPOOL_UOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-unit.o alpacaqueue-
 # ALPACA-COMMS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o sock.o wolf.o) 
-ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o sock-debug.o wolf-debug.o)
-ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o sock-unit.o wolf-unit.o)
+ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o wolf.o) 
+ALPACACOMMS_DOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-debug.o wolf-debug.o)
+ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o wolf-unit.o)
 
 #
 # ALPACA-UTILS object files
@@ -139,6 +149,14 @@ ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_bu
 ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buffer-unit.o) 
 
 #
+# ALPACA-MEMORY object files
+# Build out seperate objs for release, test, debug 
+#
+ALPACATASK_ROBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+ALPACATASK_DOBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+ALPACATASK_UOBJS=$(addprefix $(ALPACATASKSSRC)/, ) 
+
+#
 # ALPACA-UNITTESTS object files
 # Build out seperate objs for release, test, debug 
 #
@@ -149,25 +167,25 @@ ALPACAUNIT_UOBJS=$(addprefix $(UNITTESTSRC)/, alpacaunit_main-unit.o alpacaunit_
 #
 ALLROBJS = $(ALPACAMAIN_ROBJ)		 \
 		   $(ALPACACORE_ROBJS)       \
-		   $(ALPACAMTHREADSERV_ROBJS)\
 		   $(ALPACATPOOL_ROBJS) 	 \
 		   $(ALPACACOMMS_ROBJS) 	 \
 		   $(ALPACAUTILS_ROBJS) 	 \
+		   $(ALPACATASK_ROBJS) 	 	 \
 		   $(ALPACAMEM_ROBJS)
 
 ALLDOBJS = $(ALPACAMAIN_DOBJ)		 \
 		   $(ALPACACORE_DOBJS) 		 \
-		   $(ALPACAMTHREADSERV_DOBJS)\
 		   $(ALPACATPOOL_DOBJS)		 \
 		   $(ALPACACOMMS_DOBJS)		 \
 		   $(ALPACAUTILS_DOBJS)		 \
+		   $(ALPACATASK_DOBJS)		 \
 		   $(ALPACAMEM_DOBJS)		
 
 ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
-		   $(ALPACAMTHREADSERV_UOBJS)\
 		   $(ALPACATPOOL_UOBJS)		 \
 		   $(ALPACACOMMS_UOBJS)		 \
 		   $(ALPACAUTILS_UOBJS)		 \
+		   $(ALPACATASK_UOBJS)		 \
 		   $(ALPACAMEM_UOBJS) 		 \
 		   $(ALPACAUNIT_UOBJS)
 
@@ -255,7 +273,7 @@ wolf:
 	rm -rf $(CRYPTBASE)/*
 	rm -rf $(CRYPTSRC)
 	unzip -o -q $(CRYPTSRC).zip -d $(DIR)/ext/wolfSSL
-
+	$(call PY, $(WOLFOPT) is set)
 	cd $(CRYPTSRC) && ./configure \
 		--prefix=$(CRYPTBASE) \
 		--disable-oldtls \
@@ -266,6 +284,7 @@ wolf:
 		--disable-des3 \
 		--disable-md5 \
 		--disable-pkcs12 \
+		$(WOLFOPT) \
 		--enable-static \
 		--enable-harden \
 		--enable-fastmath \

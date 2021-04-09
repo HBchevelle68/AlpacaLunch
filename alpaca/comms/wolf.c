@@ -2,22 +2,23 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
 
+
 // Internal
 #include <interfaces/comms_interface.h>
+#include <interfaces/utility_interface.h>
 #include <core/codes.h>
 #include <core/logging.h>
+#include <comms/wolf.h>
 
 static const char TEMPCERTFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-cert-dungpile.pem";
 static const char TEMPKEYFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-key-dungpile.pem";
-
-// For Atomics
-//__atribute__((unused)) static const uint8_t FLAGON  = 1;
-//__atribute__((unused)) static const uint8_t FLAGOFF = 0;
 
 // Static Globals
 static WOLFSSL_CTX* procWolfClientCtx;
 static WOLFSSL_CTX* procWolfServerCtx;
 static uint8_t 		wolfInitialized = 0;
+
+
 
 
 typedef struct WolfSSL_TLS_Version {
@@ -29,7 +30,7 @@ typedef struct WolfSSL_TLS_Version {
 
 static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] = 
 {
-	{
+    {
 		wolfTLSv1_2_server_method, 
 		wolfTLSv1_2_client_method
 	},
@@ -40,25 +41,38 @@ static const ALPACA_TLSVersion_t WOLFTLSVERSION[2] =
 };
 
 
-/**
- *  @brief Initializes the global WolfSSL contexts. These wolf contexts
- *         can be found in wolf.c. contexts are used to generate new
- *         ssl objects for client or server objects
- *  
- *  @param version version of wolfssl comms  
- *  
- *  @return ALPACA_STATUS
- */
 ALPACA_STATUS AlpacaWolf_init(uint16_t version){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
+    WOLFLOGGING;
     ENTRY;
 
-    if(version > ALPACA_COMMSPROTO_SSH){
+    if(version > ALPACACOMMS_PROTO_SSH || version == 0){
         LOGERROR("Version number not in range: %d\n", version);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     }
+
+    /**
+     * In order to keep this working  
+     * shift bit down by 1. Since I use(d)
+     * This as the index into the ALPACA_TLSVersion_t
+     * 
+     * The defines are
+     * TLS1.2 == 0001
+     * TLS1.3 == 0010
+     * 
+     * however indexes are: 
+     * [0] == TLS1.2
+     * [1] == TLS1.3
+     * 
+     * Bit shift >>1 will now yield:
+     * TLS1.2 == 0000
+     * TLS1.3 == 0001 
+     * 
+     * Bit shift is purely local
+     */
+    version = version>>1;
 
     if(!wolfInitialized){
         LOGINFO("Initializing global wolfCTX's with version [%x]\n", version);
@@ -72,7 +86,9 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
         procWolfClientCtx = NULL;
         procWolfServerCtx = NULL;
         
-        
+        /*
+         * SERVER
+         */
         if ((procWolfServerCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].server_method())) == NULL){
 
             LOGERROR("procWolfServerCtx ERROR: %d\n", ALAPCA_ERROR_WOLFINIT);
@@ -96,12 +112,21 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
         }
         wolfSSL_CTX_set_verify(procWolfServerCtx, SSL_VERIFY_NONE, 0);
         
+        /*
+         * CLIENT
+         */
         if ((procWolfClientCtx = wolfSSL_CTX_new(WOLFTLSVERSION[version].client_method())) == NULL){
             LOGERROR("procWolfClientCtx ERROR: %d\n", ALAPCA_ERROR_WOLFINIT);
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
         
+        /* Load server key into WOLFSSL_CTX */
+        if (wolfSSL_CTX_use_PrivateKey_file(procWolfClientCtx, TEMPKEYFILE, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
+            LOGERROR("ERROR: failed to load %s, please check the file.\n", TEMPKEYFILE);
+            result = ALAPCA_ERROR_WOLFINIT;
+            goto exit;
+        }
         wolfSSL_CTX_set_verify(procWolfClientCtx, SSL_VERIFY_NONE, 0);
         
         result = ALPACA_SUCCESS;
@@ -112,9 +137,7 @@ exit:
     return result;
 }
 
-/**
- *  @brief
- */ 
+
 ALPACA_STATUS AlpacaWolf_cleanUp(void){
 
     ALPACA_STATUS result = ALPACA_SUCCESS;
@@ -146,55 +169,58 @@ ALPACA_STATUS AlpacaWolf_cleanUp(void){
     return result;
 }
 
-/**
- *  @brief Create a underlying SSL object of the type specified
- *  
- *  @param alpacasock Alpaca_sock_t pointer to custom socket
- *  @param type unsigned byte int representing the ssl type
- * 
- *  @return ALPACA_STATUS
- */
-ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
+
+ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
-    LOGDEBUG("Entering with params alpacasock[%p] alpacasock->ssl[%p] flags[%X]\n",alpacasock, alpacasock->ssl, flags);
-    if(!alpacasock || (alpacasock->ssl)){
+    
+    if(!ctx){
         result = ALPACA_ERROR_BADPARAM;
-        LOGERROR(" Bad param(s) -> alpacasock:[%p] alpacasock->ssl:[%p]\n",alpacasock, alpacasock->ssl);
+        LOGERROR(" Bad param(s) -> ctx:[%p]\n", ctx);
+        goto exit;
+    }
+
+    if(NULL != ctx->protoCtx){
+        result = ALPACA_ERROR_BADPARAM;
+        LOGERROR(" Bad param(s) -> ctx->protoCtx:[%p]\n", ctx->protoCtx);
         goto exit;
     }
 
     switch(GET_COMMS_PROTO(flags)){
 
-        case ALPACA_COMMSPROTO_TLS12:
+        case ALPACACOMMS_PROTO_TLS12:
             /**
-             * Create ssl object
+             * Create SSL object
              */
-            if(ALPACA_COMMSTYPE_CLIENT & flags){
-
-                if ((alpacasock->ssl = wolfSSL_new(procWolfClientCtx)) == NULL) {
+            if(ALPACACOMMS_TYPE_CLIENT & flags){
+                // CLIENT
+                LOGDEBUG("Generating wolfSSL Client object\n");
+                if ((ctx->protoCtx = wolfSSL_new(procWolfClientCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
                     result = ALPACA_ERROR_WOLFSSLCREATE;
                 }
                 result = ALPACA_SUCCESS;
+
             }
-            else if (ALPACA_COMMSTYPE_SERVER & flags){
-
-                if ((alpacasock->ssl = wolfSSL_new(procWolfServerCtx)) == NULL) {
+            else if (ALPACACOMMS_TYPE_SERVER & flags){
+                // SERVER
+                LOGDEBUG("Generating wolfSSL Server object\n");
+                if ((ctx->protoCtx = wolfSSL_new(procWolfServerCtx)) == NULL) {
                     LOGERROR("Error from wolfSSL_new, no SSL object created\n");
                     result = ALPACA_ERROR_WOLFSSLCREATE;
                 }
                 result = ALPACA_SUCCESS;
+
             }
             else {
-
+                // ERROR
                 LOGERROR("Error, invalid flags used %04x\n", flags);
                 result = ALPACA_ERROR_WOLFSSLCREATE;
             }
             break;
 
-        case ALPACA_COMMSPROTO_TLS13:
+        case ALPACACOMMS_PROTO_TLS13:
 			result = ALPACA_FAILURE;
 			LOGERROR("TLS 1.3 not supported yet\n");
             break;
@@ -205,60 +231,190 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_sock_t* alpacasock , uint16_t flags){
     }
     
 exit:
-    LOGDEBUG("Leaving with alpacasock[%p] alpacasock->ssl[%p] flags[%X]\n",alpacasock, alpacasock->ssl, flags);
+    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] flags[0x%08x]\n",ctx, ctx->protoCtx, flags);
     LEAVING;
     return result;
 }
 
 
-/**
- *  @brief Perform TLS handshake. Should only be called after 
- *         TCP handshake successful.
- * 
- *  @param alpacasock Alpaca_sock_t pointer to custom socket
- * 
- *  @return ALPACA_STATUS 
- */
-ALPACA_STATUS AlpacaWolf_accept(Alpaca_sock_t* alpacasock, int16_t fd){
-    ALPACA_STATUS result = ALPACA_SUCCESS;
+ALPACA_STATUS AlpacaWolf_listen(Alpaca_commsCtx_t* ctx, uint16_t port){
+    
     ENTRY;
+	ALPACA_STATUS result = ALPACA_SUCCESS;
+    struct sockaddr_in servAddr;
+	socklen_t saddr_size = sizeof(servAddr);
+    int ret = 0;
+    
+    /*
+     * Port already verified 
+     * Verify socket is not still valid
+     */
+    if(ctx->fd > 0){
+        LOGERROR("Socket still valid...bad state\n");
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
 
-    /* Verify pointers */
-    if(alpacasock && alpacasock->ssl && fd > 2){
+    // Set up server address for bind
+    memset(&servAddr, 0, sizeof(servAddr));
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_port = htons(port);
+    servAddr.sin_addr.s_addr = INADDR_ANY;
+
+    /*
+     * Create socket and verify
+     * Socket created is set to non-blocking as well as setting the
+     * Close on Exec (CLOEXEC) flag to prevent file descriptor
+     * leaking into child processes 
+     */
+    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0); 
+    if(-1 == ctx->fd) { 
+        LOGERROR("Failure to create socket\n");
+        result = ALPACA_ERROR_SOCKCREATE;
+        goto exit;
+    }
+    setsockopt(ctx->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+	/* Bind the server socket to our port */
+    ret = bind(ctx->fd, (struct sockaddr*)&servAddr, saddr_size);
+    if(-1 == ret) {
+        LOGERROR("Error failed to bind to port [%d] errno [%d]\n", port, errno);
+		result = ALPACA_ERROR_TCPBIND;
+        goto exit;
+    }
+
+	/* 
+     * Listen for a new connection we are only 
+     * expecting at most a single connection 
+     */
+    ret = listen(ctx->fd, 1);
+    if(-1 == ret) {
+        LOGERROR("Error failed to listen errno [%d]\n", errno);
+		result = ALPACA_ERROR_TCPLISTEN;
+        goto exit;
+    }
+	LOGINFO("Successfully listening on port [%d] for TCP connection\n", port);
+
+exit:
+    LEAVING;
+    return result;
+}
+
+static
+void close_sleep(int32_t* fd, Alpaca_commsCtx_t* ctx) {
+
+    if(*fd > 0){
+        close(*fd);
+        *fd = -1;
+    } 
+    if(NULL != ctx){
+        AlpacaWolf_close(ctx);
+    }    
+	AlpacaUtilities_mSleep(THREE_SECONDS_MILLI);
+}
+ALPACA_STATUS AlpacaWolf_accept(Alpaca_commsCtx_t* ctx){
+    
+    ENTRY;
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+	socklen_t saddr_size = sizeof(struct sockaddr_in);
+    int32_t attempts = 0;
+    int32_t clientFd = 0;
+
+    /*
+	 * Loop attempting to catch connect
+	 * If a failure is detected sleep for 3 seconds before
+	 * retrying. Retry up to MAX_RETRIES
+	 */
+	while(attempts < MAX_RETRIES && ctx->status == ALPACACOMMS_STATUS_NOTCONN) {
+
+		LOGINFO("Attepmt #%d to catch TCP connection\n", attempts+1);
+		/* 
+         * TCP 
+         * Accept client connections 
+         */
+        clientFd = accept(ctx->fd, (struct sockaddr*)&ctx->peer, &saddr_size);
+        if (-1 == clientFd) {
+            LOGERROR("Failed to accept... errno: %d\n", errno);
+			close_sleep(&clientFd, ctx);
+            attempts++;
+        }
+		/* 
+         * TCP Connection established 
+         */
+		ctx->status |= ALPACACOMMS_STATUS_CONN;
+		LOGDEBUG("TCP connection established!\n");	
+		
         /*
+         * Create Client ssl object
+         */
+        result = AlpacaWolf_createSSL(ctx, ctx->flags);
+        if(NULL == ctx->protoCtx || ALPACA_SUCCESS != result ) {
+            LOGERROR("Error generating ssl object\n");
+            goto exit;
+        }
+
+		/*
          * Wrap bottom layer TCP socket in wolf
          * then perform TLS handshake 
+         * 
+         * @note need to use the newly created client
+         * socket
          */
-        if(wolfSSL_set_fd(alpacasock->ssl, fd) != SSL_SUCCESS){
+        if(SSL_SUCCESS != wolfSSL_set_fd((WOLFSSL*)ctx->protoCtx, clientFd)){
             LOGERROR("wolfSSL_set_fd error\n");
-            result = ALPACA_ERROR_WOLFSSLCREATE;
+            close_sleep(&clientFd, ctx);
+            ctx->status = ALPACACOMMS_STATUS_NOTCONN;
+            attempts++;
+            continue;
         }
         
-        if (wolfSSL_accept(alpacasock->ssl) != SSL_SUCCESS) {
-            LOGERROR("ERROR failed to accept wolfSSL\n");
-            result = ALPACA_ERROR_WOLFSSLCONNECT;
+        if (SSL_SUCCESS != wolfSSL_accept((WOLFSSL*)ctx->protoCtx)) {
+            LOGERROR("Error failed to accept in wolfSSL\n");
+            close_sleep(&clientFd, ctx);
+            ctx->status = ALPACACOMMS_STATUS_NOTCONN;
+            attempts++;
         }
     }
+
+exit:
+    /*
+     * Any result not SUCCESS we need to 
+     * clean our client connection
+     */
+    if(ALPACA_SUCCESS != result) {
+        LOGERROR("TLS handshake failed!\n");
+        if(0 < clientFd){
+            close(clientFd);
+        }
+        AlpacaWolf_close(ctx);
+        ctx->status = ALPACACOMMS_STATUS_NOTCONN;
+    }
     else {
-        LOGERROR("Error param(s) passed alpacasock[%p] ssl[%p] fd[%d]\n", alpacasock, alpacasock->ssl, fd);
-        result = ALPACA_ERROR_BADPARAM;
+
+        LOGINFO("TLS established\n");
+        ctx->status |= ALPACACOMMS_STATUS_TLSCONN;
+        /*
+        * SUCCESS Close listener
+        * Swap socket descriptors
+        */
+	    close(ctx->fd);
+	    ctx->fd = clientFd;
+        clientFd = -1;
     }
 
     LEAVING;
     return result;
 }
-/**
- *  @brief Perform TLS handshake. Should only be called after 
- *         TCP handshake successful.
- * 
- *  @param alpacasock Alpaca_sock_t pointer to custom socket
- * 
- *  @return ALPACA_STATUS 
- */
-ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
+
+
+ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
+    
     ALPACA_STATUS result = ALPACA_SUCCESS;
+    int32_t ret = 0;
+    ctx->status = ALPACACOMMS_STATUS_NOTCONN;
     ENTRY;
 
+<<<<<<< HEAD
     /* Verify pointers */
     if(alpacasock && alpacasock->ssl){
         /*
@@ -279,38 +435,88 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_sock_t* alpacasock){
 
             result = ALPACA_ERROR_WOLFSSLCONNECT;
         }
+=======
+
+    /*
+     * Create socket and verify
+     * Socket created is set to non-blocking as well as setting the
+     * Close on Exec (CLOEXEC) flag to prevent file descriptor
+     * leaking into child processes 
+     */
+    ctx->fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0); 
+    if(-1 == ctx->fd) { 
+        LOGERROR("Failure to create socket\n");
+        result = ALPACA_ERROR_SOCKCREATE;
+        goto exit;
+>>>>>>> master
     }
-    else {
-        LOGERROR("Error invalid pointer(s) passed alpacasock:%p ssl:%p\n", alpacasock, alpacasock->ssl);
-        result = ALPACA_ERROR_BADPARAM;
+    
+    
+
+    // TCP Connect
+    ret = connect(ctx->fd, (struct sockaddr*)&ctx->peer, sizeof(struct sockaddr_in));
+    if (0 != ret) {
+        // Connection error or failure
+        LOGERROR("**** Connection failure ****\n");
+        result = ALPACA_ERROR_COMMSCONNECT;
+        goto exit;
+    }
+    
+    
+    // TCP Connection established 
+    ctx->status |= ALPACACOMMS_STATUS_CONN;
+    LOGDEBUG("TCP connection established!\n");
+
+    // Create Client ssl object    
+    result = AlpacaWolf_createSSL(ctx, ctx->flags);
+    if(NULL == ctx->protoCtx || ALPACA_SUCCESS != result ) {
+        LOGERROR("Error generating ssl object\n");
+        goto exit;
     }
 
+    LOGDEBUG("Leaving with ctx[%p] ctx->protoCtx[%p] \n",ctx, ctx->protoCtx);
+    
+    /*
+     * Wrap bottom layer TCP socket in wolf
+     * then perform TLS handshake 
+     */
+    if(SSL_SUCCESS != wolfSSL_set_fd(ctx->protoCtx, ctx->fd)){
+        LOGERROR("ERROR wolfSSL_set_fd\n");
+        result = ALPACA_ERROR_WOLFSSLCREATE;
+        goto exit;
+    }
+    
+    if (SSL_SUCCESS != wolfSSL_connect(ctx->protoCtx)) {
+        LOGERROR("ERROR failed to connect in wolfSSL\n");
+        result = ALPACA_ERROR_WOLFSSLCONNECT;
+    }
+
+
+exit:
     LEAVING;
+    if(result == ALPACA_SUCCESS){
+        ctx->status |= ALPACACOMMS_STATUS_TLSCONN;
+    }
+    /*
+     * At this point TCP connection is possibly valid
+     * Top layer will properly handle
+     */
     return result;
 }
 
-/**
- *  @brief Send data through set SSL connection   
- *         
- *  @param alpacasock Alpaca_sock_t pointer to custom socket
- *  @param buf pointer to buffer to send
- *  @param len length of data to send
- *  @param out out variable of bytes successfully sent
- * 
- *  @return ALPACA_STATUS 
- */
-ALPACA_STATUS AlpacaWolf_send(WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
+
+ALPACA_STATUS AlpacaWolf_send(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
-    if(NULL == sslCtx || NULL == buf || len == 0){
+    if(NULL == ctx || NULL == buf || len == 0){
         LOGERROR("AlpacaWolf_send given bad params!\n");
         result = ALPACA_ERROR_BADPARAM;
         *out = -1;
         goto exit;
     }
 
-    *out = wolfSSL_write(sslCtx, buf, len);
+    *out = wolfSSL_write((WOLFSSL*)ctx->protoCtx, buf, len);
     if(*out <= 0){
         LOGERROR("Failure to send!\n");
         result = ALPACA_ERROR_WOLFSSLWRITE;
@@ -326,28 +532,18 @@ exit:
 }
 
 
-/**
- *  @brief Send data through set SSL connection   
- *         
- *  @param alpacasock Alpaca_sock_t pointer to custom socket
- *  @param buf pointer to buffer to send
- *  @param len length of data to send
- *  @param out out variable of bytes successfully sent
- * 
- *  @return ALPACA_STATUS 
- */
-ALPACA_STATUS AlpacaWolf_recv(WOLFSSL* sslCtx, void* buf, size_t len, ssize_t* out){
+ALPACA_STATUS AlpacaWolf_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssize_t* out){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
-    if(NULL == sslCtx || NULL == buf || len == 0){
+    if(NULL == ctx || NULL == buf || len == 0){
         LOGERROR("AlpacaWolf_recv given bad params!\n");
         result = ALPACA_ERROR_BADPARAM;
         *out = -1;
         goto exit;
     }
 
-    *out = wolfSSL_read(sslCtx, buf, len);
+    *out = wolfSSL_read((WOLFSSL*)ctx->protoCtx, buf, len);
     if(*out <= 0){
         LOGERROR("Failure to read!\n");
         result = ALPACA_ERROR_WOLFSSLREAD;
@@ -370,18 +566,19 @@ exit:
  * 
  *  @return ALPACA_STATUS 
  */
-ALPACA_STATUS AlpacaWolf_close(WOLFSSL** sslCtx) {
+ALPACA_STATUS AlpacaWolf_close(Alpaca_commsCtx_t* ctx) {
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
-    LOGDEBUG("Freeing SSL OBJ at [%p]\n", (*sslCtx));
-    if((*sslCtx)) {
-        wolfSSL_free((*sslCtx));
-        (*sslCtx) = NULL;
+    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] \n",ctx, ctx->protoCtx);
+    if(ctx && ctx->protoCtx) {
+        LOGDEBUG("Freeing SSL OBJ at [%p]\n", (ctx->protoCtx));
+        wolfSSL_free((WOLFSSL*)ctx->protoCtx);
+        ctx->protoCtx = NULL;
         goto done;
     }
 
-    LOGERROR("No SSL object to free\n");
+    LOGINFO("No SSL object to free\n");
 
 done:
     LEAVING;

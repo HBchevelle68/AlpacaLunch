@@ -13,7 +13,7 @@ Unit Build Options:
 
 RUNUNIT - Run unit test
 MEMCHECK - Run unit test with valgrind
-TALKBUGGYTOME - Add "-DTALKATIVELLAMA" to build
+TALKBUGGYTOME - Add "-DTALKATIVE_ALPACA" to build
 
 
 Certs generated with:

@@ -7,7 +7,6 @@
                 "${workspaceFolder}/alpaca/*",
                 "${workspaceFolder}/alpaca/**",
                 "${workspaceFolder}/alpaca/core/*",
-                "${workspaceFolder}/alpaca/multithreadserver/*",
                 "${workspaceFolder}/alpaca/threadpool/*",
                 "${workspaceFolder}/alpaca/cryptlibs/include/**"
             ],

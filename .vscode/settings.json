@@ -6,6 +6,7 @@
         "unistd_64.h": "c",
         "logging.h": "c",
         "steque.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "comms_interface.h": "c"
     }
 }
