@@ -12,7 +12,7 @@
 #include <interfaces/utility_interface.h>
 
 
-#ifndef DEBUGENABLE
+#ifndef TALKATIVE_ALPACA
 void AlpacaUtilities_daemonize(void){
 
 	int fd;
