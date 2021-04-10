@@ -33,7 +33,10 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_HDRBODYSIZE        (25)
 
 
-
+/*
+ * Config Codes
+ */
+#define ALPACA_ERROR_CONFINITBEH        (40)
 
 /*
  * Crypto Error Codes 

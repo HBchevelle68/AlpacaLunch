@@ -107,7 +107,7 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
      * controller. we also are concerned about
      * loss of connection  
      */
-    //DEBUG_COMMS_CTX(coreComms);
+    DEBUG_COMMS_CTX(coreComms);
 
     pfd.fd = coreComms->fd;
     pfd.events = POLLIN;
