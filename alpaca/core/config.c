@@ -4,8 +4,6 @@
 
 #include <core/config.h>
 #include <core/logging.h>
-//#include "config.h"
-//#include "logging.h"
 
 
 Alpaca_config_t alpaca_config = {

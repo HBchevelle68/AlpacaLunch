@@ -125,7 +125,7 @@ int main(int argc, char** argv){
             goto exit;
         }
     }
-    else{
+    else {
         result = ALPACA_ERROR_CONFINITBEH;
         goto exit;
     }
