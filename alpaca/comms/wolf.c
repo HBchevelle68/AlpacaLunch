@@ -9,7 +9,7 @@
 #include <core/codes.h>
 #include <core/logging.h>
 #include <comms/wolf.h>
-
+#include <core/config.h>
 
 
 // TEMPORARY
@@ -99,10 +99,23 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
+       
+        /*
+        if (wolfSSL_CTX_use_certificate_buffer(procWolfServerCtx, alpaca_config.cert, sizeof(alpaca_config.cert) ,SSL_FILETYPE_PEM) ){
+            LOGERROR("ERROR: failed to load certifacte from buffer \n");
+            result = ALAPCA_ERROR_WOLFINIT;
+            goto exit;
+        }
+        if (wolfSSL_CTX_use_PrivateKey_buffer(procWolfServerCtx, alpaca_config.certkey, sizeof(alpaca_config.certkey) ,SSL_FILETYPE_PEM) ){
+            LOGERROR("ERROR: failed to load certifacte from buffer \n");
+            result = ALAPCA_ERROR_WOLFINIT;
+            goto exit;
+        }
+        */
         
+
         /* Load server certificates into WOLFSSL_CTX */
-        if (wolfSSL_CTX_use_certificate_file(procWolfServerCtx, TEMPCERTFILE, SSL_FILETYPE_PEM)
-            != SSL_SUCCESS) {
+        if (wolfSSL_CTX_use_certificate_file(procWolfServerCtx, TEMPCERTFILE, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
             LOGERROR("ERROR: failed to load %s, please check the file.\n", TEMPCERTFILE);
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
