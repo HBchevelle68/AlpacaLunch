@@ -10,13 +10,13 @@
 
 ALPACA_STATUS handle_payload(void){
     ALPACA_STATUS result = ALPACA_SUCCESS;
-    ssize_t numRecvd = 0;
-    //size_t numWant = 0;
     Alpaca_protoHdr_t header =  {0};
+    ssize_t numRecvd = 0;
     uint8_t body[COMMS_MAX_BODY];
-
-    memset(body, 0, sizeof(body));
     ENTRY;
+    
+    // Clear Body buffer
+    memset(body, 0, sizeof(body));
 
     result = AlpacaComms_recv(coreComms, &header, COMMS_HDR_SIZE, &numRecvd);
     if(0 < numRecvd){
@@ -48,11 +48,8 @@ ALPACA_STATUS handle_payload(void){
         if(0 < numRecvd){
             LOGDEBUG("Received: {%s}\n", body);
             //LOGDEBUG("Counter: %d\n", ++debug_counter);
-
-
             // TODO 
             // Process whole payload
-
         }
         else if(0 > numRecvd) {
             /*
@@ -84,13 +81,6 @@ exit:
     LEAVING;
     return result;
 }
-
-
-
-
-
-
-
 
 
 ALPACA_STATUS AlpacaCore_coreLoop(void){
@@ -137,7 +127,6 @@ ALPACA_STATUS AlpacaCore_coreLoop(void){
                 if(ALPACA_ERROR_COMMSCLOSED == result) 
                 {
                     // TODO
-
                     // HANDLE RECONNECTION
                     break;
                 }

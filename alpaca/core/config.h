@@ -19,6 +19,11 @@ typedef struct __attribute__((packed)) AlpacaLunch_Configuration {
     uint16_t port;            
     uint8_t  addr[INET_ADDRSTRLEN];
 
+    // Max retries
+    // Max threads
+    // Retry delay
+    // What else????
+
     char MAGIC_FOOTER[HDR_FTR_SIZE]; 
 
 } Alpaca_config_t;
