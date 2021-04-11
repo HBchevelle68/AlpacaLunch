@@ -274,11 +274,6 @@ misc:
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	$(call READELF_LOOP, $(BINLIST))
 
-<<<<<<< HEAD
-
-=======
-	
->>>>>>> e920937cc55ae5176010188d19791f66037ba14a
 
 wolf:
 	rm -rf $(CRYPTBASE)/*

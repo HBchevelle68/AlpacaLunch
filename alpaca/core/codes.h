@@ -36,7 +36,11 @@ typedef uint32_t ALPACA_STATUS;
 /*
  * Config Codes
  */
-#define ALPACA_ERROR_CONFINITBEH        (40)
+#define ALPACA_ERROR_CONFINITBEHAV      (40)
+#define ALPACA_ERROR_CONFINITPROTO      (41)
+#define ALPACA_ERROR_CONFCORRUPT        (42)
+#define ALPACA_ERROR_CONFBADPORT        (43)
+
 
 /*
  * Crypto Error Codes 

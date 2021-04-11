@@ -57,8 +57,8 @@ typedef enum AlpacaLunch_TLSVersion{
  */
 #define ALPACACOMMS_MAX_BUFF (1024*64)
 
-#define ALPACACOMMS_INIT_CALLBACK 0
-#define ALPACACOMMS_INIT_LISTEN   1
+#define ALPACACOMMS_INIT_LISTEN   0
+#define ALPACACOMMS_INIT_CALLBACK 1
 
 
 /*

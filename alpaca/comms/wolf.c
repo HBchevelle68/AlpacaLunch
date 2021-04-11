@@ -77,6 +77,11 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
      * Bit shift is purely local
      */
     version = version>>1;
+    if(0 != version && 1 != version){
+        LOGERROR("Version mismatch after bitshift! [%u]\n", version);
+        result = ALAPCA_ERROR_WOLFINIT;
+        goto exit;
+    }
 
     if(!wolfInitialized){
         LOGINFO("Initializing global wolfCTX's with version [%x]\n", version);

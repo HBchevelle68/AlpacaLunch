@@ -12,20 +12,19 @@
 
 typedef struct __attribute__((packed)) AlpacaLunch_Configuration {
 
-    char MAGIC_HEADER[HDR_FTR_SIZE];
+    char MAGIC_HEADER[HDR_FTR_SIZE]; // 8
 
-    uint8_t  padding;         
-    uint8_t  initial_behavior;
-    uint16_t port;            
-    uint8_t  addr[INET_ADDRSTRLEN];
+    uint8_t  initial_protocol; // 1
+    uint8_t  initial_behavior; // 1
+    uint16_t port;             // 2
+    uint8_t  addr[INET_ADDRSTRLEN]; // 16
 
-    // initial comms type
     // Max retries
     // Max threads
     // Retry delay
     // What else????
 
-    char MAGIC_FOOTER[HDR_FTR_SIZE]; 
+    char MAGIC_FOOTER[HDR_FTR_SIZE]; // 8
 
 } Alpaca_config_t;
 

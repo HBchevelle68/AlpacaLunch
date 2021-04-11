@@ -7,8 +7,8 @@ import ipaddress
 import shutil
 
 class Config:
-    HDR_MAGIC = b'WwXxYyZz'
-    FTR_MAGIC = b'wWxXyYzZ'
+    HDR_MAGIC = b'WwXxYyZ\0'
+    FTR_MAGIC = b'wWxXyYz\0'
     
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -19,12 +19,16 @@ class Config:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'   
-    CONFIG_FMT=(
-                '?'    # iniitialBehavior
+    CONFIG_FMT=('B'    # initial_protocol
+                '?'    # iniitial_Behavior
                 'H'    # port
                 '16s'  # address 
                 )
     USABLE_CONF_SIZE = struct.calcsize(CONFIG_FMT)
+    TLS1_2 = 1
+    TLS1_3 = 2
+    UDP = 4
+    SSH = 8
 
 
 def __validate_ipv4_address(address):
@@ -72,6 +76,14 @@ def __validate_behavior(cb,lstn):
     else:
         print(Config.FAIL+f'[-] Neither callback or listen behavior selected...'+Config.ENDC)
 
+def __validate_protocol(tls12, tls13=None, udp=None, ssh=None):
+    if tls12:
+        print(Config.OKGREEN+f'[*] Configured to use TLS 1.2'+Config.ENDC)
+        if tls13 or udp or ssh:
+            raise Exception(Config.FAIL+f'Cannot be configured use multiple protocols for initial behavior'+Config.ENDC)
+    else:
+        raise Exception(Config.FAIL+f'[-] No supported initial protocol provided...'+Config.ENDC)
+
 
 def _find_magic(infile):
 
@@ -113,6 +125,7 @@ def _find_magic(infile):
 def _validate_args(args):
     print(Config.OKBLUE+f'Validating args...'+Config.ENDC)
     __validate_file(args.infile)
+    __validate_protocol(args.tls12)
     __validate_behavior(args.callback, args.listen)
     __validate_port(args.port)
 
@@ -130,8 +143,14 @@ def configure(args):
         return
 
     initBehavior = 0 if args.listen else 1
+    initproto = 0
+    if args.tls12:
+        initproto = Config.TLS1_2
+    
+         
 
     packed_conf = struct.pack(Config.CONFIG_FMT,
+                             initproto,
                              initBehavior,
                              args.port,
                              args.addr.encode('utf-8')
@@ -140,7 +159,7 @@ def configure(args):
          print(Config.FAIL+f'[-] Actual size of config is {calc_size} '+
                f'while usable size in binary is {Config.USABLE_CONF_SIZE}'+Config.ENDC)
 
-    print(f'{initBehavior},{args.port},{args.addr}')
+    print(f'{initproto}, {initBehavior},{args.port},{args.addr}')
 
     v_bytes = None
     with open(args.infile, 'rb') as vanilla_bin:
@@ -161,6 +180,8 @@ if __name__ == "__main__":
     parser.add_argument("outfile", type=str, help="Output of configuration")
     parser.add_argument("--listen", dest="listen", action='store_true',  required=False, help="Set initial behavior to listen")
     parser.add_argument("--callback", dest="callback", action='store_true', required=False, help="Set initial behavior to callback")
+    parser.add_argument("--tls1.2", dest="tls12", action='store_true', required=False, help="Set initial protoco to TLS 1.2")
+    #parser.add_argument("--tls1.3", dest="callback", action='store_true', required=False, help="Set initial protoco to TLS 1.3")
     parser.add_argument("-p","--port", dest= "port", required=True, type=int, help="Callback port/Listen port")
     parser.add_argument("-a","--address", dest="addr", required=False, type=str)
     configure(parser.parse_args())

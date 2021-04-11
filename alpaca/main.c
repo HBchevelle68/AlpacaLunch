@@ -21,7 +21,7 @@ extern Alpaca_commsCtx_t *coreComms;
 
 
 
-ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
+ALPACA_STATUS AlpacaCore_init(){
     ENTRY;
     ALPACA_STATUS result = ALPACA_SUCCESS;
 
@@ -38,7 +38,7 @@ ALPACA_STATUS AlpacaCore_init(uint16_t commsFlags){
     /*
      * Initialize comms
      */
-    result = AlpacaComms_init(commsFlags);
+    result = AlpacaComms_init(alpaca_config.initial_protocol);
     if(result){
         LOGERROR("Error initializing Alpaca Comms\n");
         goto exit;
@@ -83,7 +83,7 @@ int main(int argc, char** argv){
      */
     AlpacaUtilities_daemonize();
 
-    result = AlpacaCore_init(ALPACACOMMS_PROTO_TLS12);
+    result = AlpacaCore_init();
     if(ALPACA_SUCCESS != result){
         LOGERROR("Global initialization error! [%u]\n", result);
         goto exit;
@@ -103,6 +103,7 @@ int main(int argc, char** argv){
         // Listen
         LOGERROR("NO INITIAL LISTEN BUILT YET!\n");
         result = ALPACA_ERROR_UNSUPPORTED;
+        goto exit;
     }
     else if(ALPACACOMMS_INIT_CALLBACK == alpaca_config.initial_behavior) {
         
@@ -121,7 +122,7 @@ int main(int argc, char** argv){
         }
     }
     else {
-        result = ALPACA_ERROR_CONFINITBEH;
+        result = ALPACA_ERROR_CONFINITBEHAV;
         goto exit;
     }
     
