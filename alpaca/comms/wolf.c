@@ -95,6 +95,7 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
         procWolfClientCtx = NULL;
         procWolfServerCtx = NULL;
         
+        
         /*
          * SERVER
          */
