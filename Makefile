@@ -4,7 +4,7 @@
 DIR := ${CURDIR}
 BIN = $(DIR)/binaries
 HASH = $(BIN)/hashes
-BUILD = $(DIR)/build
+INFO = $(BIN)/bininfo
 
 #
 # Source directories
@@ -112,9 +112,9 @@ ALPACAMAIN_DOBJ=$(addprefix $(SRCBASE)/, main-debug.o)
 # ALPACA-CORE object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o)
-ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o) 
-ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o)
+ALPACACORE_ROBJS=$(addprefix $(ALPACACORESRC)/, coreloop.o config.o)
+ALPACACORE_DOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-debug.o config-debug.o) 
+ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o config-unit.o)
 
 #
 # ALPACA-THREADPOOL object files
@@ -196,13 +196,13 @@ all: clean init-dirs \
 	 alpacalunch-debug 	  \
 	 alpacalunch-unittest \
 	 rununittest 	 \
-	 scrub success   \
+	 scrub misc success   \
 
-release:  init-dirs prescrub alpacalunch-release scrub success
+release:  init-dirs prescrub alpacalunch-release scrub misc success
 
-debug: 	  init-dirs prescrub alpacalunch-debug scrub success
+debug: 	  init-dirs prescrub alpacalunch-debug scrub misc success
 
-unittest: init-dirs prescrub alpacalunch-unittest scrub success rununittest
+unittest: init-dirs prescrub alpacalunch-unittest scrub misc success rununittest
 
 #
 # RELEASE, RELEASE STATIC(broken) builds
@@ -235,7 +235,7 @@ alpacalunch-unittest: $(ALLUOBJS)
 	$(call PG, $@ Done)
 	
 %.o: %.c $(DEPS)
-	$(CC) -c $(CFLAGS) $(RELEASE) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %-debug.o: %.c $(DEPS)
 	$(CC) -c $(DBG) $(DBGCFLAGS) $< -o $@
@@ -262,12 +262,16 @@ endif
 
 init-dirs:
 	mkdir -p $(HASH)
+	mkdir -p $(INFO)
 	mkdir -p $(BIN)
 
+BINLIST = $(shell ls -p $(BIN) | grep -v /)
+FINDTREE= $(shell which tree)
 misc: 
-	mkdir -p $(HASH)
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
+	$(call READELF_LOOP, $(BINLIST))
+
 
 wolf:
 	rm -rf $(CRYPTBASE)/*
@@ -311,6 +315,7 @@ prescrub scrub:
 	
 success:
 	$(call PG, BUILD COMPLETE) 
+	@tree $(BIN)
 
 # Functions
 # Print Yellow
@@ -331,3 +336,9 @@ define SCRUB
 	rm -f $(1)
 endef
 
+define READELF_LOOP
+	@for file in $(1) ; do \
+	  out=$$file-readelf; \
+	  readelf -a $(BIN)/$$file > $(INFO)/$$out; \
+	done
+endef

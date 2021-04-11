@@ -19,54 +19,62 @@ typedef uint32_t ALPACA_STATUS;
 #define ALPACA_ERROR_WOLFSSLWRITE       (6)
 #define ALPACA_ERROR_WOLFSSLREAD        (7)
 #define ALPACA_ERROR_WOLFSSLACCEPT      (8)
+#define ALPACA_ERROR_WOLFSSLFDSET       (9)
+#define ALPACA_ERROR_SOCKCREATE	        (10)
+#define ALPACA_ERROR_SOCKSETPEER        (11)
+#define ALPACA_ERROR_TCPBIND            (12)
+#define ALPACA_ERROR_TCPLISTEN          (13)
+
+#define ALPACA_ERROR_COMMSINIT 	        (15)
+#define ALPACA_ERROR_COMMSCONNECT       (16)
+#define ALPACA_ERROR_COMMSLISTEN        (17)
+#define ALPACA_ERROR_COMMSCLOSED        (18)
+
+#define ALPACA_ERROR_HDRBODYSIZE        (25)
 
 
-#define ALPACA_ERROR_COMMSINIT 	        (10)
-#define ALPACA_ERROR_COMMSCONNECT       (11)
-#define ALPACA_ERROR_COMMSLISTEN        (12)
-
-
-
-#define ALPACA_ERROR_SOCKCREATE	        (20)
-#define ALPACA_ERROR_SOCKSETPEER        (21)
-#define ALPACA_ERROR_TCPBIND            (22)
-#define ALPACA_ERROR_TCPLISTEN          (23)
-
+/*
+ * Config Codes
+ */
+#define ALPACA_ERROR_CONFINITBEHAV      (40)
+#define ALPACA_ERROR_CONFINITPROTO      (41)
+#define ALPACA_ERROR_CONFCORRUPT        (42)
+#define ALPACA_ERROR_CONFBADPORT        (43)
 
 
 /*
  * Crypto Error Codes 
  */
-#define ALPACA_ERROR_CRYPTSETKEY  	    (30)
+#define ALPACA_ERROR_CRYPTSETKEY  	    (60)
 
 
 /*
  * Memory Error Codes
  */
-#define ALPACA_ERROR_MEMINIT    	  	(49)
-#define ALPACA_ERROR_MEMNOBUFFER	  	(50)
-#define ALPACA_ERROR_MEMEXCEEDED	  	(51)
-#define ALPACA_ERROR_MEMRESZFAIL	  	(52)
-#define ALPACA_ERROR_MEMAPNDFAIL	  	(53)
-#define ALPACA_ERROR_MEMFREEFAIL	  	(54)
+#define ALPACA_ERROR_MEMINIT    	  	(70)
+#define ALPACA_ERROR_MEMNOBUFFER	  	(71)
+#define ALPACA_ERROR_MEMEXCEEDED	  	(72)
+#define ALPACA_ERROR_MEMRESZFAIL	  	(73)
+#define ALPACA_ERROR_MEMAPNDFAIL	  	(74)
+#define ALPACA_ERROR_MEMFREEFAIL	  	(75)
 
 /*
  * Threadpool Error Codes
  */
-#define ALPACA_ERROR_TPOOLINIT  	  	(60)
+#define ALPACA_ERROR_TPOOLINIT  	  	(80)
 
 
 /*
  * Generic Codes
  */
-#define ALPACA_ERROR_UNKNOWN	        (100)
-#define ALPACA_ERROR_OPEN	  	        (101)
-#define ALPACA_ERROR_READ	  	        (102)
-#define ALPACA_ERROR_WRITE	  	        (103)
-#define ALPACA_ERROR_BADPARAM	        (104)
-#define ALPACA_ERROR_MALLOC 	        (105)
-#define ALPACA_ERROR_BADSTATE           (106)
-#define ALPACA_ERROR_UNSUPPORTED        (107)
+#define ALPACA_ERROR_UNKNOWN	        (200)
+#define ALPACA_ERROR_OPEN	  	        (201)
+#define ALPACA_ERROR_READ	  	        (202)
+#define ALPACA_ERROR_WRITE	  	        (203)
+#define ALPACA_ERROR_BADPARAM	        (204)
+#define ALPACA_ERROR_MALLOC 	        (205)
+#define ALPACA_ERROR_BADSTATE           (206)
+#define ALPACA_ERROR_UNSUPPORTED        (207)
 
 
 

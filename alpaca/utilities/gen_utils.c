@@ -7,11 +7,12 @@
 #include <errno.h>
 #include <time.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include <interfaces/utility_interface.h>
 
 
-#if DEBUGENABLE
+#ifndef TALKATIVE_ALPACA
 void AlpacaUtilities_daemonize(void){
 
 	int fd;
@@ -20,14 +21,14 @@ void AlpacaUtilities_daemonize(void){
     {
         case -1:
             // Error during fork
-            exit(EXIT_FAILURE) 
+            exit(EXIT_FAILURE); 
             break;
         case 0:
             // Child falls through
-            break
+            break;
         default:
             // Parent exits
-            _exit(EXIT_SUCCESS)
+            _exit(EXIT_SUCCESS);
             break;
     }
 
@@ -45,14 +46,14 @@ void AlpacaUtilities_daemonize(void){
     {
         case -1:
             // Error during fork
-            exit(EXIT_FAILURE) 
+            exit(EXIT_FAILURE);
             break;
         case 0:
             // Child falls through
-            break
+            break;
         default:
             // Parent exits
-            _exit(EXIT_SUCCESS)
+            _exit(EXIT_SUCCESS);
             break;
     }
 

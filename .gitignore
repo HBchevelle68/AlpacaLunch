@@ -183,3 +183,4 @@ dmypy.json
 
 #Ignore Wolf Libs
 alpaca/cryptlibs/
+alpaca/binaries/

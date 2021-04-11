@@ -9,6 +9,7 @@
 #include <core/codes.h>
 #include <core/logging.h>
 #include <comms/wolf.h>
+#include <core/config.h>
 
 static const char TEMPCERTFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-cert-dungpile.pem";
 static const char TEMPKEYFILE[] = "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-key-dungpile.pem";
@@ -73,6 +74,11 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
      * Bit shift is purely local
      */
     version = version>>1;
+    if(0 != version && 1 != version){
+        LOGERROR("Version mismatch after bitshift! [%u]\n", version);
+        result = ALAPCA_ERROR_WOLFINIT;
+        goto exit;
+    }
 
     if(!wolfInitialized){
         LOGINFO("Initializing global wolfCTX's with version [%x]\n", version);
@@ -86,6 +92,7 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
         procWolfClientCtx = NULL;
         procWolfServerCtx = NULL;
         
+        
         /*
          * SERVER
          */
@@ -95,10 +102,23 @@ ALPACA_STATUS AlpacaWolf_init(uint16_t version){
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
         }
+       
+        /*
+        if (wolfSSL_CTX_use_certificate_buffer(procWolfServerCtx, alpaca_config.cert, sizeof(alpaca_config.cert) ,SSL_FILETYPE_PEM) ){
+            LOGERROR("ERROR: failed to load certifacte from buffer \n");
+            result = ALAPCA_ERROR_WOLFINIT;
+            goto exit;
+        }
+        if (wolfSSL_CTX_use_PrivateKey_buffer(procWolfServerCtx, alpaca_config.certkey, sizeof(alpaca_config.certkey) ,SSL_FILETYPE_PEM) ){
+            LOGERROR("ERROR: failed to load certifacte from buffer \n");
+            result = ALAPCA_ERROR_WOLFINIT;
+            goto exit;
+        }
+        */
         
+
         /* Load server certificates into WOLFSSL_CTX */
-        if (wolfSSL_CTX_use_certificate_file(procWolfServerCtx, TEMPCERTFILE, SSL_FILETYPE_PEM)
-            != SSL_SUCCESS) {
+        if (wolfSSL_CTX_use_certificate_file(procWolfServerCtx, TEMPCERTFILE, SSL_FILETYPE_PEM) != SSL_SUCCESS) {
             LOGERROR("ERROR: failed to load %s, please check the file.\n", TEMPCERTFILE);
             result = ALAPCA_ERROR_WOLFINIT;
             goto exit;
@@ -170,7 +190,7 @@ ALPACA_STATUS AlpacaWolf_cleanUp(void){
 }
 
 
-ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
+ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
@@ -187,13 +207,13 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
         goto exit;
     }
 
-    switch(GET_COMMS_PROTO(flags)){
+    switch(GET_COMMS_PROTO(ctx->flags)){
 
         case ALPACACOMMS_PROTO_TLS12:
             /**
              * Create SSL object
              */
-            if(ALPACACOMMS_TYPE_CLIENT & flags){
+            if(ALPACACOMMS_TYPE_CLIENT & ctx->flags){
                 // CLIENT
                 LOGDEBUG("Generating wolfSSL Client object\n");
                 if ((ctx->protoCtx = wolfSSL_new(procWolfClientCtx)) == NULL) {
@@ -203,7 +223,7 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
                 result = ALPACA_SUCCESS;
 
             }
-            else if (ALPACACOMMS_TYPE_SERVER & flags){
+            else if (ALPACACOMMS_TYPE_SERVER & ctx->flags){
                 // SERVER
                 LOGDEBUG("Generating wolfSSL Server object\n");
                 if ((ctx->protoCtx = wolfSSL_new(procWolfServerCtx)) == NULL) {
@@ -215,23 +235,23 @@ ALPACA_STATUS AlpacaWolf_createSSL(Alpaca_commsCtx_t* ctx, uint16_t flags){
             }
             else {
                 // ERROR
-                LOGERROR("Error, invalid flags used %04x\n", flags);
+                LOGERROR("Error, invalid ctx->flags used [0x%04x]\n", ctx->flags);
                 result = ALPACA_ERROR_WOLFSSLCREATE;
             }
             break;
 
         case ALPACACOMMS_PROTO_TLS13:
-			result = ALPACA_FAILURE;
+			result = ALPACA_ERROR_UNSUPPORTED;
 			LOGERROR("TLS 1.3 not supported yet\n");
             break;
 
 		default:
 			result = ALPACA_ERROR_UNKNOWN;
-			LOGERROR("Invalid comms type passed -> %d\n", flags);
+			LOGERROR("Invalid comms type passed -> %d\n", ctx->flags);
     }
     
 exit:
-    LOGDEBUG("Leaving with ctx[%p] ctx->ssl[%p] flags[0x%08x]\n",ctx, ctx->protoCtx, flags);
+    LOGDEBUG("Leaving with ctx[%p] ctx->protoCtx [%p] ctx->flags [0x%08x]\n",ctx, ctx->protoCtx, ctx->flags);
     LEAVING;
     return result;
 }
@@ -347,7 +367,7 @@ ALPACA_STATUS AlpacaWolf_accept(Alpaca_commsCtx_t* ctx){
         /*
          * Create Client ssl object
          */
-        result = AlpacaWolf_createSSL(ctx, ctx->flags);
+        result = AlpacaWolf_createSSL(ctx);
         if(NULL == ctx->protoCtx || ALPACA_SUCCESS != result ) {
             LOGERROR("Error generating ssl object\n");
             goto exit;
@@ -427,8 +447,6 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
         goto exit;
     }
     
-    
-
     // TCP Connect
     ret = connect(ctx->fd, (struct sockaddr*)&ctx->peer, sizeof(struct sockaddr_in));
     if (0 != ret) {
@@ -438,13 +456,12 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
         goto exit;
     }
     
-    
     // TCP Connection established 
     ctx->status |= ALPACACOMMS_STATUS_CONN;
     LOGDEBUG("TCP connection established!\n");
 
     // Create Client ssl object    
-    result = AlpacaWolf_createSSL(ctx, ctx->flags);
+    result = AlpacaWolf_createSSL(ctx);
     if(NULL == ctx->protoCtx || ALPACA_SUCCESS != result ) {
         LOGERROR("Error generating ssl object\n");
         goto exit;
@@ -458,7 +475,7 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
      */
     if(SSL_SUCCESS != wolfSSL_set_fd(ctx->protoCtx, ctx->fd)){
         LOGERROR("ERROR wolfSSL_set_fd\n");
-        result = ALPACA_ERROR_WOLFSSLCREATE;
+        result = ALPACA_ERROR_WOLFSSLFDSET;
         goto exit;
     }
     
@@ -467,7 +484,6 @@ ALPACA_STATUS AlpacaWolf_connect(Alpaca_commsCtx_t* ctx){
         result = ALPACA_ERROR_WOLFSSLCONNECT;
     }
 
-
 exit:
     LEAVING;
     if(result == ALPACA_SUCCESS){
@@ -475,7 +491,8 @@ exit:
     }
     /*
      * At this point TCP connection is possibly valid
-     * Top layer will properly handle
+     * or an error occured. Above layer will 
+     * properly handle
      */
     return result;
 }
@@ -520,15 +537,18 @@ ALPACA_STATUS AlpacaWolf_recv(Alpaca_commsCtx_t* ctx, void* buf, size_t len, ssi
     }
 
     *out = wolfSSL_read((WOLFSSL*)ctx->protoCtx, buf, len);
-    if(*out <= 0){
-        LOGERROR("Failure to read!\n");
-        result = ALPACA_ERROR_WOLFSSLREAD;
+    if(0 == *out){
+        LOGINFO("Peer closed connection!\n");
+        result = ALPACA_ERROR_COMMSCLOSED;
     }
+    else if(0 > *out){
+        LOGERROR("Error during read!\n");
+        result = ALPACA_ERROR_WOLFSSLREAD;
+    } 
     /*
      * If ever switched to non-blocking some extra work
      * needs to be done here
      */
-
 exit:
     LEAVING;
     return result;

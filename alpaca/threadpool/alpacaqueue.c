@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <threadpool/alpacaqueue.h>
 
-void AL_queue_init(AL_queue_t *this){
+void AlpacaQueue_queue_init(AlpacaQueue_t *this){
   this->front = NULL;
   this->back = NULL;
   this->N = 0;
 }
 
-void AL_queue_enqueue(AL_queue_t* this, AL_item_t item){
-  AL_queue_node_t* node;
+void AlpacaQueue_queue_enqueue(AlpacaQueue_t* this, AlpacaQueue_item_t item){
+  AlpacaQueue_node_t* node;
 
-  node = (AL_queue_node_t*) malloc(sizeof(AL_queue_node_t));
+  node = (AlpacaQueue_node_t*) malloc(sizeof(AlpacaQueue_node_t));
   node->item = item;
   node->next = NULL;
 
@@ -25,20 +25,20 @@ void AL_queue_enqueue(AL_queue_t* this, AL_item_t item){
 }
 
 
-int AL_queue_size(AL_queue_t* this){
+int AlpacaQueue_queue_size(AlpacaQueue_t* this){
   return this->N;
 }
 
-int AL_queue_isempty(AL_queue_t *this){
+int AlpacaQueue_queue_isempty(AlpacaQueue_t *this){
   return this->N == 0;
 }
 
-AL_item_t AL_queue_dequeue(AL_queue_t* this){
-  AL_item_t ans;
-  AL_queue_node_t* node;
+AlpacaQueue_item_t AlpacaQueue_queue_dequeue(AlpacaQueue_t* this){
+  AlpacaQueue_item_t ans;
+  AlpacaQueue_node_t* node;
 
   if(this->front == NULL){
-    fprintf(stderr, "Error: underflow in AL_queue_pop.\n");
+    fprintf(stderr, "Error: underflow in AlpacaQueue_queue_pop.\n");
     fflush(stderr);
     exit(EXIT_FAILURE);
   }
@@ -55,7 +55,7 @@ AL_item_t AL_queue_dequeue(AL_queue_t* this){
   return ans;
 }
 
-void AL_queue_cycle(AL_queue_t* this){
+void AlpacaQueue_queue_cycle(AlpacaQueue_t* this){
   if(this->back == NULL)
     return;
 
@@ -65,9 +65,9 @@ void AL_queue_cycle(AL_queue_t* this){
   this->back->next = NULL;
 }
 
-AL_item_t AL_queue_peek(AL_queue_t* this){
+AlpacaQueue_item_t AlpacaQueue_queue_peek(AlpacaQueue_t* this){
   if(this->front == NULL){
-    fprintf(stderr, "Error: underflow in AL_queue_front.\n");
+    fprintf(stderr, "Error: underflow in AlpacaQueue_queue_front.\n");
     fflush(stderr);
     exit(EXIT_FAILURE);
   }
@@ -75,7 +75,7 @@ AL_item_t AL_queue_peek(AL_queue_t* this){
   return this->front->item;
 }
 
-void AL_queue_destroy(AL_queue_t* this){
-  while(!AL_queue_isempty(this))
-    AL_queue_dequeue(this);
+void AlpacaQueue_queue_destroy(AlpacaQueue_t* this){
+  while(!AlpacaQueue_queue_isempty(this))
+    AlpacaQueue_queue_dequeue(this);
 }
