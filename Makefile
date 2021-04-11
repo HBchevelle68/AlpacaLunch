@@ -268,12 +268,17 @@ init-dirs:
 	mkdir -p $(BIN)
 
 BINLIST = $(shell ls -p $(BIN) | grep -v /)
+FINDTREE= $(shell which tree)
 misc: 
 	md5sum $(BIN)/alpaca* >> $(HASH)/MD5SUMS
 	sha1sum $(BIN)/alpaca* >> $(HASH)/SHA1SUMS
 	$(call READELF_LOOP, $(BINLIST))
 
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> e920937cc55ae5176010188d19791f66037ba14a
 
 wolf:
 	rm -rf $(CRYPTBASE)/*
