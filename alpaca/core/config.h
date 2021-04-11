@@ -19,6 +19,7 @@ typedef struct __attribute__((packed)) AlpacaLunch_Configuration {
     uint16_t port;            
     uint8_t  addr[INET_ADDRSTRLEN];
 
+    // initial comms type
     // Max retries
     // Max threads
     // Retry delay

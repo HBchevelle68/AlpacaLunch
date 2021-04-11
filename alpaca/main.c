@@ -83,17 +83,15 @@ int main(int argc, char** argv){
      */
     AlpacaUtilities_daemonize();
 
-    /** 
-     * When debug is enabled this is an empty function
-     */
     result = AlpacaCore_init(ALPACACOMMS_PROTO_TLS12);
     if(ALPACA_SUCCESS != result){
         LOGERROR("Global initialization error! [%u]\n", result);
         goto exit;
     }
 
-    // Need to perform initial comms
-
+    /*
+     * Read config and perform initial behavior
+     */
     if(ALPACACOMMS_INIT_LISTEN == alpaca_config.initial_behavior){
         // Init core comms
         result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_TYPE_SERVER | ALPACACOMMS_PROTO_TLS12);
@@ -103,14 +101,11 @@ int main(int argc, char** argv){
         }
 
         // Listen
-        result = AlpacaComms_initialCallback(coreComms);    
-        if(ALPACA_SUCCESS != result){
-            LOGERROR("Initial listen exited with result [%u]\n", result);
-            goto exit;
-        }
+        LOGERROR("NO INITIAL LISTEN BUILT YET!\n");
+        result = ALPACA_ERROR_UNSUPPORTED;
     }
     else if(ALPACACOMMS_INIT_CALLBACK == alpaca_config.initial_behavior) {
-
+        
         // Init core comms
         result = AlpacaComms_initCtx(&coreComms, ALPACACOMMS_TYPE_CLIENT | ALPACACOMMS_PROTO_TLS12);
         if(ALPACA_SUCCESS != result){
