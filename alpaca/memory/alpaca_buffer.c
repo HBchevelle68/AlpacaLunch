@@ -4,14 +4,14 @@
 #include <interfaces/memory_interface.h>
 
 /**
- *	@brief initializes a ALLU_Buffer_t structure which 
+ *	@brief initializes a alpaca_buffer_t structure which 
  *		   represnts a ALLU buffer
  *	
- *  @param allubuffer ptr to ALLU_Buffer_t ptr 
+ *  @param allubuffer ptr to alpaca_buffer_t ptr 
  *	@param size the size of the memory pool required
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaBuffer_init(ALLU_Buffer_t **alluBuffer, size_t size){
+ALPACA_STATUS AlpacaBuffer_init(alpaca_buffer_t **alluBuffer, size_t size){
 
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 
@@ -22,7 +22,7 @@ ALPACA_STATUS AlpacaBuffer_init(ALLU_Buffer_t **alluBuffer, size_t size){
 	}
 
 	// Alloc 
-	(*alluBuffer) = (ALLU_Buffer_t *)calloc((sizeof(ALLU_Buffer_t) + size), sizeof(uint8_t));
+	(*alluBuffer) = (alpaca_buffer_t *)calloc((sizeof(alpaca_buffer_t) + size), sizeof(uint8_t));
 	if(!(*alluBuffer)){
 		LOGERROR("Failed to calloc\n");
 		result = ALPACA_ERROR_MALLOC;
@@ -39,10 +39,10 @@ exit:
 /**
  *	@brief free's the respective buffer and set ptr to NULL
  *	
- *	@param alluBuffer by ref ptr to ALLU_Buffer_t* struct
+ *	@param alluBuffer by ref ptr to alpaca_buffer_t* struct
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
+ALPACA_STATUS AlpacaBuffer_free(alpaca_buffer_t **alluBuffer){
 	
 	/*
 	 * Check if invalid buffer passed
@@ -69,7 +69,7 @@ ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
 
 /**
  *	@brief Appends the data for a given size to the respective
- *		   ALLU_Buffer_t struct. 
+ *		   alpaca_buffer_t struct. 
  *
  *	@warning If there is not enough room
  *		   	 AlpacaBuffer_resize is called under the hood in 
@@ -77,7 +77,7 @@ ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
  *		   	 change!! 
  *		   
  *	
- *	@param alluBuffer ptr to ALLU_Buffer_t* struct
+ *	@param alluBuffer ptr to alpaca_buffer_t* struct
  *	@param data by ptr to src data to copy from
  *	@param size amount from data to copy from
  *
@@ -85,7 +85,7 @@ ALPACA_STATUS AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer){
  *  
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaBuffer_append(ALLU_Buffer_t **alluBuffer, uint8_t *data, size_t size){
+ALPACA_STATUS AlpacaBuffer_append(alpaca_buffer_t **alluBuffer, uint8_t *data, size_t size){
 
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	/*
@@ -121,11 +121,11 @@ exit:
  *	@brief Resize the respective structure. This can be used
  *		   to SHRINK a ALLU_Buffer as well grow
  *	
- *	@param alluBuffer ptr to ALLU_Buffer_t* struct
+ *	@param alluBuffer ptr to alpaca_buffer_t* struct
  *	@param memNeeded amount of memory needed
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaBuffer_resize(ALLU_Buffer_t **alluBuffer, size_t memNeeded) {
+ALPACA_STATUS AlpacaBuffer_resize(alpaca_buffer_t **alluBuffer, size_t memNeeded) {
  	
 	ALPACA_STATUS result = ALPACA_SUCCESS; 
 
@@ -135,7 +135,7 @@ ALPACA_STATUS AlpacaBuffer_resize(ALLU_Buffer_t **alluBuffer, size_t memNeeded) 
 	 * that we are not shrinking to a size that
 	 * cannot hold current data
 	 */
-	ALLU_Buffer_t* tmp = NULL;
+	alpaca_buffer_t* tmp = NULL;
 	if(!(*alluBuffer) ||  memNeeded < (*alluBuffer)->index) {
 		result = ALPACA_ERROR_BADPARAM;
 		goto exit;
@@ -178,11 +178,11 @@ exit:
  * 
  * 	@warning  This function will always be called by AlpacaBuffer_append
  *	
- *	@param alluBuffer by ref ptr to ALLU_Buffer_t* struct
+ *	@param alluBuffer by ref ptr to alpaca_buffer_t* struct
  *	@param memNeeded Amount of memory needed for successful write
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS AlpacaBuffer_ensureRoom(ALLU_Buffer_t **alluBuffer, size_t memNeeded){
+ALPACA_STATUS AlpacaBuffer_ensureRoom(alpaca_buffer_t **alluBuffer, size_t memNeeded){
 
 	ALPACA_STATUS result = ALPACA_SUCCESS;
 	/*
@@ -212,10 +212,10 @@ exit:
 /**
  *	@brief Zero's out all memory in buffer and sets index accordingly
  *	
- *	@param alluBuffer by ref ptr to ALLU_Buffer_t* struct
+ *	@param alluBuffer by ref ptr to alpaca_buffer_t* struct
  *	@return ALPACA_STATUS
  */
-ALPACA_STATUS  AlpacaBuffer_zero(ALLU_Buffer_t **alluBuffer){
+ALPACA_STATUS  AlpacaBuffer_zero(alpaca_buffer_t **alluBuffer){
 
 	/*
 	 * Check if invalid buffer passed

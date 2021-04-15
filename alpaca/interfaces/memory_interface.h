@@ -17,7 +17,20 @@ typedef struct AlpacaBuffer{
 	size_t index;
 	uint8_t padding[7];
 	uint8_t buffer[0];
-} ALLU_Buffer_t;
+} alpaca_buffer_t;
+
+
+typedef struct Alpaca_RingBuffer{
+
+	uint8_t *buffer;
+	uint8_t *head;
+	uint8_t *tail;
+
+	// Lock
+
+	size_t  size;
+
+} alpaca_rbuff_t;
 
 
 /*
@@ -30,12 +43,12 @@ void* AlpacaMemory_zero(void* buf, size_t bufsize, size_t len);
 /*
  * Implemented in alpaca_buffer.c
  */
-ALPACA_STATUS  AlpacaBuffer_init(ALLU_Buffer_t **alluBuffer, size_t size);
-ALPACA_STATUS  AlpacaBuffer_free(ALLU_Buffer_t **alluBuffer);
-ALPACA_STATUS  AlpacaBuffer_append(ALLU_Buffer_t **alluBuffer, uint8_t *data, size_t size);
-ALPACA_STATUS  AlpacaBuffer_resize(ALLU_Buffer_t **alluBuffer, size_t memNeeded);
-ALPACA_STATUS  AlpacaBuffer_ensureRoom(ALLU_Buffer_t **alluBuffer, size_t memNeeded);
-ALPACA_STATUS  AlpacaBuffer_zero(ALLU_Buffer_t **alluBuffer);
+ALPACA_STATUS  AlpacaBuffer_init(alpaca_buffer_t **alluBuffer, size_t size);
+ALPACA_STATUS  AlpacaBuffer_free(alpaca_buffer_t **alluBuffer);
+ALPACA_STATUS  AlpacaBuffer_append(alpaca_buffer_t **alluBuffer, uint8_t *data, size_t size);
+ALPACA_STATUS  AlpacaBuffer_resize(alpaca_buffer_t **alluBuffer, size_t memNeeded);
+ALPACA_STATUS  AlpacaBuffer_ensureRoom(alpaca_buffer_t **alluBuffer, size_t memNeeded);
+ALPACA_STATUS  AlpacaBuffer_zero(alpaca_buffer_t **alluBuffer);
 
 
 

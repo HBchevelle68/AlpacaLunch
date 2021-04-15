@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <threadpool/alpacaqueue.h>
+
+// internal
+#include <threading/alpacaqueue.h>
 
 void AlpacaQueue_queue_init(AlpacaQueue_t *this){
   this->front = NULL;

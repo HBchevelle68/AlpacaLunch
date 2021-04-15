@@ -5,7 +5,7 @@
 #include <errno.h>
 
 // Internal
-#include <interfaces/threadpool_interface.h>
+#include <interfaces/threading_interface.h>
 #include <core/logging.h>
 
 #define DEFAULTTHRDS 20
@@ -15,19 +15,19 @@
 //static const uint8_t FLAGOFF = 0;
 
  
-static Alpaca_tPool_t proc_pool;
+static alpaca_tmngr_t proc_pool;
 
 /**
- * @brief Initialize threadpool for process
+ * @brief Initialize threadmanager for process
  * 
  * @param max_thrds unsigned 1-byte value of max threads for pool
  *  
  * @return Returns the ALPACA_STATUS. If no errors and 
- *         threadpool is usable ALPACA_SUCCESS returned.
+ *         threadmanager is usable ALPACA_SUCCESS returned.
  *         Otherwise, pool will be destroyed and an error 
  *         code will be returned.
  */
-ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
+ALPACA_STATUS AlpacaThreadManager_initPool(uint8_t max_thrds){
 
     ALPACA_STATUS result = ALPACA_ERROR_UNKNOWN;
     ENTRY;
@@ -37,13 +37,13 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
         max_thrds = DEFAULTTHRDS;
     }
 
-    proc_pool.pool = calloc(sizeof(Alpaca_tPool_t)*max_thrds, sizeof(uint8_t));
+    proc_pool.pool = calloc(sizeof(alpaca_tmngr_t)*max_thrds, sizeof(uint8_t));
     if(!proc_pool.pool){
-        LOGERROR("Error allocating threadpool");
-        result = ALPACA_ERROR_TPOOLINIT;
+        LOGERROR("Error allocating threadmanager");
+        result = ALPACA_ERROR_THRDINIT;
         goto exit;
     }
-    proc_pool.status |= ALPACA_TPOOL_POOLINIT;
+    proc_pool.status |= ALPACA_THRD_POOLINIT;
     for(uint8_t i = 0; i < max_thrds; i++) {
         proc_pool.pool[i].aptid = i;
     }
@@ -57,10 +57,10 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
     result = pthread_mutexattr_init(&proc_pool.lock_attr);
     if(result){
         LOGERROR("Error initializing mutex attributes!");
-        result = ALPACA_ERROR_TPOOLINIT;
+        result = ALPACA_ERROR_THRDINIT;
         goto initfail;
     }
-    proc_pool.status |= ALPACA_TPOOL_ATTRINIT;
+    proc_pool.status |= ALPACA_THRD_ATTRINIT;
 
     /* Set type to error checking 
      * Provides some deadlock protection
@@ -69,19 +69,19 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
     result = pthread_mutexattr_settype(&proc_pool.lock_attr, PTHREAD_MUTEX_ERRORCHECK);
     if(result){
         LOGERROR("Error initializing mutex attributes!");
-        result = ALPACA_ERROR_TPOOLINIT;
+        result = ALPACA_ERROR_THRDINIT;
         goto initfail;
     }
 
     result = pthread_mutex_init(&proc_pool.lock, &proc_pool.lock_attr);
     if(result){
         LOGERROR("Error initializing mutex!");
-        result = ALPACA_ERROR_TPOOLINIT;
+        result = ALPACA_ERROR_THRDINIT;
         goto initfail;    
     }
     // Finish setting members
     proc_pool.max_threads = max_thrds;
-    proc_pool.status |= (ALPACA_TPOOL_LOCKINIT | ALPACA_TPOOL_READY);
+    proc_pool.status |= (ALPACA_THRD_LOCKINIT | ALPACA_THRD_READY);
 
     /*
      * It is not entirely clear, but at this point
@@ -91,12 +91,12 @@ ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds){
     goto exit;
 
 initfail: 
-    if(proc_pool.status & ALPACA_TPOOL_POOLINIT) {
+    if(proc_pool.status & ALPACA_THRD_POOLINIT) {
 
-        if(proc_pool.status & ALPACA_TPOOL_ATTRINIT) {
+        if(proc_pool.status & ALPACA_THRD_ATTRINIT) {
             pthread_mutexattr_destroy(&proc_pool.lock_attr);
         }
-        if(proc_pool.status & ALPACA_TPOOL_LOCKINIT) {
+        if(proc_pool.status & ALPACA_THRD_LOCKINIT) {
             pthread_mutex_destroy(&proc_pool.lock);
         }
         free(proc_pool.pool);
@@ -119,21 +119,21 @@ exit:
  *        this call will block waiting for all threads to complete
  *  
  */
-ALPACA_STATUS AlpacaThreadpool_teardownPool(void){
+ALPACA_STATUS AlpacaThreadManager_teardownPool(void){
     
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
 
-    if(proc_pool.status & ALPACA_TPOOL_POOLINIT) {
-        proc_pool.status ^= ALPACA_TPOOL_READY;
+    if(proc_pool.status & ALPACA_THRD_POOLINIT) {
+        proc_pool.status ^= ALPACA_THRD_READY;
 
         // Cancel all
         // join all
 
-        if(proc_pool.status & ALPACA_TPOOL_ATTRINIT) {
+        if(proc_pool.status & ALPACA_THRD_ATTRINIT) {
             pthread_mutexattr_destroy(&proc_pool.lock_attr);
         }
-        if(proc_pool.status & ALPACA_TPOOL_LOCKINIT) {
+        if(proc_pool.status & ALPACA_THRD_LOCKINIT) {
             pthread_mutex_destroy(&proc_pool.lock);
         }
         free(proc_pool.pool);

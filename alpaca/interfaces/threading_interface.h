@@ -6,20 +6,20 @@
 //#include <stdatomic.h> // Needed?? 
 
 #include <core/codes.h>
-#include <threadpool/alpacaqueue.h>
+#include <threading/alpacaqueue.h>
 
-#define ALPACA_TPOOL_INACTIVE 0
-#define ALPACA_TPOOL_POOLINIT 1
-#define ALPACA_TPOOL_ATTRINIT 2
-#define ALPACA_TPOOL_LOCKINIT 4
-#define ALPACA_TPOOL_READY    8  
+#define ALPACA_THRD_INACTIVE 0
+#define ALPACA_THRD_POOLINIT 1
+#define ALPACA_THRD_ATTRINIT 2
+#define ALPACA_THRD_LOCKINIT 4
+#define ALPACA_THRD_READY    8  
 
 
 /**
  * @brief Alpaca thread structure
  * 
  * thrd - posix thread
- * aptid - alapaca threadpool ID
+ * aptid - alapaca threadmanager ID
  * active - bool, is the thread active
  */
 typedef struct AlpacaThread {
@@ -38,7 +38,7 @@ typedef struct AlpacaThread {
  * @brief Alpaca Threadpool structure
  *        
  * @note  Exepected to be used as an event based
- *        threadpool 
+ *        threadmanager 
  * 
  * 
  * pool - allocated array of Alpaca_thrd_t's
@@ -47,10 +47,10 @@ typedef struct AlpacaThread {
  * lock_attr - attricutes of aformentioned lock
  * max_threads - max alloed threads for this pool
  * active_threads - number of actively executing threads
- * status - bit flag of threadpool status 
+ * status - bit flag of threadmanager status 
  * 
  */
-typedef struct AlpacaThreadPool {
+typedef struct AlpacaThreadManager {
   
   Alpaca_thrd_t*      pool;
   pthread_mutex_t     lock;
@@ -59,14 +59,14 @@ typedef struct AlpacaThreadPool {
   uint8_t  active_threads;
   uint8_t  status;
 
-} Alpaca_tPool_t;
+} alpaca_tmngr_t;
 
 
-// init threadpool
-ALPACA_STATUS AlpacaThreadpool_initPool(uint8_t max_thrds);
+// init threadmanager
+ALPACA_STATUS AlpacaThreadManager_initPool(uint8_t max_thrds);
 
-// exit threadpool
-ALPACA_STATUS AlpacaThreadpool_teardownPool(void);
+// exit threadmanager
+ALPACA_STATUS AlpacaThreadManager_teardownPool(void);
 
 
 // create thread

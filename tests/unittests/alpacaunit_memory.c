@@ -12,7 +12,7 @@
 
 
 
-ALLU_Buffer_t *alpaca_buffer;
+alpaca_buffer_t *alpaca_buffer;
 static char HELLOWORLD[] = "HELLO WORLD!";
 static const uint32_t HWSTRSZ = 12;
 

@@ -10,21 +10,21 @@ INFO = $(BIN)/bininfo
 # Source directories
 #
 SRCBASE = $(DIR)/alpaca
-ALPACACORESRC   = $(SRCBASE)/core
-ALPACACOMMSSRC	= $(SRCBASE)/comms
-ALPACATPOOLSRC  = $(SRCBASE)/threadpool
-ALPACAUTILSSRC	= $(SRCBASE)/utilities
-ALPACAMEMORYSRC = $(SRCBASE)/memory
-ALPACATASKSSRC  = $(SRCBASE)/tasks
+ALPACACORESRC    = $(SRCBASE)/core
+ALPACACOMMSSRC	 = $(SRCBASE)/comms
+ALPACATHRDINGSRC = $(SRCBASE)/threading
+ALPACAUTILSSRC	 = $(SRCBASE)/utilities
+ALPACAMEMORYSRC  = $(SRCBASE)/memory
+ALPACATASKSSRC   = $(SRCBASE)/tasks
 
 #
 # TEST DIRECTORIES
 #
 TESTBASE= $(DIR)/tests
-UNITTESTBASE = $(TESTBASE)/unittests
-UNITTESTSRC = $(UNITTESTBASE)
+UNITTESTBASE  = $(TESTBASE)/unittests
+UNITTESTSRC   = $(UNITTESTBASE)
 COMPONENTBASE = $(TESTBASE)/component
-COMPONENTALL = $(COMPONENTBASE)/allTest.py
+COMPONENTALL  = $(COMPONENTBASE)/allTest.py
 
 #
 # WolfSSL
@@ -118,14 +118,14 @@ ALPACACORE_UOBJS=$(addprefix $(ALPACACORESRC)/, coreloop-unit.o config-unit.o)
 
 #
 # ALPACA-THREADPOOL object files
-# Build out seperate objs for release, test, debug 
-#
-ALPACATPOOL_ROBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool.o alpacaqueue.o) 
-ALPACATPOOL_DOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-debug.o alpacaqueue-debug.o) 
-ALPACATPOOL_UOBJS=$(addprefix $(ALPACATPOOLSRC)/, threadpool-unit.o alpacaqueue-unit.o) 
-
-#
-# ALPACA-COMMS object files
+ # Build out seperate objs for release, test, debug 
+  #
+ALPACATHRDING_ROBJS=$(addprefix $(ALPACATHRDINGSRC)/, threading.o alpacaqueue.o sync.o) 
+ALPACATHRDING_DOBJS=$(addprefix $(ALPACATHRDINGSRC)/, threading-debug.o alpacaqueue-debug.o sync-debug.o) 
+ALPACATHRDING_UOBJS=$(addprefix $(ALPACATHRDINGSRC)/, threading-unit.o alpacaqueue-unit.o sync-unit.o) 
+   
+  #
+ # ALPACA-COMMS object files
 # Build out seperate objs for release, test, debug 
 #
 ALPACACOMMS_ROBJS=$(addprefix $(ALPACACOMMSSRC)/, comms.o wolf.o) 
@@ -136,17 +136,17 @@ ALPACACOMMS_UOBJS=$(addprefix $(ALPACACOMMSSRC)/, comms-unit.o wolf-unit.o)
 # ALPACA-UTILS object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils.o gen_utils.o) 
-ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-debug.o gen_utils-debug.o) 
-ALPACAUTILS_UOBJS=$(addprefix $(ALPACAUTILSSRC)/, file_utils-unit.o gen_utils-unit.o) 
+ALPACAUTILS_ROBJS=$(addprefix $(ALPACAUTILSSRC)/, gen_utils.o) 
+ALPACAUTILS_DOBJS=$(addprefix $(ALPACAUTILSSRC)/, gen_utils-debug.o) 
+ALPACAUTILS_UOBJS=$(addprefix $(ALPACAUTILSSRC)/, gen_utils-unit.o) 
 
 #
 # ALPACA-MEMORY object files
 # Build out seperate objs for release, test, debug 
 #
-ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory.o alpaca_buffer.o) 
-ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_buffer-debug.o) 
-ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buffer-unit.o) 
+ALPACAMEM_ROBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory.o alpaca_buffer.o ringbuff.o) 
+ALPACAMEM_DOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-debug.o alpaca_buffer-debug.o ringbuff-debug.o) 
+ALPACAMEM_UOBJS=$(addprefix $(ALPACAMEMORYSRC)/, alpaca_memory-unit.o alpaca_buffer-unit.o ringbuff-unit.o) 
 
 #
 # ALPACA-MEMORY object files
@@ -167,7 +167,7 @@ ALPACAUNIT_UOBJS=$(addprefix $(UNITTESTSRC)/, alpacaunit_main-unit.o alpacaunit_
 #
 ALLROBJS = $(ALPACAMAIN_ROBJ)		 \
 		   $(ALPACACORE_ROBJS)       \
-		   $(ALPACATPOOL_ROBJS) 	 \
+		   $(ALPACATHRDING_ROBJS) 	 \
 		   $(ALPACACOMMS_ROBJS) 	 \
 		   $(ALPACAUTILS_ROBJS) 	 \
 		   $(ALPACATASK_ROBJS) 	 	 \
@@ -175,14 +175,14 @@ ALLROBJS = $(ALPACAMAIN_ROBJ)		 \
 
 ALLDOBJS = $(ALPACAMAIN_DOBJ)		 \
 		   $(ALPACACORE_DOBJS) 		 \
-		   $(ALPACATPOOL_DOBJS)		 \
+		   $(ALPACATHRDING_DOBJS)	 \
 		   $(ALPACACOMMS_DOBJS)		 \
 		   $(ALPACAUTILS_DOBJS)		 \
 		   $(ALPACATASK_DOBJS)		 \
 		   $(ALPACAMEM_DOBJS)		
 
 ALLUOBJS = $(ALPACACORE_UOBJS) 		 \
-		   $(ALPACATPOOL_UOBJS)		 \
+		   $(ALPACATHRDING_UOBJS)	 \
 		   $(ALPACACOMMS_UOBJS)		 \
 		   $(ALPACAUTILS_UOBJS)		 \
 		   $(ALPACATASK_UOBJS)		 \
