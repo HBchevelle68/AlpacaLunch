@@ -184,3 +184,6 @@ dmypy.json
 #Ignore Wolf Libs
 alpaca/cryptlibs/
 alpaca/binaries/
+
+#Ignore VScode
+.vscode/settings.json

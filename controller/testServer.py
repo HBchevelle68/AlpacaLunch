@@ -11,7 +11,7 @@ bind_socket.listen(5)
 context = wolfssl.SSLContext(wolfssl.PROTOCOL_TLSv1_2, server_side=True)
 context.verify_mode = wolfssl.CERT_NONE
 
-context.load_cert_chain("/home/ap/AlpacaLunch/.testcerts/cert.pem", "/home/ap/AlpacaLunch/.testcerts/private.pem")
+context.load_cert_chain("/home/chris/repos/AlpacaLunch/controller/hutch/hutch-cert-dungpile.pem", "/home/chris/repos/AlpacaLunch/controller/hutch/hutch-key-dungpile.pem")
 
 #typedef struct __attribute__((packed)) AlpacaLunch_Protocol_Header {
 #	uint32_t alpacaID;
