@@ -5,8 +5,6 @@ import wolfcrypt
 import getpass
 import sys
 import argparse
-from controller.herder.herder_auth import HerderAuth
-
 
 class Herder(cmd2.Cmd):
     """Main Client to connect to a hutch to interact with Alpacas Class
