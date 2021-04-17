@@ -3,7 +3,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
+
+ pthread_t t;
 /*
  * Grab source file
  */ 
@@ -16,15 +19,15 @@
 #ifdef TALKATIVE_ALPACA
 
 #define LOGINFO(fmt, ...) \
-    do { fprintf(stdout, "[  INFO  ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
+    do { fprintf(stdout, "[  INFO  ] ==%015lu== \033[1m%s:%d\033[0m:%s(): " fmt, pthread_self(), __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGDEBUG(fmt, ...) \
-    do { fprintf(stdout, "[  \033[0;33mDEBUG\033[0m ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
+    do { fprintf(stdout, "[  \033[0;33mDEBUG\033[0m ] ==%015lu== \033[1m%s:%d\033[0m:%s(): " fmt, pthread_self(), __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stdout); } while(0)
 
 #define LOGERROR(fmt, ...) \
-    do { fprintf(stderr, "[  \033[0;31mERROR\033[0m ] \033[1m%s:%d\033[0m:%s(): " fmt, __FNAME__, \
+    do { fprintf(stderr, "[  \033[0;31mERROR\033[0m ] ==%015lu== \033[1m%s:%d\033[0m:%s(): " fmt, pthread_self(), __FNAME__, \
     __LINE__, __func__, ##__VA_ARGS__); fflush(stderr); } while(0)
 
 #ifdef TALKATIVE_WOLF

@@ -16,13 +16,13 @@ ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* mtx){
      * Verify paramters
      */
     if(NULL == mtx) {
-        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]", mtx );
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     } 
 
     if(ALPACA_SYNC_INACTIVE != mtx->status){
-        LOGERROR("Mutex is either active or in bad state mtx->status[%u]!", mtx->status);
+        LOGERROR("Mutex is either active or in bad state mtx->status[%u]!\n", mtx->status);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     }
@@ -33,7 +33,7 @@ ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* mtx){
      * deallocation
      */
     if(pthread_mutexattr_init(&mtx->lock_attr)){
-        LOGERROR("Error initializing mutex attributes! [%d]", errno);
+        LOGERROR("Error initializing mutex attributes! [%d]\n", errno);
         result = ALPACA_ERROR_MTXATTRINIT;
         goto exit;
     }
@@ -44,13 +44,22 @@ ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* mtx){
      * See man pages for details
      */ 
     if(pthread_mutexattr_settype(&mtx->lock_attr, PTHREAD_MUTEX_ERRORCHECK)){
-        LOGERROR("Error setting mutex type attributes! [%d]", errno);
+        LOGERROR("Error setting mutex type attributes! [%d]\n", errno);
+        result = ALPACA_ERROR_MTXATTRINIT;
+        goto exit;
+    }
+    /* Set robustness to Robust 
+     * Alerts if orig owner died with lock held
+     * See man pages for details
+     */ 
+    if(pthread_mutexattr_setrobust(&mtx->lock_attr, PTHREAD_MUTEX_ROBUST)){
+        LOGERROR("Error setting mutex robustness attributes! [%d]\n", errno);
         result = ALPACA_ERROR_MTXATTRINIT;
         goto exit;
     }
 
     if(pthread_mutex_init(&mtx->lock, &mtx->lock_attr)){
-        LOGERROR("Error initializing mutex![%d]", errno);
+        LOGERROR("Error initializing mutex![%d]\n", errno);
         result = ALPACA_ERROR_MTXINIT;
         goto exit;
     }
@@ -79,13 +88,13 @@ ALPACA_STATUS AlpacaSync_destroy(alpaca_mtx_t* mtx){
      * Verify paramters
      */
     if(NULL == mtx) {
-        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]", mtx );
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     } 
 
     if(ALPACA_SYNC_INACTIVE == mtx->status){
-        LOGERROR("Mutex is inactive cannot destroy mtx[%p] mtx->status[%u]!", mtx, mtx->status);
+        LOGERROR("Mutex is inactive cannot destroy mtx[%p] mtx->status[%u]!\n", mtx, mtx->status);
         result = ALPACA_ERROR_BADPARAM;
         goto exit;
     }
@@ -95,12 +104,12 @@ ALPACA_STATUS AlpacaSync_destroy(alpaca_mtx_t* mtx){
      * double free's
      */
     if(ALPACA_SYNC_ATTRINIT && mtx->status){
-        LOGDEBUG("Cleaning mutex [%p] attribute structure ", mtx);
+        LOGDEBUG("Cleaning mutex [%p] attribute structure\n", mtx);
         pthread_mutexattr_destroy(&mtx->lock_attr);
     }
 
     if(ALPACA_SYNC_LOCKINIT && mtx->status){
-        LOGDEBUG("Cleaning mutex [%p]", mtx);
+        LOGDEBUG("Cleaning mutex [%p]\n", mtx);
         pthread_mutex_destroy(&mtx->lock);
     }
 
@@ -110,6 +119,84 @@ exit:
     LEAVING;
     return result;
 }
-//ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t*);
+
+static
+void checkerror(void){
+    ENTRY;
+
+    switch (errno) {
+        case EINVAL:
+            LOGERROR("Lock or unlock attempted on uninitialized mutex\n");
+            break;
+
+        case EBUSY:
+            LOGERROR("Lock is currently owned by another thread\n");
+            break;
+
+        case EDEADLK:
+            LOGERROR("Deadlock detected or This thread attempted to lock an already owned lock");
+            break;
+
+        case EPERM:
+            LOGERROR("Current thread does not own mutex");
+            break;
+
+        case ETIMEDOUT:
+            LOGERROR("Timed out waiting for lock\n");
+            break;
+
+        case EOWNERDEAD:
+            LOGERROR("*** Lock was left locked by previous thread when thread terminated ***\n");
+            break;
+
+        default:
+            LOGERROR("Error occured during lock or unlock with unknown calue [%d]\n", errno);    
+            break;
+    }
+
+    LEAVING;
+}
+
+ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t* mtx){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+    /*
+     * Verify paramters
+     */
+    if(NULL != mtx && (ALPACA_SYNC_LOCKINIT && mtx->status)) {
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
+
+    if(0 != pthread_mutex_lock(&mtx->lock)){
+        checkerror();
+        goto exit;
+    }
+
+exit:
+    LEAVING;
+    return result;
+}
 //ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t*, size_t timeout);
-//ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t*);
+ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* mtx){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+    /*
+     * Verify paramters
+     */
+    if(NULL != mtx && (ALPACA_SYNC_LOCKINIT && mtx->status)) {
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
+
+    if(0 != pthread_mutex_unlock(&mtx->lock)){
+        checkerror();
+        goto exit;
+    }
+
+exit:
+    LEAVING;
+    return result;
+}

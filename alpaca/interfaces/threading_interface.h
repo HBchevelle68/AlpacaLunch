@@ -36,11 +36,12 @@ typedef struct AlpacaMutex {
 
 #define ALPACA_MTX_SIZE sizeof(struct AlpacaMutex)
 
-ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* lock);
-ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t* lock);
-ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t* lock, size_t timeout);
-ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* lock);
-ALPACA_STATUS AlpacaSync_destroy(alpaca_mtx_t* lock);
+ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* mtx);
+ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t* mtx);
+ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t* mtx);
+ALPACA_STATUS AlpacaSync_timelock(alpaca_mtx_t* mtx);
+ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* mtx);
+ALPACA_STATUS AlpacaSync_destroy(alpaca_mtx_t* mtx);
 
 
 
