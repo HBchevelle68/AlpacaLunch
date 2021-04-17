@@ -14,6 +14,36 @@
 #define ALPACA_THRD_LOCKINIT 4
 #define ALPACA_THRD_READY    8  
 
+/*
+ * Remade for clarity
+ */ 
+#define ALPACA_SYNC_INACTIVE ALPACA_THRD_INACTIVE
+#define ALPACA_SYNC_ATTRINIT ALPACA_THRD_ATTRINIT
+#define ALPACA_SYNC_LOCKINIT ALPACA_THRD_LOCKINIT
+
+
+/**
+ * @brief Alpaca Mutex structure
+ * 
+ * lock - mutex
+ * lock_attr - mutex attributes
+ */
+typedef struct AlpacaMutex {
+    pthread_mutex_t     lock;
+    pthread_mutexattr_t lock_attr;
+    uint8_t status;
+} alpaca_mtx_t;
+
+#define ALPACA_MTX_SIZE sizeof(struct AlpacaMutex)
+
+ALPACA_STATUS AlpacaSync_init(alpaca_mtx_t* lock);
+ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t* lock);
+ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t* lock, size_t timeout);
+ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* lock);
+ALPACA_STATUS AlpacaSync_destroy(alpaca_mtx_t* lock);
+
+
+
 
 /**
  * @brief Alpaca thread structure
@@ -28,9 +58,9 @@ typedef struct AlpacaThread {
   uint8_t   aptid;
   uint8_t   active;
 
-} Alpaca_thrd_t;
+} alpaca_thrd_t;
 
-#define ALPACA_THRD_SIZE (sizeof(Alpaca_thrd_t))
+#define ALPACA_THRD_SIZE (sizeof(struct AlpacaThread))
 
 
 
@@ -41,7 +71,7 @@ typedef struct AlpacaThread {
  *        threadmanager 
  * 
  * 
- * pool - allocated array of Alpaca_thrd_t's
+ * pool - allocated array of alpaca_thrd_t's
  *        These are our actual threads
  * lock - mutex for pool access 
  * lock_attr - attricutes of aformentioned lock
@@ -52,7 +82,7 @@ typedef struct AlpacaThread {
  */
 typedef struct AlpacaThreadManager {
   
-  Alpaca_thrd_t*      pool;
+  alpaca_thrd_t*      pool;
   pthread_mutex_t     lock;
   pthread_mutexattr_t lock_attr;
   uint8_t  max_threads;

@@ -61,7 +61,15 @@ typedef uint32_t ALPACA_STATUS;
 /*
  * Threadpool Error Codes
  */
-#define ALPACA_ERROR_THRDINIT  	  	(80)
+#define ALPACA_ERROR_THRDINIT  	  	    (80)
+
+
+/*
+ * Synchronization Error Codes
+ */
+#define ALPACA_ERROR_MTXATTRINIT	  	(100)
+#define ALPACA_ERROR_MTXINIT	  	    (101)
+
 
 
 /*

@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE 700
+#define _XOPEN_SOURCE 700 //https://pubs.opengroup.org/onlinepubs/9699919799/
 #include <stdio.h> 
 #include <string.h>
 #include <stdlib.h>
