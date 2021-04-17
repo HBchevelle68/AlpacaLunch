@@ -6,8 +6,6 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/alpaca/*",
                 "${workspaceFolder}/alpaca/**",
-                "${workspaceFolder}/alpaca/core/*",
-                "${workspaceFolder}/alpaca/threadpool/*",
                 "${workspaceFolder}/alpaca/cryptlibs/include/**"
             ],
             "defines": ["WOLFSSL_TLS13=1"],
