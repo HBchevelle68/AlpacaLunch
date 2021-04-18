@@ -69,6 +69,12 @@ typedef uint32_t ALPACA_STATUS;
  */
 #define ALPACA_ERROR_MTXATTRINIT	  	(100)
 #define ALPACA_ERROR_MTXINIT	  	    (101)
+#define ALPACA_ERROR_MTXBUSY	  	    (102)
+#define ALPACA_ERROR_MTXLOCK	  	    (103)
+#define ALPACA_ERROR_MTXUNLOCK	  	    (104)
+#define ALPACA_ERROR_MTXOWNDED	  	    (105)
+#define ALPACA_ERROR_MTXTIMEOUT	  	    (106)
+
 
 
 

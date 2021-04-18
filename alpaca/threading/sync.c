@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 700 //https://pubs.opengroup.org/onlinepubs/9699919799/
 #include <pthread.h>
 #include <errno.h>
+#include <time.h>
 
 #include <core/logging.h>
 #include <interfaces/threading_interface.h>
@@ -121,7 +122,7 @@ exit:
 }
 
 static
-void checkerror(void){
+void syncCheckError(void){
     ENTRY;
 
     switch (errno) {
@@ -170,7 +171,8 @@ ALPACA_STATUS AlpacaSync_lock(alpaca_mtx_t* mtx){
     }
 
     if(0 != pthread_mutex_lock(&mtx->lock)){
-        checkerror();
+        syncCheckError();
+        result = ALPACA_ERROR_MTXLOCK;
         goto exit;
     }
 
@@ -178,7 +180,72 @@ exit:
     LEAVING;
     return result;
 }
-//ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t*, size_t timeout);
+ALPACA_STATUS AlpacaSync_trylock(alpaca_mtx_t* mtx){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    ENTRY;
+    /*
+     * Verify paramters
+     */
+    if(NULL != mtx && (ALPACA_SYNC_LOCKINIT && mtx->status)) {
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
+
+    if(0 != pthread_mutex_trylock(&mtx->lock)){
+        if(EBUSY == errno){
+            /* This is part of the expected behavior 
+             * of trylock, no need to check errors
+             * for print
+             */
+            result = ALPACA_ERROR_MTXBUSY;
+        }
+        else {
+            syncCheckError();
+        }
+        goto exit;
+    }
+
+
+exit:
+    LEAVING;
+    return result;
+}
+
+ALPACA_STATUS AlpacaSync_timelock(alpaca_mtx_t* mtx, time_t sec, long nanosec){
+    ALPACA_STATUS result = ALPACA_SUCCESS;
+    struct timespec timeout = {.tv_sec=sec, .tv_nsec=nanosec};
+    ENTRY;
+
+    LOGDEBUG("If lock unavailable will sleep for %lld.%.9ld", (long long)timeout.tv_sec, timeout.tv_nsec);
+
+    /*
+     * Verify paramters
+     */
+    if(NULL != mtx && (ALPACA_SYNC_LOCKINIT && mtx->status)) {
+        LOGERROR("Bad lock variable passed, make sure its not still valid mtx[%p]\n", mtx );
+        result = ALPACA_ERROR_BADPARAM;
+        goto exit;
+    }
+
+    if(0 != pthread_mutex_timedlock(&mtx->lock, &timeout)){
+        if(ETIMEDOUT == errno){
+            /* This is part of the expected behavior 
+             * of timedlock, no need to check errors
+             */
+            result = ALPACA_ERROR_MTXTIMEOUT;
+        }
+        else {
+            syncCheckError();
+        }
+        goto exit;
+    }
+
+exit:
+    LEAVING;
+    return result;
+}
+
 ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* mtx){
     ALPACA_STATUS result = ALPACA_SUCCESS;
     ENTRY;
@@ -192,7 +259,8 @@ ALPACA_STATUS AlpacaSync_unlock(alpaca_mtx_t* mtx){
     }
 
     if(0 != pthread_mutex_unlock(&mtx->lock)){
-        checkerror();
+        syncCheckError();
+        result = ALPACA_ERROR_MTXUNLOCK;
         goto exit;
     }
 
